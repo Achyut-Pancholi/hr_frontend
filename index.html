@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume Upload & Parsing | KadelLabs ATS</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo-area">
+        <span class="logo-title">KadelLabs</span>
+        <span class="logo-subtitle">serving through technology</span>
+      </div>
+      
+      <nav class="navigation-menu">
+        <a href="index.html" class="nav-item active">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" /></svg>
+          Resume Upload
+        </a>
+        <a href="video-screening.html" class="nav-item">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+          Video Bot Screening
+        </a>
+        <a href="#" class="nav-item">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" /></svg>
+          Technical Scheduler
+        </a>
+        <a href="reports.html" class="nav-item">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+          Reports
+        </a>
+        <a href="#" class="nav-item">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" /></svg>
+          Dashboard
+        </a>
+        <a href="departments.html" class="nav-item">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg>
+          Department
+        </a>
+        <a href="#" class="nav-item">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.43l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.991l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.645-.869l.214-1.28z" /><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+          Email Settings
+        </a>
+      </nav>
+      
+      <div class="sidebar-bottom">
+        <button class="logout-btn">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- RIGHT CONTENT AREA -->
+    <main class="main-wrapper">
+      
+      <!-- TOP BAR -->
+      <header class="top-bar">
+        <h1 class="page-title" id="page-main-header">Resume Upload & Parsing</h1>
+        
+        <div class="profile-block">
+          <div class="profile-details">
+            <span class="profile-name">Admin</span>
+            <span class="profile-email">careers@kadellabs.com</span>
+          </div>
+          <div class="avatar-initials">KL</div>
+        </div>
+      </header>
+
+      <!-- MAIN CONTENT CONTAINER -->
+      <div class="main-content">
+        
+        <!-- CARD 1: UPLOAD RESUMES -->
+        <section class="premium-card" id="card-upload-resumes">
+          <div class="card-header">
+            <div class="card-title-group">
+              <h2 class="card-title">Upload Resumes</h2>
+              <p class="card-subtitle">Select a Department and Sub Department and upload applicant resumes for AI parsing.</p>
+            </div>
+          </div>
+          
+          <!-- Dropdown Selectors Row -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="select-dept">Department<span>*</span></label>
+              <div class="select-wrapper">
+                <select id="select-dept" class="custom-select">
+                  <option value="" disabled selected>Select Department</option>
+                  <option value="engineering">Engineering</option>
+                  <option value="product">Product Management</option>
+                  <option value="design">Product Design</option>
+                  <option value="hr">Human Resources</option>
+                  <option value="marketing">Marketing & Sales</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="select-sub-dept">Sub Department<span>*</span></label>
+              <div class="select-wrapper">
+                <select id="select-sub-dept" class="custom-select" disabled>
+                  <option value="" disabled selected>Select Sub Department</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="select-role">Role<span>*</span></label>
+              <div class="select-wrapper">
+                <select id="select-role" class="custom-select" disabled>
+                  <option value="" disabled selected>Select Role</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Drag and Drop Target Box -->
+          <div class="upload-zone" id="drop-zone">
+            <div class="upload-icon-container">
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" /></svg>
+            </div>
+            <h3 class="upload-heading">Drag & drop resumes here</h3>
+            <p class="upload-subheading">Supports PDF up to 5MB each.</p>
+            <button class="btn-pill" id="btn-browse-trigger">Browse Files</button>
+            <input type="file" id="file-input" class="hidden-file-input" multiple accept=".pdf">
+          </div>
+
+          <!-- File Upload Progress Cards Area -->
+          <div class="progress-list" id="progress-list-container"></div>
+        </section>
+
+        <!-- CARD 2: PARSED CANDIDATES -->
+        <section class="premium-card" id="card-parsed-candidates">
+          <div class="card-header">
+            <div class="card-title-group">
+              <h2 class="card-title">Candidate Profile from Resume Parsing</h2>
+            </div>
+            
+            <!-- Search bar component -->
+            <div class="search-container">
+              <span class="search-icon">
+                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+              </span>
+              <input type="text" id="candidate-search" class="search-input" placeholder="Search candidate">
+            </div>
+          </div>
+
+          <!-- Candidates ATS Table layout -->
+          <div class="table-responsive">
+            <table class="ats-table" id="candidates-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Candidate</th>
+                  <th>Email</th>
+                  <th>Applied For</th>
+                  <th>Status</th>
+                  <th>HR Notes</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="candidates-table-body">
+                <!-- Javascript will inject table rows dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- CONTEXTUAL ACTION MENU (ABSOLUTE POP-OVER DROPDOWN) -->
+  <div class="action-dropdown" id="actions-menu-dropdown">
+    <button class="dropdown-item" id="menu-view-profile">
+      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+      View Profile
+    </button>
+    <div class="dropdown-divider"></div>
+    <div class="dropdown-section-label">Change Status</div>
+    
+    <button class="dropdown-item status-change-btn" data-status="Pending">
+      <span class="status-dot pending"></span> Pending
+    </button>
+    <button class="dropdown-item status-change-btn" data-status="On Hold">
+      <span class="status-dot on-hold"></span> On Hold
+    </button>
+    <button class="dropdown-item status-change-btn" data-status="Selected">
+      <span class="status-dot selected"></span> Selected
+    </button>
+    <button class="dropdown-item status-change-btn" data-status="Rejected">
+      <span class="status-dot rejected"></span> Rejected
+    </button>
+    <button class="dropdown-item status-change-btn" data-status="Cancelled">
+      <span class="status-dot cancelled"></span> Cancelled
+    </button>
+    
+    <div class="dropdown-divider"></div>
+    <button class="dropdown-item" id="menu-add-note">
+      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+      Add HR Note
+    </button>
+    <div class="dropdown-divider"></div>
+    <button class="dropdown-item remove-action" id="menu-remove-candidate">
+      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M14.74 9l-.346 9m-4.788 0L9 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+      Remove
+    </button>
+  </div>
+
+  <!-- HR NOTES MODAL -->
+  <div class="modal-overlay" id="notes-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="notes-modal-title">Candidate Notes</h3>
+        <button class="modal-close-btn" id="close-notes-modal">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="card-subtitle" style="margin-bottom: 4px;">Recruiter notes will be saved to the applicant profile. Hover over the notes icon on the candidate list to quick-read.</p>
+        <textarea id="notes-textarea" class="notes-textarea" placeholder="Type recruitment updates, interview remarks, or status reminders here..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary-pill" id="btn-cancel-notes">Cancel</button>
+        <button class="btn-primary-pill" id="btn-save-notes">Save Notes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE VIEW MODAL -->
+  <div class="modal-overlay" id="profile-modal">
+    <div class="modal-card profile-detail-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="profile-modal-title">Applicant Profile</h3>
+        <button class="modal-close-btn" id="close-profile-modal">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 20px 24px; gap: 16px;">
+        <div class="profile-split-container">
+          
+          <!-- Left Panel: General Info & Parser Metadata -->
+          <div class="profile-left-panel">
+            <div class="profile-avatar-header">
+              <div class="profile-avatar-circle" id="prof-avatar">DR</div>
+              <div class="profile-header-info">
+                <h4 class="profile-header-name" id="prof-name">Dianne Russell</h4>
+                <span class="profile-header-role" id="prof-role">Frontend Developer</span>
+              </div>
+            </div>
+            
+            <div class="profile-meta-grid" style="grid-template-columns: 1fr; gap: 12px; margin-top: 4px;">
+              <div class="profile-meta-item">
+                <span class="profile-meta-label">Candidate ID</span>
+                <span class="profile-meta-value" id="prof-id" style="font-family: var(--font-mono); color: var(--active-nav-bg);">CAN-1024</span>
+              </div>
+              <div class="profile-meta-item">
+                <span class="profile-meta-label">Email Address</span>
+                <span class="profile-meta-value" id="prof-email" style="word-break: break-all;">dianne.russell@example.com</span>
+              </div>
+              <div class="profile-meta-item">
+                <span class="profile-meta-label">Phone Number</span>
+                <span class="profile-meta-value" id="prof-phone">(406) 555-0120</span>
+              </div>
+              <div class="profile-meta-item">
+                <span class="profile-meta-label">Current Status</span>
+                <div><span class="status-pill selected" id="prof-status">Selected</span></div>
+              </div>
+            </div>
+            
+            <div class="parser-meta-box">
+              <span class="parser-meta-title">AI Parse Insights</span>
+              <div class="confidence-container">
+                <div class="confidence-header-row">
+                  <span class="confidence-label">Parsing Confidence</span>
+                  <span class="confidence-pct" id="prof-confidence">96%</span>
+                </div>
+                <div class="confidence-bar-bg">
+                  <div class="confidence-bar-fill" id="prof-confidence-bar" style="width: 96%"></div>
+                </div>
+              </div>
+              <div style="height: 0.5px; background-color: var(--divider-color); margin: 2px 0;"></div>
+              <div class="parser-stat-row">
+                <span>File Name</span>
+                <span class="parser-stat-val" id="prof-filename" title="Dianne_Russell_Resume.pdf">Dianne_Russell_Resume.pdf</span>
+              </div>
+              <div class="parser-stat-row">
+                <span>File Size</span>
+                <span class="parser-stat-val" id="prof-filesize">1.4 MB</span>
+              </div>
+              <div class="parser-stat-row">
+                <span>Parsed At</span>
+                <span class="parser-stat-val" id="prof-parsedat">2026-06-03 10:15 AM</span>
+              </div>
+              <div class="parser-stat-row">
+                <span>Parser Engine</span>
+                <span class="parser-stat-val" style="font-family: var(--font-mono);">v4.2-neural</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right Panel: Parsed Resume Details -->
+          <div class="profile-right-panel">
+            <div>
+              <span class="profile-meta-label">Core Technical Skills</span>
+              <div class="parsed-skills-group" id="prof-skills-container">
+                <!-- Injected dynamically -->
+              </div>
+            </div>
+            
+            <div>
+              <span class="profile-meta-label">Professional Experience (Parsed)</span>
+              <div class="parsed-timeline" id="prof-experience-timeline">
+                <!-- Injected dynamically -->
+              </div>
+            </div>
+            
+            <div>
+              <span class="profile-meta-label">Academic Background (Parsed)</span>
+              <div class="parsed-edu-card" id="prof-education-container">
+                <!-- Injected dynamically -->
+              </div>
+            </div>
+          </div>
+          
+        </div>
+        
+        <div style="height: 0.5px; background-color: var(--divider-color); margin: 6px 0 0 0;"></div>
+        <div class="profile-meta-item" style="width: 100%;">
+          <span class="profile-meta-label" style="margin-bottom: 4px;">Recruitment Notes</span>
+          <p id="prof-notes" style="font-size: 13px; color: var(--text-primary); line-height: 1.5; background-color: #FAF9F6; padding: 12px; border-radius: var(--radius-input); border: 0.5px solid #EEEAE3; min-height: 60px; white-space: pre-wrap;"></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary-pill" id="btn-close-profile">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS HOLDER -->
+  <div class="toast-container" id="toast-holder"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
