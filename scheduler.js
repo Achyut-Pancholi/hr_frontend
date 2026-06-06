@@ -126,7 +126,7 @@ let currentView   = 'month';           // 'month' | 'week'
 let weekStart     = getWeekStartDate(today); // Date object
 let activeFilter  = 'all';
 let activeEventId = null;
-let selectedPlatform = 'Google Meet';
+let selectedPlatform = 'MS Teams';
 let selectedModalPanelists = [];
 let editingInterviewId = null; // Interview ID being edited/rescheduled
 
@@ -858,10 +858,17 @@ function openScheduleModal(interviewId = null, focusPanelists = false) {
     if (titleText) titleText.textContent = 'Reschedule Interview';
     if (submitBtn) submitBtn.textContent = 'Update Interview';
 
-    selectedPlatform = iv.platform;
-    document.querySelectorAll('#platform-btns .platform-btn').forEach(b => {
-      b.classList.toggle('selected', b.dataset.platform === iv.platform);
-    });
+    selectedPlatform = iv.platform || 'MS Teams';
+    const platformSel = document.getElementById('modal-platform');
+    if (platformSel) platformSel.value = 'MS Teams';
+
+    // Set interviewer from panelists
+    const interviewerSel = document.getElementById('modal-interviewer-select');
+    if (interviewerSel && iv.panelists && iv.panelists.length > 0) {
+      const p = getPanelist(iv.panelists[0]);
+      if (p) interviewerSel.value = p.name;
+    }
+    selectedModalPanelists = iv.panelists ? [...iv.panelists] : [];
   } else {
     if (applicantInput) applicantInput.value = '';
     if (dateInput) dateInput.value = today.toISOString().split('T')[0];
@@ -871,10 +878,12 @@ function openScheduleModal(interviewId = null, focusPanelists = false) {
     if (titleText) titleText.textContent = 'Schedule Interview';
     if (submitBtn) submitBtn.textContent = 'Schedule Interview';
 
-    selectedPlatform = 'Google Meet';
-    document.querySelectorAll('#platform-btns .platform-btn').forEach(b => {
-      b.classList.toggle('selected', b.dataset.platform === 'Google Meet');
-    });
+    selectedPlatform = 'MS Teams';
+    const platformSel2 = document.getElementById('modal-platform');
+    if (platformSel2) platformSel2.value = 'MS Teams';
+    const interviewerSel2 = document.getElementById('modal-interviewer-select');
+    if (interviewerSel2) interviewerSel2.value = '';
+    selectedModalPanelists = [];
   }
 
   // Bind change listeners to check conflicts in real-time
@@ -1076,11 +1085,11 @@ if (overlaySchedule) {
 }
 
 const platformBtns = document.getElementById('platform-btns');
-if (platformBtns) {
-  platformBtns.addEventListener('click', e => {
-    const btn = e.target.closest('.platform-btn'); if (!btn) return;
-    document.querySelectorAll('#platform-btns .platform-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected'); selectedPlatform = btn.dataset.platform;
+// Platform is now a dropdown - no button handler needed
+const platformSelect = document.getElementById('modal-platform');
+if (platformSelect) {
+  platformSelect.addEventListener('change', e => {
+    selectedPlatform = e.target.value;
   });
 }
 
@@ -1093,7 +1102,15 @@ if (submitModalBtn) {
     if (!applicant) { showToast('Please enter a candidate name.','warning'); return; }
     if (!date)      { showToast('Please select a date.','warning'); return; }
     if (!time)      { showToast('Please select a time.','warning'); return; }
-    if (!selectedModalPanelists.length) { showToast('Select at least one interviewer.','warning'); return; }
+    
+    // Get interviewer from dropdown
+    const interviewerSelect = document.getElementById('modal-interviewer-select');
+    const selectedInterviewer = interviewerSelect ? interviewerSelect.value : '';
+    if (!selectedInterviewer) { showToast('Please select an interviewer.','warning'); return; }
+    
+    // Map interviewer name to panelist ID
+    const matchedPanelist = panelists.find(p => p.name === selectedInterviewer);
+    selectedModalPanelists = matchedPanelist ? [matchedPanelist.id] : [selectedInterviewer];
 
     const parts = applicant.split('–');
     const candName = parts[0].trim();
@@ -1110,7 +1127,7 @@ if (submitModalBtn) {
         interviews[idx].time = time;
         interviews[idx].duration = duration;
         interviews[idx].platform = selectedPlatform;
-        interviews[idx].platformLink = selectedPlatform==='In-Person'?'':`https://meet.google.com/${Math.random().toString(36).slice(2,8)}`;
+        interviews[idx].platformLink = `https://teams.microsoft.com/l/meeting/${Math.random().toString(36).slice(2,10)}`;
         interviews[idx].panelists = [...selectedModalPanelists];
         interviews[idx].notes = notes;
         
@@ -1125,7 +1142,7 @@ if (submitModalBtn) {
         time,
         duration,
         platform: selectedPlatform,
-        platformLink: selectedPlatform==='In-Person'?'':`https://meet.google.com/${Math.random().toString(36).slice(2,8)}`,
+        platformLink: `https://teams.microsoft.com/l/meeting/${Math.random().toString(36).slice(2,10)}`,
         panelists: [...selectedModalPanelists],
         status: 'pending',
         department: 'General',

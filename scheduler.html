@@ -867,19 +867,23 @@
         <!-- Platform -->
         <div class="modal-form-section">
           <label class="modal-form-label">Platform <span style="color:#C62828">*</span></label>
-          <div class="platform-btns" id="platform-btns">
-            <button class="platform-btn selected" data-platform="Google Meet">🎥 Google Meet</button>
-            <button class="platform-btn" data-platform="Zoom">💻 Zoom</button>
-            <button class="platform-btn" data-platform="MS Teams">🖥 MS Teams</button>
-            <button class="platform-btn" data-platform="In-Person">📍 In-Person</button>
-          </div>
+          <select class="modal-input" id="modal-platform" style="appearance:none;cursor:pointer;">
+            <option value="MS Teams" selected>Microsoft Teams</option>
+          </select>
         </div>
         <!-- Interviewers -->
         <div class="modal-form-section">
-          <label class="modal-form-label">Interviewer(s) <span style="color:#C62828">*</span></label>
-          <input type="text" class="modal-input" id="modal-panelist-search" placeholder="Filter interviewers by name or skill..." style="height:32px; margin-bottom:8px; font-size:12px;">
-          <div class="panelist-selector" id="modal-panelist-selector"></div>
-          <div class="conflict-warning" id="modal-conflict-warning"></div>
+          <label class="modal-form-label">Interviewer <span style="color:#C62828">*</span></label>
+          <select class="modal-input" id="modal-interviewer-select" style="appearance:none;cursor:pointer;">
+            <option value="" disabled selected>Select Interviewer</option>
+            <option value="Sarah Chen">Sarah Chen - Engineering Manager</option>
+            <option value="Marcus Johnson">Marcus Johnson - Senior Developer</option>
+            <option value="Priya Patel">Priya Patel - Tech Lead</option>
+            <option value="David Kim">David Kim - HR Director</option>
+            <option value="Emily Rodriguez">Emily Rodriguez - Product Manager</option>
+            <option value="James Wilson">James Wilson - CTO</option>
+            <option value="Aisha Mohammed">Aisha Mohammed - VP Engineering</option>
+          </select>
         </div>
         <!-- Notes -->
         <div class="modal-form-section">
