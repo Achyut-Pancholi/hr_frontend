@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Candidates Directory | KadelLabs ATS</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ══ Consolidated Style Overrides ═════════════════════════ */
+    
+    /* Active Nav State */
+    .nav-item.active {
+      background-color: rgba(255, 255, 255, 0.12) !important;
+      color: #FFFFFF !important;
+      font-weight: 600 !important;
+      border-left: 3px solid var(--active-nav-bg) !important;
+    }
+    
+    /* Layouts */
+    .dashboard-tabs-header {
+      display: flex;
+      background-color: #FFFFFF;
+      border: 0.5px solid #E8E6E0;
+      border-radius: var(--radius-card);
+      padding: 0 16px;
+      gap: 16px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+    }
+    .main-dashboard-tab {
+      padding: 14px 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      outline: none;
+      transition: var(--transition-normal);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .main-dashboard-tab.active {
+      color: var(--sidebar-bg) !important;
+      border-bottom-color: var(--active-nav-bg) !important;
+      font-weight: 700;
+    }
+    .main-dashboard-tab:hover {
+      color: var(--text-primary);
+    }
+    .main-dashboard-tab .count-badge {
+      font-size: 10px;
+      background: #F3F4F6;
+      color: var(--text-secondary);
+      border-radius: 999px;
+      padding: 1px 7px;
+      font-weight: 700;
+    }
+    .main-dashboard-tab.active .count-badge {
+      background: var(--sidebar-bg);
+      color: #FFF;
+    }
+
+    /* Split Grid for Table & Side Action Panel */
+    .candidates-split-grid {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    
+    /* Contextual Action Panel */
+    .contextual-action-panel {
+      background: #FFFFFF;
+      border: 1.5px dashed #C8D6EE;
+      border-radius: var(--radius-card);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: sticky;
+      top: 20px;
+      transition: all 0.2s;
+    }
+    .contextual-panel-header {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      border-bottom: 0.5px solid #EEEAE3;
+      padding-bottom: 8px;
+      margin: 0;
+    }
+    .action-card-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .action-card-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      letter-spacing: 0.3px;
+      margin-bottom: 2px;
+    }
+    .action-panel-btn {
+      width: 100%;
+      height: 36px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.18s;
+      border: 1px solid transparent;
+      outline: none;
+    }
+    .action-panel-btn.primary {
+      background-color: var(--active-nav-bg);
+      color: #FFFFFF;
+    }
+    .action-panel-btn.primary:hover {
+      background-color: #178a65;
+    }
+    .action-panel-btn.outline-blue {
+      background-color: #FFFFFF;
+      border-color: #3B82F6;
+      color: #1d4ed8;
+    }
+    .action-panel-btn.outline-blue:hover {
+      background-color: #EBF4FF;
+    }
+    .action-panel-btn.outline-amber {
+      background-color: #FFFFFF;
+      border-color: #F59E0B;
+      color: #B45309;
+    }
+    .action-panel-btn.outline-amber:hover {
+      background-color: #FEF3C7;
+    }
+    .action-panel-btn.outline-red {
+      background-color: #FFFFFF;
+      border-color: #E24B4A;
+      color: #C62828;
+    }
+    .action-panel-btn.outline-red:hover {
+      background-color: #FEF0EF;
+    }
+    .action-panel-btn.danger {
+      background-color: #FFFFFF;
+      border-color: #E2DFD7;
+      color: var(--text-secondary);
+    }
+    .action-panel-btn.danger:hover {
+      background-color: #FEF0EF;
+      border-color: #F9BFBE;
+      color: #C62828;
+    }
+    .action-panel-btn.disabled {
+      background-color: #F3F4F6 !important;
+      border-color: #E5E7EB !important;
+      color: #9CA3AF !important;
+      cursor: not-allowed !important;
+      pointer-events: none;
+    }
+
+    /* ══ Scheduler Styles ══════════════════════════════════════ */
+    .sched-layout { display:flex; gap:20px; align-items:flex-start; flex:1; min-height:0; width: 100%; }
+    .calendar-col { flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:16px; }
+    .sched-sidebar { width:320px; flex-shrink:0; display:flex; flex-direction:column; gap:14px; }
+    .stats-bar { display:flex; gap:12px; margin-bottom:0px; flex-shrink:0; width: 100%; }
+    .stat-pill {
+      display:flex; flex-direction:column; align-items:center; gap:2px;
+      background:#FFFFFF; border:0.5px solid #E8E6E0; border-radius:12px; padding:10px 22px;
+      cursor:pointer; transition:all 0.2s; box-shadow:var(--shadow-sm); min-width:120px; user-select:none;
+    }
+    .stat-pill:hover { transform:translateY(-1px); border-color:var(--active-nav-bg); }
+    .stat-pill.active { background:var(--sidebar-bg); border-color:var(--sidebar-bg); }
+    .stat-pill .stat-num { font-size:22px; font-weight:700; color:var(--text-primary); line-height:1.1; letter-spacing:-0.5px; }
+    .stat-pill .stat-label { font-size:10px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.4px; }
+    .stat-pill.active .stat-num,.stat-pill.active .stat-label { color:#FFF; }
+    .stat-pill.active .stat-label { color:rgba(255,255,255,0.7); }
+    .stat-pill.confirmed .stat-num { color:var(--active-nav-bg); }
+    .stat-pill.pending   .stat-num { color:#B45309; }
+    .stat-pill.completed .stat-num { color:#1d4ed8; }
+
+    .calendar-card {
+      background:#FFFFFF; border:0.5px solid #E8E6E0; border-radius:12px;
+      box-shadow:var(--shadow-sm); overflow:hidden; display:flex; flex-direction:column;
+    }
+    .calendar-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 20px; border-bottom:0.5px solid #EEEAE3; background:#FAFAF8; flex-shrink:0;
+    }
+    .cal-month-label { font-size:14px; font-weight:700; color:var(--text-primary); }
+    .cal-nav-btns { display:flex; gap:4px; }
+    .cal-nav-btn {
+      background:none; border:1px solid #E8E6E0; border-radius:6px;
+      width:28px; height:28px; display:flex; align-items:center; justify-content:center;
+      cursor:pointer; color:var(--text-secondary); transition:all 0.18s;
+    }
+    .cal-nav-btn:hover { border-color:var(--active-nav-bg); color:var(--active-nav-bg); background:rgba(26,122,74,0.04); }
+    .cal-nav-btn svg { width:14px; height:14px; stroke-width:2; }
+    .cal-view-toggle { display:flex; gap:2px; background:#F0EEE8; border-radius:6px; padding:2px; }
+    .cal-view-btn { border:none; background:none; padding:4px 12px; font-size:11px; font-weight:600; color:var(--text-secondary); border-radius:4px; cursor:pointer; transition:all 0.18s; }
+    .cal-view-btn.active { background:#FFFFFF; color:var(--text-primary); box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+
+    .cal-grid { padding:0 14px 14px; overflow:auto; flex:1; }
+    .cal-day-headers {
+      display:grid; grid-template-columns:repeat(7,1fr); gap:2px;
+      margin-bottom:4px; position:sticky; top:0; background:#FFF; z-index:2; padding-top:8px;
+    }
+    .cal-day-hdr {
+      text-align:center; font-size:10px; font-weight:700; color:var(--text-secondary);
+      text-transform:uppercase; letter-spacing:0.5px; padding:6px 0;
+    }
+    .cal-days {
+      display:grid; grid-template-columns:repeat(7,1fr); gap:1px;
+      background:#EEEAE3; border-radius:8px; overflow:hidden;
+    }
+    .cal-day {
+      min-height:85px; background:#FFFFFF; padding:6px 5px 5px;
+      display:flex; flex-direction:column; gap:2px; position:relative;
+      transition:background 0.15s;
+    }
+    .cal-day:hover { background:#FAF9F6; }
+    .cal-day.other-month { background:#FAFAF8; }
+    .cal-day.other-month .cal-day-num { color:#C8C5BD !important; }
+    .cal-day.weekend { background:#FAFAF9; }
+    
+    .cal-day-num-wrap { display:flex; align-items:center; gap:4px; margin-bottom:2px; }
+    .cal-day-num {
+      font-size:11.5px; font-weight:600; color:var(--text-primary);
+      width:22px; height:22px; display:flex; align-items:center; justify-content:center;
+      border-radius:50%; line-height:1; flex-shrink:0;
+    }
+    .cal-day-num.today-badge {
+      background:var(--active-nav-bg); color:#FFF;
+    }
+    .cal-event {
+      border-radius:5px; padding:2px 6px; font-size:9.5px; font-weight:600;
+      cursor:pointer; transition:all 0.15s; display:flex; flex-direction:column;
+      overflow:hidden; border-left:3px solid transparent;
+    }
+    .cal-event.confirmed { background:rgba(26,122,74,0.1);  color:#14532d; border-left-color:#1D9E75; }
+    .cal-event.pending   { background:rgba(245,158,11,0.11); color:#92400e; border-left-color:#F59E0B; }
+    .cal-event.cancelled { background:rgba(239,68,68,0.09);  color:#991b1b; border-left-color:#EF4444; }
+    .cal-event-time { font-size:8.5px; font-weight:700; opacity:0.75; }
+    .cal-event-name { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    /* Week View */
+    .cal-days.week-grid {
+      display:grid;
+      grid-template-columns: 50px repeat(7, 1fr);
+      gap:0; background:#E8E6E0; border-radius:8px; overflow:auto; max-height:480px;
+    }
+    .cal-day-headers.week-headers {
+      grid-template-columns: 50px repeat(7, 1fr);
+      background:#FAFAF8; border-bottom:1px solid #EEEAE3;
+    }
+    .week-time-col { background:#FAFAF8; }
+    .week-col-hdr { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:8px 4px; background:#FAFAF8; }
+    .week-hdr-day { font-size:9px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; }
+    .week-hdr-num { font-size:13px; font-weight:700; color:var(--text-primary); width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:50%; }
+    .week-hdr-num.today-badge { background:var(--active-nav-bg); color:#FFF; }
+    .week-time-cell { background:#FAFAF8; font-size:10px; font-weight:600; color:var(--text-secondary); padding:4px 6px; text-align:right; border-bottom:1px solid #EEEAE3; border-right:1px solid #EEEAE3; height:45px; min-width:50px; }
+    .week-slot { background:#FFFFFF; border-bottom:1px solid #F0EEE8; border-right:1px solid #F0EEE8; position:relative; height:45px; }
+    .week-event { position:absolute; left:2px; right:2px; border-radius:5px; padding:3px 5px; font-size:9.5px; font-weight:600; cursor:pointer; overflow:hidden; display:flex; flex-direction:column; z-index:2; border-left:3px solid transparent; }
+    .week-event.confirmed { background:rgba(26,122,74,0.14); color:#14532d; border-left-color:#1D9E75; }
+    .week-event.pending   { background:rgba(245,158,11,0.14); color:#92400e; border-left-color:#F59E0B; }
+    .week-event.cancelled { background:rgba(239,68,68,0.12); color:#991b1b; border-left-color:#EF4444; }
+
+    /* Sidebar Panels */
+    .sidebar-panel { background:#FFFFFF; border:0.5px solid #E8E6E0; border-radius:12px; box-shadow:var(--shadow-sm); overflow:hidden; }
+    .sidebar-panel-header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background:#FAFAF8; cursor:pointer; border-bottom:0.5px solid #EEEAE3; user-select:none; }
+    .sidebar-panel-title { font-size:12px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px; }
+    .sidebar-panel-title .count-badge { font-size:10px; background:var(--sidebar-bg); color:#FFF; border-radius:999px; padding:1px 7px; font-weight:700; }
+    .collapse-arrow { width:16px; height:16px; stroke-width:2.5; color:var(--text-secondary); transition:transform 0.2s; }
+    .sidebar-panel.collapsed .collapse-arrow { transform:rotate(-90deg); }
+    .sidebar-panel-body { overflow:hidden; transition:max-height 0.3s cubic-bezier(0.4,0,0.2,1); max-height:800px; }
+    .sidebar-panel.collapsed .sidebar-panel-body { max-height:0; }
+
+    /* Panelist Row Enhanced */
+    .pa-controls { display:flex; gap:6px; align-items:center; padding:10px 14px 0; }
+    .pa-search-wrap { position:relative; flex:1; }
+    .pa-search-wrap svg { position:absolute; left:7px; top:50%; transform:translateY(-50%); width:12px; height:12px; color:var(--text-secondary); pointer-events:none; }
+    .pa-search { height:28px; width:100%; background:#F5F6FA; border:1px solid #E2DFD7; border-radius:7px; padding:0 8px 0 25px; font-size:11.5px; font-weight:500; outline:none; }
+    .pa-filter { height:28px; background:#F5F6FA; border:1px solid #E2DFD7; border-radius:7px; padding:0 8px; font-size:11px; font-weight:500; color:var(--text-secondary); outline:none; cursor:pointer; }
+    .pa-add-btn { width:28px; height:28px; background:var(--active-nav-bg); border:none; border-radius:7px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#FFF; transition:background 0.18s; flex-shrink:0; }
+    .pa-add-btn:hover { background:#178a65; }
+    .panelist-row-enhanced { display:flex; align-items:center; gap:9px; padding:9px 14px; border-bottom:0.5px solid #F3F1EC; transition:background 0.15s; position:relative; }
+    .panelist-row-enhanced:last-child { border-bottom:none; }
+    .panelist-row-enhanced:hover { background:#FAF9F6; }
+    .pa-avail-indicator { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .pa-avail-indicator.available { background:#0D7A57; }
+    .pa-avail-indicator.busy       { background:#F59E0B; }
+    .pa-avail-indicator.on-leave   { background:#E24B4A; }
+    .panelist-avatar-sm { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#FFF; flex-shrink:0; }
+    .pa-workload-wrap { flex:1; display:flex; flex-direction:column; gap:3px; }
+    .pa-workload-bar-bg { height:5px; background:#F0EEE8; border-radius:3px; overflow:hidden; }
+    .pa-workload-bar-fill { height:5px; border-radius:3px; }
+    .pa-workload-label { font-size:9.5px; font-weight:600; color:var(--text-secondary); }
+    .panelist-avail-bar { display:flex; gap:2px; }
+    .avail-slot { height:6px; flex:1; border-radius:1px; }
+    .avail-slot.free { background:rgba(26,122,74,0.18); }
+    .avail-slot.busy { background:rgba(239,68,68,0.18); }
+
+    .panelist-tooltip { position:absolute; left:100%; top:0; z-index:999; width:220px; background:#1B2B5E; color:#FFF; border-radius:10px; padding:12px; box-shadow:0 8px 24px rgba(27,43,94,0.25); font-size:11px; display:none; pointer-events:none; margin-left:6px; }
+    .panelist-row-enhanced:hover .panelist-tooltip { display:block; }
+    .panelist-tooltip h6 { margin:0 0 6px; font-size:12px; font-weight:700; }
+    .avail-day-row { display:flex; align-items:center; gap:6px; margin-bottom:5px; }
+    .avail-day-label { font-size:10px; width:28px; color:rgba(255,255,255,0.6); font-weight:600; }
+    .avail-day-slots { display:flex; gap:2px; flex:1; }
+    .avail-day-slot { width:12px; height:12px; border-radius:2px; }
+    .avail-day-slot.free { background:rgba(29,158,117,0.6); }
+    .avail-day-slot.busy { background:rgba(226,75,74,0.5); }
+    .tooltip-legend { display:flex; gap:10px; margin-top:8px; }
+    .tooltip-legend span { display:flex; align-items:center; gap:4px; font-size:9px; color:rgba(255,255,255,0.6); }
+    .legend-dot { width:8px; height:8px; border-radius:2px; }
+
+    /* Upcoming Interviews */
+    .upcoming-item { padding:12px 16px; border-bottom:0.5px solid #F3F1EC; display:flex; flex-direction:column; gap:6px; transition:background 0.15s; cursor:pointer; }
+    .upcoming-item:last-child { border-bottom:none; }
+    .upcoming-item:hover { background:#FAF9F6; }
+    .upcoming-item-top { display:flex; align-items:center; justify-content:space-between; }
+    .upcoming-cand-name { font-size:12.5px; font-weight:600; color:var(--text-primary); }
+    .upcoming-status-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .upcoming-status-dot.confirmed { background:var(--active-nav-bg); }
+    .upcoming-status-dot.pending   { background:#F59E0B; }
+    .upcoming-status-dot.cancelled { background:#E24B4A; }
+    .upcoming-meta { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .upcoming-meta-tag { font-size:10px; color:var(--text-secondary); display:flex; align-items:center; gap:4px; }
+    .upcoming-meta-tag svg { width:11px; height:11px; }
+    .upcoming-actions { display:flex; gap:6px; align-items:center; }
+    .btn-join-sm { background:var(--active-nav-bg); color:#FFF; border:none; border-radius:6px; padding:4px 12px; font-size:10.5px; font-weight:600; cursor:pointer; }
+    .btn-join-sm:hover { background:#178a65; }
+    .btn-more-sm { background:none; border:1px solid #E8E6E0; border-radius:6px; width:24px; height:24px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-secondary); position:relative; }
+    .btn-more-sm:hover { background:#F3F1EC; }
+    .more-dropdown { position:absolute; left:0; top:calc(100% + 4px); z-index:500; background:#FFF; border:0.5px solid #E8E6E0; border-radius:10px; box-shadow:0 6px 20px rgba(28,43,74,0.1); padding:5px; min-width:160px; display:none; }
+    .more-dropdown.open { display:block; }
+    .more-dd-item { display:flex; align-items:center; gap:8px; padding:6px 10px; border:none; background:none; width:100%; text-align:left; font-size:11.5px; font-weight:500; color:var(--text-primary); border-radius:6px; cursor:pointer; }
+    .more-dd-item:hover { background:#FAF9F6; }
+    .more-dd-item.danger { color:#E24B4A; }
+    .more-dd-item.danger:hover { background:#FEF0EF; }
+    .more-dd-item svg { width:13px; height:13px; color:var(--text-secondary); }
+    .more-dd-item.danger svg { color:#E24B4A; }
+    .more-dd-divider { height:1px; background:#F3F1EC; margin:3px 0; }
+    .panelist-avatars { display:flex; align-items:center; }
+    .pa-mini-avatar { width:18px; height:18px; border-radius:50%; border:1.5px solid #FFF; display:flex; align-items:center; justify-content:center; font-size:7px; font-weight:700; color:#FFF; margin-left:-4px; flex-shrink:0; }
+    .pa-mini-avatar:first-child { margin-left:0; }
+    .pa-mini-overflow { width:18px; height:18px; border-radius:50%; border:1.5px solid #FFF; background:#E8E6E0; color:var(--text-secondary); font-size:7px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-left:-4px; }
+
+    /* KPI Panels and Directory Dashboard */
+    .pm-dashboard { background:#FFFFFF; border:0.5px solid #E8E6E0; border-radius:12px; box-shadow:var(--shadow-sm); padding:16px 20px; margin-bottom:18px; width: 100%; }
+    .pm-dashboard-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+    .pm-dashboard-title { font-size:12.5px; font-weight:600; color:var(--text-primary); display:flex; align-items:center; gap:8px; }
+    .pm-dashboard-title svg { width:15px; height:15px; color:var(--active-nav-bg); }
+    .pm-kpi-row { display:flex; gap:10px; flex-wrap:wrap; }
+    .pm-kpi-card { flex:1; min-width:100px; background:#F9FAFB; border:0.5px solid #E8E6E0; border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; gap:2px; }
+    .pm-kpi-val { font-size:18px; font-weight:700; color:var(--text-primary); }
+    .pm-kpi-label { font-size:9.5px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; }
+    .pm-kpi-card.kpi-available .pm-kpi-val { color:#0D7A57; }
+    .pm-kpi-card.kpi-busy .pm-kpi-val { color:#F59E0B; }
+    .pm-kpi-card.kpi-leave .pm-kpi-val { color:#E24B4A; }
+    .pm-kpi-card.kpi-week .pm-kpi-val { color:#378ADD; }
+    .pm-dept-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; }
+    .pm-dept-chip { display:inline-flex; align-items:center; gap:5px; background:#F3F4F6; border:0.5px solid #E2E8F0; border-radius:999px; padding:3px 10px; font-size:11px; font-weight:500; color:var(--text-secondary); }
+    .pm-dept-chip .dept-dot { width:7px; height:7px; border-radius:50%; }
+
+    .panelist-directory { background:#FFFFFF; border:0.5px solid #E8E6E0; border-radius:12px; box-shadow:var(--shadow-sm); overflow:hidden; margin-top:16px; width: 100%; }
+    .dir-header { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:0.5px solid #EEEAE3; background:#FAFAF8; }
+    .dir-title { font-size:12.5px; font-weight:600; color:var(--text-primary); display:flex; align-items:center; gap:8px; }
+    .dir-title .count-badge { font-size:9.5px; background:var(--sidebar-bg); color:#FFF; border-radius:999px; padding:1px 6px; }
+    .dir-filters { display:flex; gap:8px; align-items:center; }
+    .dir-search-wrap { position:relative; }
+    .dir-search-wrap svg { position:absolute; left:8px; top:50%; transform:translateY(-50%); width:12px; height:12px; color:var(--text-secondary); pointer-events:none; }
+    .dir-search { height:28px; background:#F5F6FA; border:1px solid #E2DFD7; border-radius:8px; padding:0 10px 0 26px; font-size:11.5px; outline:none; width:150px; }
+    .dir-filter-select { height:28px; background:#F5F6FA; border:1px solid #E2DFD7; border-radius:8px; padding:0 10px; font-size:11px; color:var(--text-secondary); outline:none; cursor:pointer; }
+    .dir-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:14px; padding:16px 20px; }
+    .dir-card { background:#FAFAFA; border:0.5px solid #E8E6E0; border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:8px; transition:all 0.15s; }
+    .dir-card:hover { border-color:#C8D6EE; background:#FFF; box-shadow:0 2px 8px rgba(27,43,94,0.06); }
+    .dir-card-top { display:flex; align-items:flex-start; gap:10px; }
+    .dir-avatar { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#FFF; flex-shrink:0; }
+    .dir-card-info { flex:1; min-width:0; }
+    .dir-card-name { font-size:12.5px; font-weight:600; color:var(--text-primary); }
+    .dir-card-role { font-size:10.5px; color:var(--text-secondary); }
+    .dir-card-dept { font-size:9.5px; color:#378ADD; font-weight:600; background:#EBF4FF; border-radius:4px; padding:1px 6px; display:inline-block; margin-top:2px; }
+    .dir-avail-badge { display:inline-flex; align-items:center; gap:3px; border-radius:999px; padding:2px 6px; font-size:9.5px; font-weight:700; }
+    .dir-avail-badge.available { background:#E6F7F2; color:#0D7A57; }
+    .dir-avail-badge.busy       { background:#FEF3C7; color:#B45309; }
+    .dir-avail-badge.on-leave   { background:#FEF0EF; color:#E24B4A; }
+    .dir-avail-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+    .dir-skills { display:flex; gap:4px; flex-wrap:wrap; margin:2px 0; }
+    .dir-skill-chip { background:#F0F3FA; color:#1B2B5E; border-radius:999px; padding:1px 6px; font-size:9.5px; font-weight:600; }
+    .dir-card-footer { display:flex; align-items:center; justify-content:space-between; margin-top:4px; border-top:0.5px solid #F3F1EC; padding-top:6px; }
+    .dir-upcoming-count { font-size:10.5px; color:var(--text-secondary); display:flex; align-items:center; gap:3px; }
+    .dir-upcoming-count svg { width:11px; height:11px; }
+    .dir-actions { display:flex; gap:4px; }
+    .dir-action-btn { width:24px; height:24px; background:none; border:1px solid #E8E6E0; border-radius:6px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-secondary); }
+    .dir-action-btn:hover { background:#F0F3FA; border-color:#C8D6EE; color:var(--sidebar-bg); }
+    .dir-action-btn.danger:hover { background:#FEF0EF; border-color:#F9BFBE; color:#E24B4A; }
+    .dir-action-btn svg { width:12px; height:12px; }
+    .dir-interview-types { display:flex; gap:4px; flex-wrap:wrap; margin-top:2px; }
+    .dir-type-chip { background:#F5F6FA; color:var(--text-secondary); border-radius:4px; padding:1px 5px; font-size:9px; font-weight:600; }
+
+    /* Drawers Overlays and Modals */
+    .event-popup-overlay { position:fixed; inset:0; z-index:1100; display:flex; align-items:center; justify-content:center; background:rgba(28,43,74,0.35); backdrop-filter:blur(3px); opacity:0; pointer-events:none; transition:opacity 0.2s; }
+    .event-popup-overlay.active { opacity:1; pointer-events:auto; }
+    .event-popup { background:#FFF; border-radius:14px; width:400px; box-shadow:0 20px 60px rgba(28,43,74,0.2); border:0.5px solid #E8E6E0; transform:scale(0.96); transition:transform 0.2s; overflow:hidden; }
+    .event-popup-overlay.active .event-popup { transform:scale(1); }
+    .event-popup-header { padding:14px 20px; background:#FAFAF8; border-bottom:0.5px solid #EEEAE3; display:flex; align-items:center; justify-content:space-between; }
+    .event-popup-title { font-size:14px; font-weight:700; }
+    .popup-role-tag { font-size:11px; color:var(--text-secondary); }
+    .event-popup-body { padding:16px 20px; display:flex; flex-direction:column; gap:12px; }
+    .popup-detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .popup-detail-item { display:flex; flex-direction:column; gap:2px; }
+    .popup-detail-label { font-size:9.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; }
+    .popup-detail-value { font-size:12.5px; font-weight:600; }
+    .popup-panelists { display:flex; gap:5px; flex-wrap:wrap; }
+    .popup-panelist-chip { background:#F0F9F4; border:0.5px solid #BBE5CE; color:#14532d; border-radius:999px; padding:2px 8px; font-size:10.5px; font-weight:600; }
+    .popup-footer { display:flex; gap:8px; padding:12px 20px; border-top:0.5px solid #EEEAE3; background:#FAFAF8; }
+    .btn-popup-join { background:var(--active-nav-bg); color:#FFF; border:none; border-radius:8px; padding:8px 16px; font-size:12px; font-weight:600; cursor:pointer; flex:1; }
+    .btn-popup-join:hover { background:#178a65; }
+    .btn-popup-reschedule, .btn-popup-cancel { border:1px solid #E8E6E0; background:#FFF; border-radius:8px; padding:8px 12px; font-size:11.5px; font-weight:600; cursor:pointer; }
+    .btn-popup-reschedule:hover { background:#F5F3EF; }
+    .btn-popup-cancel { color:#E24B4A; border-color:#FFCDD2; }
+    .btn-popup-cancel:hover { background:#FEF0EF; }
+
+    /* Conflict Warning */
+    .conflict-warning { display:none; background:#FEF3C7; border:1px solid #F59E0B; border-radius:8px; padding:8px 12px; font-size:11px; color:#92400e; font-weight:500; align-items:center; gap:6px; margin-top:6px; }
+    .conflict-warning.show { display:flex; }
+    .conflict-warning svg { width:14px; height:14px; flex-shrink:0; }
+    .panelist-chip-sel.recommended::after { content:' ⭐'; font-size:8px; }
+    .panelist-chip-sel.conflict { background:#FEF0EF !important; border-color:#E24B4A !important; color:#E24B4A !important; }
+
+    /* Drawers overlays */
+    .mp-drawer-overlay { position:fixed; inset:0; z-index:1300; background:rgba(27,43,94,0.35); backdrop-filter:blur(3px); opacity:0; pointer-events:none; transition:opacity 0.22s; }
+    .mp-drawer-overlay.active { opacity:1; pointer-events:auto; }
+    .mp-drawer { position:fixed; top:0; right:-640px; width:620px; height:100vh; background:#FFFFFF; box-shadow:-8px 0 40px rgba(27,43,94,0.15); z-index:1301; display:flex; flex-direction:column; transition:right 0.3s cubic-bezier(0.4,0,0.2,1); border-left:0.5px solid #E2E8F0; }
+    .mp-drawer-overlay.active .mp-drawer { right:0; }
+    .mp-drawer-header { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:0.5px solid #EEEAE3; background:#FAFAF8; }
+    .mp-drawer-title { font-size:14px; font-weight:600; }
+    .mp-drawer-subtitle { font-size:11.5px; color:var(--text-secondary); margin-top:2px; }
+    .mp-drawer-body { flex:1; overflow-y:auto; padding:0; display:flex; flex-direction:column; }
+    .mp-drawer-section { padding:16px 24px; border-bottom:0.5px solid #EEEAE3; }
+    .mp-section-title { font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; }
+    .mp-form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .mp-form-group { display:flex; flex-direction:column; gap:4px; }
+    .mp-form-label { font-size:11px; font-weight:600; }
+    .mp-form-label span { color:#E24B4A; }
+    .mp-input { height:34px; background:#F9FAFB; border:1px solid #E2DFD7; border-radius:8px; padding:0 12px; font-size:12.5px; outline:none; transition:all 0.18s; }
+    .mp-input:focus { border-color:var(--active-nav-bg); background:#FFF; }
+    .mp-select { height:34px; background:#F9FAFB; border:1px solid #E2DFD7; border-radius:8px; padding:0 12px; font-size:12.5px; outline:none; cursor:pointer; }
+    .mp-tag-input-wrap { display:flex; flex-wrap:wrap; gap:5px; align-items:center; min-height:34px; background:#F9FAFB; border:1px solid #E2DFD7; border-radius:8px; padding:4px 8px; }
+    .mp-tag-input-wrap:focus-within { border-color:var(--active-nav-bg); background:#FFF; }
+    .mp-tag { display:inline-flex; align-items:center; gap:4px; background:#1B2B5E; color:#FFF; border-radius:999px; padding:2px 8px; font-size:10.5px; font-weight:600; }
+    .mp-tag button { background:none; border:none; color:rgba(255,255,255,0.7); cursor:pointer; padding:0; font-size:11px; line-height:1; }
+    .mp-tag-bare { border:none; background:none; outline:none; font-size:12px; color:var(--text-primary); min-width:80px; flex:1; }
+    .mp-interview-types { display:flex; gap:5px; flex-wrap:wrap; }
+    .mp-type-btn { padding:4px 10px; border:1.5px solid #E2DFD7; background:#F9FAFB; border-radius:8px; font-size:11px; font-weight:600; color:var(--text-secondary); cursor:pointer; }
+    .mp-type-btn.active { border-color:var(--sidebar-bg); background:#EBF0FA; color:var(--sidebar-bg); }
+    .mp-avail-btns { display:flex; gap:6px; }
+    .mp-avail-btn { flex:1; padding:6px 0; border:1.5px solid #E2DFD7; background:#F9FAFB; border-radius:8px; font-size:11.5px; font-weight:600; color:var(--text-secondary); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:4px; }
+    .mp-avail-btn.active-avail   { border-color:#0D7A57; background:#E6F7F2; color:#0D7A57; }
+    .mp-avail-btn.active-busy    { border-color:#F59E0B; background:#FEF3C7; color:#B45309; }
+    .mp-avail-btn.active-leave   { border-color:#E24B4A; background:#FEF0EF; color:#E24B4A; }
+    .mp-avail-dot-btn { width:6px; height:6px; border-radius:50%; background:currentColor; }
+    .mp-drawer-footer { padding:12px 24px; border-top:0.5px solid #EEEAE3; background:#FAFAF8; display:flex; gap:10px; justify-content:flex-end; flex-shrink:0; }
+    
+    /* Toast override for unified page */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 9999;
+    }
+    .toast-notification {
+      background: #FFFFFF;
+      border: 0.5px solid #E8E6E0;
+      border-left: 4px solid #1D9E75;
+      padding: 12px 18px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(27,43,94,0.15);
+      color: var(--text-primary);
+      font-size: 12.5px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+    }
+    .toast-notification.show {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .toast-info { border-left-color: #378ADD; }
+    .toast-warning { border-left-color: #F59E0B; }
+    .toast-danger { border-left-color: #E24B4A; }
+
+    /* Decision Pill Select Dropdown */
+    .decision-pill-select {
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 3px 20px 3px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      appearance: none;
+      outline: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 6px center;
+      background-size: 8px;
+      transition: all 0.15s;
+    }
+    .decision-pill-select.proceed { background-color: #E6F7F2; color: #0D7A57; }
+    .decision-pill-select.hold { background-color: #EBF4FF; color: #378ADD; }
+    .decision-pill-select.rejected { background-color: #FEF0EF; color: #E24B4A; }
+    .decision-pill-select.pending { background-color: #FEF3C7; color: #B45309; }
+
+    /* Collapsible Section styles */
+    .collapsible-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+      padding: 10px 0;
+      border-top: 0.5px solid #EEEAE3;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .collapsible-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease-out;
+    }
+    .collapsible-body.open {
+      max-height: 420px;
+    }
+
+    /* Expandable transcript */
+    .transcript-answer-text {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      cursor: pointer;
+      transition: max-height 0.2s;
+    }
+    .transcript-answer-text.expanded {
+      display: block;
+      -webkit-line-clamp: initial;
+    }
+
+    /* Info Tooltips */
+    .info-tooltip-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      transition: background 0.15s;
+      position: relative;
+    }
+    .info-tooltip-btn:hover {
+      background: #F3F1EC;
+      color: var(--sidebar-bg);
+    }
+    .info-tooltip-content {
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1B2B5E;
+      color: #FFF;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 10.5px;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(27,43,94,0.2);
+      display: none;
+      z-index: 10;
+    }
+    .info-tooltip-btn:hover .info-tooltip-content {
+      display: block;
+    }
+
+    /* Popover Delete confirmation */
+    .delete-popover-container {
+      position: relative;
+      display: inline-block;
+    }
+    .delete-confirm-popover {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      right: 0;
+      background: #FFFFFF;
+      border: 1px solid #E2DFD7;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 4px 16px rgba(27,43,94,0.15);
+      z-index: 1200;
+      width: 200px;
+      display: none;
+    }
+    .delete-confirm-popover.show {
+      display: block;
+    }
+    .delete-popover-arrow {
+      position: absolute;
+      top: 100%;
+      right: 12px;
+      width: 8px;
+      height: 8px;
+      background: #FFFFFF;
+      border-right: 1px solid #E2DFD7;
+      border-bottom: 1px solid #E2DFD7;
+      transform: rotate(45deg) translateY(-4px);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo-area">
+        <span class="logo-title">KadelLabs</span>
+        <span class="logo-subtitle">serving through technology</span>
+      </div>
+      
+      <nav class="navigation-menu">
+        <a href="index.html" class="nav-item">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" /></svg>
+          Dashboard
+        </a>
+        <a href="candidates.html" class="nav-item active">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+          Candidates
+          <span class="nav-badge-dot" style="margin-left: auto;"></span>
+        </a>
+        <a href="#" class="nav-item" id="nav-question-bank">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>
+          Question Bank
+        </a>
+        <a href="reports.html" class="nav-item">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+          Reports
+        </a>
+        <a href="departments.html" class="nav-item">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg>
+          Settings
+        </a>
+      </nav>
+      
+      <div class="sidebar-bottom">
+        <button class="logout-btn">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- RIGHT CONTENT AREA -->
+    <main class="main-wrapper">
+      
+      <!-- TOP BAR -->
+      <header class="top-bar">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <h1 class="page-title" id="page-main-header">Candidates Directory</h1>
+        </div>
+        <div style="display:none; align-items:center; gap:14px;" id="header-scheduler-actions">
+          <button class="btn-manage-panelists" id="btn-open-mp-drawer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg>
+            Manage Panelists
+          </button>
+          <button class="btn-schedule-interview" id="btn-open-schedule-modal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Schedule Interview
+          </button>
+        </div>
+        
+        <div class="profile-block">
+          <div class="profile-details">
+            <span class="profile-name">Admin</span>
+            <span class="profile-email">careers@kadellabs.com</span>
+          </div>
+          <div class="avatar-initials">KL</div>
+        </div>
+      </header>
+
+      <!-- STAGES TABS HEADER -->
+      <div style="padding: 18px 24px 0 24px;">
+        <nav class="dashboard-tabs-header">
+          <button class="main-dashboard-tab active" data-tab="bot-interview">
+            Bot Interview <span class="count-badge" id="badge-bot-interview">0</span>
+          </button>
+          <button class="main-dashboard-tab" data-tab="technical-round">
+            Technical Round <span class="count-badge" id="badge-technical-round">0</span>
+          </button>
+          <button class="main-dashboard-tab" data-tab="final-submission">
+            Final Submission <span class="count-badge" id="badge-final-submission">0</span>
+          </button>
+          <button class="main-dashboard-tab" data-tab="rejected">
+            Rejected <span class="count-badge" id="badge-rejected">0</span>
+          </button>
+          <button class="main-dashboard-tab" data-tab="on-hold">
+            On Hold <span class="count-badge" id="badge-on-hold">0</span>
+          </button>
+        </nav>
+      </div>
+
+      <!-- MAIN CONTENT CONTAINER -->
+      <div class="main-content" style="padding-top: 0;">
+        
+        <!-- SECTION 1: BOT INTERVIEW (VIDEO SCREENING) -->
+        <div id="section-bot-interview" class="tab-section active">
+          
+          <!-- Send Invite Panel -->
+          <section class="premium-card" id="card-invite-form" style="margin-bottom: 20px;">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2 class="card-title">Send Video Invite</h2>
+                <p class="card-subtitle">Select a department, role, and applicant to send a video screening invitation via email.</p>
+              </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+              <!-- Left: Dropdowns -->
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div class="form-row" style="grid-template-columns: 1fr 1fr; gap: 14px;">
+                  <div class="form-group">
+                    <label class="form-label">Department</label>
+                    <div class="searchable-select" id="select-dept-container">
+                      <div class="select-trigger" id="select-dept-trigger" data-value="">
+                        <span class="select-trigger-text">Select Department</span>
+                        <span class="select-trigger-arrow"></span>
+                      </div>
+                      <div class="select-dropdown-panel">
+                        <input type="text" class="select-search-input" placeholder="Search department...">
+                        <div class="select-options-list" id="select-dept-options"></div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label class="form-label">Sub-Department</label>
+                    <div class="searchable-select" id="select-subdept-container">
+                      <div class="select-trigger" id="select-subdept-trigger" data-value="">
+                        <span class="select-trigger-text">Select Sub-Department</span>
+                        <span class="select-trigger-arrow"></span>
+                      </div>
+                      <div class="select-dropdown-panel">
+                        <input type="text" class="select-search-input" placeholder="Search sub-department...">
+                        <div class="select-options-list" id="select-subdept-options"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-row" style="grid-template-columns: 1fr 1fr; gap: 14px;">
+                  <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <div class="searchable-select" id="select-role-container">
+                      <div class="select-trigger" id="select-role-trigger" data-value="">
+                        <span class="select-trigger-text">Select Role</span>
+                        <span class="select-trigger-arrow"></span>
+                      </div>
+                      <div class="select-dropdown-panel">
+                        <input type="text" class="select-search-input" placeholder="Search role...">
+                        <div class="select-options-list" id="select-role-options"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Applicant</label>
+                    <div class="searchable-select" id="select-candidate-container">
+                      <div class="select-trigger" id="select-candidate-trigger" data-value="">
+                        <span class="select-trigger-text">Select Applicant</span>
+                        <span class="select-trigger-arrow"></span>
+                      </div>
+                      <div class="select-dropdown-panel">
+                        <input type="text" class="select-search-input" placeholder="Search applicant...">
+                        <div class="select-options-list" id="select-candidate-options"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
+                  <button class="btn-pill" id="btn-send-invite" disabled style="opacity: 0.6; cursor: not-allowed; height: 34px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; margin-right: 4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
+                    Send Video Invite
+                  </button>
+                </div>
+              </div>
+
+              <!-- Right: Questions Preview Pane -->
+              <div style="background: #FAF9F6; border: 1px dashed #C8D6EE; border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 8px; max-height: 160px; overflow-y: auto;">
+                <h4 style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin: 0; border-bottom: 0.5px solid #EEEAE3; padding-bottom: 4px; letter-spacing: 0.3px;">Questions Preview</h4>
+                <div id="invite-questions-preview" style="font-size: 12px; color: var(--text-secondary); font-style: italic; line-height: 1.4;">
+                  Select a role to preview screening questions.
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Table & Right Action Panel Grid -->
+          <div class="candidates-split-grid">
+            <!-- Table list of candidates -->
+            <section class="premium-card" style="padding-bottom: 8px; flex: 1; min-width: 0;">
+              <div class="card-header">
+                <h2 class="card-title">Candidates Directory</h2>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div class="search-container">
+                    <span class="search-icon">
+                      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                    </span>
+                    <input type="text" id="candidate-search-bot" class="search-input" placeholder="Search candidate...">
+                  </div>
+                </div>
+              </div>
+
+              <div class="table-responsive" style="border: none;">
+                <table class="ats-table" id="bot-screening-table">
+                  <thead>
+                    <tr>
+                      <th class="sort-header" data-sort="name">Candidate Name<span class="sort-icon"></span></th>
+                      <th class="sort-header" data-sort="role">Role Applied<span class="sort-icon"></span></th>
+                      <th class="sort-header" data-sort="status">Interview Status<span class="sort-icon"></span></th>
+                      <th class="sort-header" data-sort="overallScore">AI Score<span class="sort-icon"></span></th>
+                      <th>Last Updated</th>
+                    </tr>
+                  </thead>
+                  <tbody id="bot-screening-table-body">
+                    <!-- Injected via JavaScript -->
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <!-- Contextual action card on the right -->
+            <aside class="contextual-action-panel" id="bot-action-panel">
+              <h4 class="contextual-panel-header">Candidate Action Panel</h4>
+              <div id="bot-panel-empty-state" style="text-align: center; padding: 24px 0; color: var(--text-secondary); font-style: italic; font-size: 12px;">
+                Select a candidate from the table to perform recruitment actions.
+              </div>
+              <div id="bot-panel-content" style="display: none;">
+                <h3 id="panel-candidate-name" style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px;">John Doe</h3>
+                <p id="panel-candidate-role" style="font-size: 11px; color: var(--text-secondary); margin-bottom: 16px;">MuleSoft Developer</p>
+                
+                <!-- Action Groups dynamic container -->
+                <div id="panel-actions-group"></div>
+              </div>
+            </aside>
+          </div>
+
+        </div>
+
+        <!-- SECTION 2: TECHNICAL ROUND (SCHEDULER) -->
+        <div id="section-technical-round" class="tab-section" style="display: none;">
+          
+          <!-- Top Scheduler stats cards -->
+          <div class="stats-bar">
+            <div class="stat-pill active" data-filter="all">
+              <span class="stat-num" id="stat-all-num">0</span>
+              <span class="stat-label">All Interviews</span>
+            </div>
+            <div class="stat-pill confirmed" data-filter="completed">
+              <span class="stat-num" id="stat-completed-num">0</span>
+              <span class="stat-label">Confirmed</span>
+            </div>
+            <div class="stat-pill pending" data-filter="pending">
+              <span class="stat-num" id="stat-pending-num">0</span>
+              <span class="stat-label">Pending</span>
+            </div>
+            <div class="stat-pill" data-filter="week" style="border-left: 4px solid #378ADD;">
+              <span class="stat-num" id="stat-week-num">0</span>
+              <span class="stat-label">This Week</span>
+            </div>
+          </div>
+
+          <!-- Panelist management dashboard summary -->
+          <div class="pm-dashboard" id="pm-dashboard" style="margin-top: 18px;">
+            <div class="pm-dashboard-header">
+              <div class="pm-dashboard-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg>
+                Panelist Coverage & Availability
+              </div>
+            </div>
+            <div class="pm-kpi-row">
+              <div class="pm-kpi-card">
+                <span class="pm-kpi-val" id="kpi-total-panelists">0</span>
+                <span class="pm-kpi-label">Total Panelists</span>
+              </div>
+              <div class="pm-kpi-card kpi-available">
+                <span class="pm-kpi-val" id="kpi-avail-today">0</span>
+                <span class="pm-kpi-label">Available Today</span>
+              </div>
+              <div class="pm-kpi-card kpi-busy">
+                <span class="pm-kpi-val" id="kpi-busy-today">0</span>
+                <span class="pm-kpi-label">Busy Today</span>
+              </div>
+              <div class="pm-kpi-card kpi-leave">
+                <span class="pm-kpi-val" id="kpi-leave-today">0</span>
+                <span class="pm-kpi-label">On Leave</span>
+              </div>
+              <div class="pm-kpi-card kpi-week">
+                <span class="pm-kpi-val" id="kpi-assigned-week">0</span>
+                <span class="pm-kpi-label">Interviews This Week</span>
+              </div>
+            </div>
+            <div class="pm-dept-row" id="pm-dept-pills"></div>
+          </div>
+
+          <!-- Calendar Split Grid -->
+          <div class="sched-layout" style="margin-top: 18px;">
+            <!-- Calendar Column -->
+            <div class="calendar-col">
+              <div class="calendar-card">
+                <header class="calendar-header">
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <button class="cal-nav-btn" id="cal-prev" title="Previous month/week">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+                    </button>
+                    <span class="cal-month-label" id="cal-month-label">June 2026</span>
+                    <button class="cal-nav-btn" id="cal-next" title="Next month/week">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                    </button>
+                    <button class="workspace-back-btn" id="cal-today" style="height:28px; padding:0 10px; font-size:11px; border-radius:6px; margin-left:6px; font-weight:600;">Today</button>
+                  </div>
+                  
+                  <div class="cal-view-toggle">
+                    <button class="cal-view-btn active" data-view="month">Month</button>
+                    <button class="cal-view-btn" data-view="week">Week</button>
+                  </div>
+                </header>
+
+                <div class="cal-grid">
+                  <div class="cal-day-headers" id="cal-day-headers"></div>
+                  <div class="cal-days" id="cal-days"></div>
+                </div>
+              </div>
+
+              <!-- Panelist directory section under calendar -->
+              <section class="panelist-directory">
+                <div class="dir-header">
+                  <div class="dir-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A11.386 11.386 0 007.91 20.8M3 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M3 19.128v-.003c0-1.113.285-2.16.786-3.07M3 19.128v.109A11.386 11.386 0 007.91 20.8M12 12a3 3 0 100-6 3 3 0 000 6zm-7-2.5a2.5 2.5 0 115 0 2.5 2.5 0 01-5 0zm14 0a2.5 2.5 0 115 0 2.5 2.5 0 01-5 0z" /></svg>
+                    Panelist Directory
+                    <span class="count-badge" id="dir-count-badge">0</span>
+                  </div>
+                  <div class="dir-filters">
+                    <div class="dir-search-wrap">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                      <input type="text" id="dir-search-input" class="dir-search" placeholder="Search name, skills...">
+                    </div>
+                    <select id="dir-filter-dept" class="dir-filter-select">
+                      <option value="all">All Departments</option>
+                      <option value="Engineering">Engineering</option>
+                      <option value="Product">Product</option>
+                      <option value="HR">HR</option>
+                      <option value="Design">Design</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="dir-grid" id="dir-grid-container"></div>
+              </section>
+            </div>
+
+            <!-- Scheduler Sidebar (Availability, Upcoming list) -->
+            <div class="sched-sidebar">
+              <!-- Card: Panel Availability -->
+              <div class="sidebar-panel" id="panel-avail-card">
+                <header class="sidebar-panel-header" id="panel-avail-toggle">
+                  <span class="sidebar-panel-title">
+                    Panel Availability
+                  </span>
+                  <svg class="collapse-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                </header>
+                <div class="sidebar-panel-body">
+                  <div class="pa-controls">
+                    <div class="pa-search-wrap">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                      <input type="text" id="pa-search-input" class="pa-search" placeholder="Search name/skills...">
+                    </div>
+                    <select id="pa-filter-dept" class="pa-filter">
+                      <option value="all">All</option>
+                      <option value="Engineering">Eng</option>
+                      <option value="Product">Prod</option>
+                      <option value="HR">HR</option>
+                      <option value="Design">Des</option>
+                    </select>
+                    <button class="pa-add-btn" id="pa-quick-add-btn" title="Add Panelist">+</button>
+                  </div>
+                  <div id="panelists-list" style="max-height: 280px; overflow-y: auto;"></div>
+                </div>
+              </div>
+
+              <!-- Card: Upcoming interviews list -->
+              <div class="sidebar-panel" id="upcoming-card">
+                <header class="sidebar-panel-header" id="upcoming-toggle">
+                  <span class="sidebar-panel-title">
+                    Upcoming Interviews
+                    <span class="count-badge" id="upcoming-count-badge">0</span>
+                  </span>
+                  <svg class="collapse-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                </header>
+                <div class="sidebar-panel-body">
+                  <div id="upcoming-list" style="max-height: 320px; overflow-y: auto;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- SECTION 3: OTHER PIPELINE STAGES (FINAL SUBMISSION, REJECTED, ON HOLD) -->
+        <div id="section-other-stages" class="tab-section" style="display: none;">
+          
+          <div class="candidates-split-grid">
+            <!-- Table list of stage candidates -->
+            <section class="premium-card" style="padding-bottom: 8px; flex: 1; min-width: 0;">
+              <div class="card-header">
+                <h2 class="card-title" id="other-stage-table-title">Hiring Stage Directory</h2>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div class="search-container">
+                    <span class="search-icon">
+                      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                    </span>
+                    <input type="text" id="candidate-search-other" class="search-input" placeholder="Search candidate...">
+                  </div>
+                </div>
+              </div>
+
+              <div class="table-responsive" style="border: none;">
+                <table class="ats-table" id="other-stages-table">
+                  <thead>
+                    <tr>
+                      <th class="sort-header" data-sort="name">Candidate Name<span class="sort-icon"></span></th>
+                      <th class="sort-header" data-sort="role">Role Applied<span class="sort-icon"></span></th>
+                      <th class="sort-header" data-sort="decision">Stage Decision<span class="sort-icon"></span></th>
+                      <th class="sort-header" data-sort="overallScore">AI Score<span class="sort-icon"></span></th>
+                      <th>Last Updated</th>
+                    </tr>
+                  </thead>
+                  <tbody id="other-stages-table-body">
+                    <!-- Injected via JavaScript -->
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <!-- Contextual action card on the right for other stages -->
+            <aside class="contextual-action-panel" id="other-action-panel">
+              <h4 class="contextual-panel-header">Candidate Action Panel</h4>
+              <div id="other-panel-empty-state" style="text-align: center; padding: 24px 0; color: var(--text-secondary); font-style: italic; font-size: 12px;">
+                Select a candidate from the table to perform recruitment actions.
+              </div>
+              <div id="other-panel-content" style="display: none;">
+                <h3 id="other-panel-candidate-name" style="font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px;">John Doe</h3>
+                <p id="other-panel-candidate-role" style="font-size: 11px; color: var(--text-secondary); margin-bottom: 16px;">MuleSoft Developer</p>
+                
+                <div id="other-panel-actions-group"></div>
+              </div>
+            </aside>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ══ MODALS & DRAWERS OVERLAYS ═══════════════════════════ -->
+
+  <!-- QUESTION BANK MANAGER DRAWER (Sidebar modal) -->
+  <div class="mp-drawer-overlay" id="questions-drawer-overlay">
+    <div class="mp-drawer">
+      <div class="mp-drawer-header">
+        <div>
+          <h3 class="mp-drawer-title">Screening Question Bank</h3>
+          <p class="mp-drawer-subtitle">Manage screening questions mapped to active roles.</p>
+        </div>
+        <button class="modal-close-btn" id="close-questions-drawer">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" style="width:18px;height:18px;"><path d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div class="mp-drawer-body">
+        <div class="mp-drawer-section">
+          <div class="mp-form-group" style="margin-bottom: 8px;">
+            <label class="mp-form-label">Configured Role</label>
+            <select id="questions-role-select" class="mp-select">
+              <option value="Frontend Developer">Frontend Developer</option>
+              <option value="Backend Engineer">Backend Engineer</option>
+              <option value="React Native Developer">React Native Developer</option>
+              <option value="Product Manager">Product Manager</option>
+              <option value="HR Executive">HR Executive</option>
+            </select>
+          </div>
+          
+          <label class="mp-form-label" style="display:block; margin: 12px 0 6px 0;">Screening Questions</label>
+          <div id="questions-list-container" class="question-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+
+        <div class="mp-drawer-section" style="border-bottom:none;">
+          <label class="mp-form-label" style="display:block; margin-bottom: 6px;">Add New Question</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="new-question-input" class="mp-input" placeholder="Type a screening question..." style="flex:1;">
+            <button class="btn-pill" id="btn-add-question" style="height: 34px; font-size:12px; border-radius:8px;">Add</button>
+          </div>
+        </div>
+      </div>
+      <div class="mp-drawer-footer">
+        <button class="btn-pill" id="btn-save-questions" style="height:34px; border-radius:8px;">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANAGE PANELISTS DRAWER -->
+  <div class="mp-drawer-overlay" id="mp-drawer-overlay">
+    <div class="mp-drawer">
+      <header class="mp-drawer-header">
+        <div>
+          <h3 class="mp-drawer-title" id="mp-drawer-title">Add New Interview Panelist</h3>
+          <p class="mp-drawer-subtitle">Configure interviewer availability status, role skills, and calendar timezone.</p>
+        </div>
+        <button class="modal-close-btn" id="close-mp-drawer">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" style="width:18px;height:18px;"><path d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </header>
+      
+      <div class="mp-drawer-body">
+        <!-- Panelist Form Section -->
+        <div class="mp-drawer-section">
+          <div class="mp-form-row" style="margin-bottom: 12px;">
+            <div class="mp-form-group">
+              <label class="mp-form-label">Full Name<span>*</span></label>
+              <input type="text" id="mp-name" class="mp-input" placeholder="e.g. Ravi Mehta">
+            </div>
+            <div class="mp-form-group">
+              <label class="mp-form-label">Designation / Role<span>*</span></label>
+              <input type="text" id="mp-title" class="mp-input" placeholder="e.g. Engineering Lead">
+            </div>
+          </div>
+          
+          <div class="mp-form-row" style="margin-bottom: 12px;">
+            <div class="mp-form-group">
+              <label class="mp-form-label">Department<span>*</span></label>
+              <select id="mp-department" class="mp-select">
+                <option value="Engineering">Engineering</option>
+                <option value="Product">Product</option>
+                <option value="HR">HR</option>
+                <option value="Design">Design</option>
+              </select>
+            </div>
+            <div class="mp-form-group">
+              <label class="mp-form-label">Email Address<span>*</span></label>
+              <input type="email" id="mp-email" class="mp-input" placeholder="e.g. ravi@kadellabs.com">
+            </div>
+          </div>
+
+          <div class="mp-form-group" style="margin-bottom: 12px;">
+            <label class="mp-form-label">Skills / Expertise Tags</label>
+            <div class="mp-tag-input-wrap">
+              <span id="mp-skills-tags-container" style="display:flex; flex-wrap:wrap; gap:4px;"></span>
+              <input type="text" id="mp-skills-input" class="mp-tag-bare" placeholder="Add skill (press Enter)...">
+            </div>
+          </div>
+
+          <div class="mp-form-group" style="margin-bottom: 12px;">
+            <label class="mp-form-label">Interview Formats Mapped</label>
+            <div class="mp-interview-types" id="mp-interview-types-btns">
+              <button class="mp-type-btn" data-type="HR">HR</button>
+              <button class="mp-type-btn" data-type="Technical">Technical</button>
+              <button class="mp-type-btn" data-type="Managerial">Managerial</button>
+              <button class="mp-type-btn" data-type="Final Round">Final Round</button>
+            </div>
+          </div>
+
+          <div class="mp-form-row">
+            <div class="mp-form-group">
+              <label class="mp-form-label">Time Zone</label>
+              <select id="mp-timezone" class="mp-select">
+                <option value="IST">IST (UTC +5:30)</option>
+                <option value="EST">EST (UTC -5:00)</option>
+                <option value="PST">PST (UTC -8:00)</option>
+                <option value="GMT">GMT (UTC +0:00)</option>
+              </select>
+            </div>
+            <div class="mp-form-group">
+              <label class="mp-form-label">Availability Status</label>
+              <div class="mp-avail-btns">
+                <button class="mp-avail-btn active-avail" data-status="available">
+                  <span class="mp-avail-dot-btn" style="color:#0D7A57;"></span> Available
+                </button>
+                <button class="mp-avail-btn" data-status="busy">
+                  <span class="mp-avail-dot-btn" style="color:#F59E0B;"></span> Busy
+                </button>
+                <button class="mp-avail-btn" data-status="on-leave">
+                  <span class="mp-avail-dot-btn" style="color:#E24B4A;"></span> On Leave
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mp-drawer-footer">
+        <button class="workspace-back-btn" id="btn-cancel-mp" style="height:34px; border-radius:8px; font-weight:600;">Cancel</button>
+        <button class="btn-pill" id="btn-save-mp" style="height:34px; border-radius:8px;">Save Panelist</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHEDULE INTERVIEW MODAL -->
+  <div class="schedule-modal-overlay" id="schedule-modal-overlay">
+    <div class="schedule-modal">
+      <header class="schedule-modal-header">
+        <h3 class="schedule-modal-title" id="schedule-modal-title">Schedule Live Interview</h3>
+        <button class="modal-close-btn" id="close-schedule-modal">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" style="width:18px;height:18px;"><path d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </header>
+      
+      <div class="schedule-modal-body">
+        <div class="modal-form-row">
+          <div class="modal-form-section">
+            <label class="modal-form-label">Candidate Name</label>
+            <input type="text" id="sch-candidate" class="modal-input" placeholder="e.g. Dianne Russell">
+          </div>
+          <div class="modal-form-section">
+            <label class="modal-form-label">Role Applied</label>
+            <input type="text" id="sch-role" class="modal-input" placeholder="e.g. Frontend Developer">
+          </div>
+        </div>
+
+        <div class="modal-form-row">
+          <div class="modal-form-section">
+            <label class="modal-form-label">Interview Date</label>
+            <input type="date" id="sch-date" class="modal-input">
+          </div>
+          <div class="modal-form-section">
+            <label class="modal-form-label">Start Time</label>
+            <input type="time" id="sch-time" class="modal-input">
+          </div>
+        </div>
+
+        <div class="modal-form-row">
+          <div class="modal-form-section">
+            <label class="modal-form-label">Duration (Minutes)</label>
+            <select id="sch-duration" class="modal-input" style="padding:0 8px;">
+              <option value="30">30 Min</option>
+              <option value="45" selected>45 Min</option>
+              <option value="60">60 Min</option>
+              <option value="90">90 Min</option>
+            </select>
+          </div>
+          <div class="modal-form-section">
+            <label class="modal-form-label">Interview Format</label>
+            <select id="sch-format" class="modal-input" style="padding:0 8px;">
+              <option value="HR">HR Round</option>
+              <option value="Technical" selected>Technical Round</option>
+              <option value="Managerial">Managerial Round</option>
+              <option value="Final Round">Final Round</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Panelist selection container -->
+        <div class="modal-form-section">
+          <label class="modal-form-label" style="display:flex; justify-content:space-between; align-items:center;">
+            Assign Panelist(s) <span style="font-size:10.5px; color:var(--text-secondary); font-weight:normal;">Select 1 or more interviewers</span>
+          </label>
+          <div class="dir-search-wrap" style="margin:4px 0 8px 0; width:100%;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+            <input type="text" id="sch-panelist-search" class="pa-search" placeholder="Search panelists by name or skills...">
+          </div>
+          
+          <!-- Alert warning for scheduling conflict -->
+          <div class="conflict-warning" id="sch-conflict-alert">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+            <span id="conflict-msg">Busy / Conflict warning.</span>
+          </div>
+
+          <div class="panelist-selector" id="sch-panelists-chips"></div>
+        </div>
+
+        <div class="modal-form-section">
+          <label class="modal-form-label">Meeting Platform</label>
+          <div class="platform-btns">
+            <button class="platform-btn selected" data-platform="Google Meet">🎥 Google Meet</button>
+            <button class="platform-btn" data-platform="Zoom">💻 Zoom</button>
+            <button class="platform-btn" data-platform="MS Teams">🖥 MS Teams</button>
+            <button class="platform-btn" data-platform="In-Person">📍 In-Person</button>
+          </div>
+        </div>
+
+        <div class="modal-form-section">
+          <label class="modal-form-label">Recruiter remarks / Scheduling notes</label>
+          <textarea id="sch-notes" class="notes-textarea" placeholder="Add details like link passwords, preparation guide links..." style="min-height:56px; font-size:12.5px;"></textarea>
+        </div>
+      </div>
+      
+      <div class="schedule-modal-footer">
+        <button class="workspace-back-btn" id="btn-cancel-schedule" style="height:36px; border-radius:8px; font-weight:600;">Cancel</button>
+        <button class="btn-pill" id="btn-save-schedule" style="height:36px; border-radius:8px;">Confirm Schedule</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERVIEW DETAILS POPUP (Calendar event details) -->
+  <div class="event-popup-overlay" id="event-popup-overlay">
+    <div class="event-popup">
+      <header class="event-popup-header">
+        <div>
+          <span class="popup-role-tag" id="popup-role-tag">Frontend Developer</span>
+          <h3 class="event-popup-title" id="popup-candidate-name">Dianne Russell</h3>
+        </div>
+        <span class="status-pill selected" id="popup-status-badge">Confirmed</span>
+      </header>
+      <div class="event-popup-body">
+        <div class="popup-detail-grid">
+          <div class="popup-detail-item">
+            <span class="popup-detail-label">Date & Time</span>
+            <span class="popup-detail-value" id="popup-datetime">June 3, 2026, 10:00 AM</span>
+          </div>
+          <div class="popup-detail-item">
+            <span class="popup-detail-label">Duration</span>
+            <span class="popup-detail-value" id="popup-duration">60 min</span>
+          </div>
+        </div>
+        <div class="popup-detail-grid" style="margin-top:2px;">
+          <div class="popup-detail-item">
+            <span class="popup-detail-label">Platform</span>
+            <span class="popup-detail-value" id="popup-platform">Google Meet</span>
+          </div>
+        </div>
+        
+        <div class="popup-detail-item">
+          <span class="popup-detail-label">Assigned Panelists</span>
+          <div class="popup-panelists" id="popup-panelists"></div>
+        </div>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-popup-cancel" id="popup-btn-cancel">Cancel Interview</button>
+        <button class="btn-popup-reschedule" id="popup-btn-reschedule">Reschedule</button>
+        <button class="btn-popup-join" id="popup-btn-join">Join Interview</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CANDIDATE REVIEW WORKSPACE OVERLAY (Full page report review) -->
+  <div class="mp-drawer-overlay" id="workspace-review-overlay" style="z-index: 1400;">
+    <div class="mp-drawer" style="width: 100vw; height: 100vh; right:-100vw; border-left:none;">
+      <!-- Header -->
+      <header class="workspace-header" style="background:#FFF; border-bottom:0.5px solid #E8E6E0; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <button class="workspace-back-btn" id="workspace-review-back-btn" style="font-weight:600;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:14px;height:14px;stroke-width:2.5;"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+            Back to Candidates
+          </button>
+          <div style="display: flex; align-items: center; gap: 12px; border-left: 1px solid #E8E6E0; padding-left: 16px;">
+            <div id="ws-avatar" class="candidate-avatar" style="width: 38px; height: 38px; border-radius: 50%; font-weight: 700; color: white;"></div>
+            <div>
+              <h2 id="ws-name" style="font-size: 15px; font-weight: 700; color: var(--text-primary); margin: 0;"></h2>
+              <p style="font-size: 11px; color: var(--text-secondary); margin: 2px 0 0 0;">
+                <span id="ws-email"></span> · <span id="ws-role" style="font-weight: 600;"></span>
+              </p>
+            </div>
+            <span id="ws-status" class="status-pill"></span>
+          </div>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">Screening Progress:</span>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="width: 100px; height: 6px; background-color: #EEEAE3; border-radius: 3px; overflow: hidden; position: relative;">
+              <div id="ws-progress-bar" style="height: 100%; background-color: var(--active-nav-bg); width: 0%;"></div>
+            </div>
+            <span id="ws-progress-text" style="font-size: 11px; font-weight: 700; color: var(--text-primary);">0%</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Grid Body -->
+      <div class="mp-drawer-body" style="background-color: var(--page-bg); padding: 20px;">
+        <div style="display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: flex-start; max-width: 1440px; margin: 0 auto; width: 100%;">
+          
+          <!-- Left Column (Video, Transcript, AI Summary) -->
+          <div>
+            <!-- Video Player -->
+            <div class="workspace-card" style="padding:0; overflow:hidden; background:#FFF; border:0.5px solid #E8E6E0; border-radius:12px; margin-bottom:20px;">
+              <div class="custom-video-wrapper">
+                <div class="custom-video-screen">
+                  <div id="ws-video-placeholder" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background-color:#111; color:#FFF; position:relative;">
+                    <div id="ws-playback-state-icon" style="background-color:rgba(29, 158, 117, 0.95); width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform 0.2s;">
+                      <svg viewBox="0 0 24 24" fill="currentColor" style="width:28px; height:28px; color:#FFFFFF; margin-left:3px;" id="ws-play-svg"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                    
+                    <div class="custom-video-active-question-banner">
+                      <span style="font-size:10px; font-weight:700; text-transform:uppercase; color:#1D9E75; display:block; letter-spacing:0.5px;">Question</span>
+                      <span id="ws-video-active-question-text" style="font-size:13px; font-weight:500; display:block; margin-top:3px; line-height:1.3;">What is exception handling</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Video Controls -->
+                <div class="custom-video-controls">
+                  <div class="custom-video-timeline-container" id="ws-vid-timeline">
+                    <div class="custom-video-timeline-bg">
+                      <div class="custom-video-timeline-fill" id="ws-vid-timeline-fill"></div>
+                    </div>
+                  </div>
+                  
+                  <div class="custom-video-control-row">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                      <button class="video-control-btn" id="ws-vid-btn-play-toggle">
+                        <svg viewBox="0 0 24 24" fill="currentColor" id="ws-vid-btn-play-svg"><path d="M8 5v14l11-7z"/></svg>
+                      </button>
+                      <span id="ws-vid-time-display" style="color:#FFF; font-size:11.5px; font-family:var(--font-mono);">0:00 / 0:00</span>
+                    </div>
+                    
+                    <div style="display:flex; align-items:center; gap:14px;">
+                      <div style="display:flex; gap:6px; align-items:center; background:rgba(255, 255, 255, 0.08); padding:3px 8px; border-radius:4px; border:0.5px solid rgba(255,255,255,0.12);">
+                        <button class="video-control-btn" id="ws-vid-prev-q" style="font-size:10.5px; font-weight:600;">&lt; Prev</button>
+                        <span id="ws-vid-q-badge" style="color:#FFF; font-size:11px; font-weight:700;">Q1</span>
+                        <button class="video-control-btn" id="ws-vid-next-q" style="font-size:10.5px; font-weight:600;">Next &gt;</button>
+                      </div>
+                      
+                      <select class="speed-select" id="ws-vid-speed-select">
+                        <option value="1">1.0x</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2">2.0x</option>
+                      </select>
+                      
+                      <button class="video-control-btn" id="ws-vid-fullscreen-btn" title="Toggle Fullscreen">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M20.25 3.75v4.5m0-4.5h-4.5m4.5 0L15 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 20.25v-4.5m0 4.5h-4.5m4.5 0L15 15" /></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Question navigation pills -->
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;" id="ws-question-pills"></div>
+
+            <!-- Dialog Transcript -->
+            <div class="workspace-card" style="background:#FFF; border:0.5px solid #E8E6E0; border-radius:12px; padding:20px; margin-bottom:20px;">
+              <h3 class="workspace-card-title" style="font-size:12.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.75.75 0 01-1.074-.765 6 6 0 001.257-2.737C3.038 16.289 1 14.368 1 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
+                Dialogue Transcript
+              </h3>
+              <div class="chat-bubble-container" id="ws-transcript-container"></div>
+            </div>
+
+            <!-- AI Summary Evaluation -->
+            <div class="workspace-card" style="background:#FFF; border:0.5px solid #E8E6E0; border-radius:12px; padding:20px; margin-bottom:20px;">
+              <h3 class="workspace-card-title" style="font-size:12.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:16px;height:16px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l8.904-4.473L21 9l-3.473-3.473L9.813 15.904zM9.01 19.01L15 13M9 15l3 3"/></svg>
+                AI Summary & Evaluation
+              </h3>
+              <div style="background-color:#FAF9F6; border:0.5px solid #E2DFD7; border-radius:8px; padding:14px; margin-bottom:16px;">
+                <h4 style="font-size:12.5px; font-weight:700; color:var(--text-primary); margin:0 0 6px 0;">Observations Summary</h4>
+                <p id="ws-ai-summary" style="font-size:12px; color:var(--text-secondary); line-height:1.4; margin:0;"></p>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <div style="background-color:#F0FDF4; border:0.5px solid #BBF7D0; border-radius:8px; padding:12px;">
+                  <h4 style="font-size:11px; font-weight:700; color:#166534; text-transform:uppercase; margin-bottom:6px;">Key Strengths</h4>
+                  <ul id="ws-strengths" style="font-size:11.5px; color:#1E293B; padding-left:16px; margin:0; display:flex; flex-direction:column; gap:4px;"></ul>
+                </div>
+                <div style="background-color:#FFFBEB; border:0.5px solid #FDE68A; border-radius:8px; padding:12px;">
+                  <h4 style="font-size:11px; font-weight:700; color:#92400E; text-transform:uppercase; margin-bottom:6px;">Areas to Explore</h4>
+                  <ul id="ws-improvements" style="font-size:11.5px; color:#1E293B; padding-left:16px; margin:0; display:flex; flex-direction:column; gap:4px;"></ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Competency snapshot -->
+            <div class="workspace-card" style="background:#FFF; border:0.5px solid #E8E6E0; border-radius:12px; padding:20px;">
+              <h3 class="workspace-card-title" style="font-size:12.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:16px;">Competency Assessment</h3>
+              <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:20px; align-items:center;">
+                <div style="display:flex; flex-direction:column; align-items:center; padding:16px; background-color:#FAF9F6; border:0.5px solid #E8E6E0; border-radius:10px;">
+                  <span style="font-size:10px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:10px;">Screening Score</span>
+                  <div style="position:relative; width:90px; height:90px;">
+                    <svg viewBox="0 0 36 36" style="width:100%; height:100%; transform:rotate(-90deg);">
+                      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#EEEAE3" stroke-width="2.5" />
+                      <circle id="ws-radial-progress" cx="18" cy="18" r="15.9155" fill="none" stroke="var(--active-nav-bg)" stroke-width="2.5" stroke-dasharray="0, 100" />
+                    </svg>
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); display:flex; flex-direction:column; align-items:center;">
+                      <span id="ws-score-percent" style="font-size:18px; font-weight:700; color:var(--text-primary);">0%</span>
+                    </div>
+                  </div>
+                  <span id="ws-score-badge" style="font-size:10.5px; font-weight:600; padding:3px 8px; border-radius:4px; margin-top:10px;"></span>
+                  
+                  <div style="margin-top:10px; width:100%; border-top:0.5px solid #E8E6E0; padding-top:10px; display:flex; flex-direction:column; align-items:center; gap:2px;">
+                    <span style="font-size:8.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase;">AI Recommendation</span>
+                    <span id="ws-ai-recommendation" style="font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px;"></span>
+                  </div>
+                </div>
+                
+                <div style="display:flex; flex-direction:column; align-items:center; padding:12px; background:#FAF9F6; border:0.5px solid #E8E6E0; border-radius:10px; height:100%;">
+                  <span style="font-size:10px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:8px;">Competency Snapshot</span>
+                  <svg viewBox="-20 -15 140 130" style="width:135px; height:135px; overflow:visible;" id="ws-radar-svg">
+                    <polygon points="50,15 85,50 50,85 15,50" fill="none" stroke="#E2DFD7" stroke-width="0.6" />
+                    <polygon points="50,26.3 73.7,50 50,73.7 26.3,50" fill="none" stroke="#E2DFD7" stroke-width="0.5" />
+                    <polygon points="50,38.3 61.7,50 50,61.7 38.3,50" fill="none" stroke="#E2DFD7" stroke-width="0.5" />
+                    <line x1="50" y1="15" x2="50" y2="85" stroke="#E2DFD7" stroke-width="0.6" />
+                    <line x1="15" y1="50" x2="85" y2="50" stroke="#E2DFD7" stroke-width="0.6" />
+                    <text x="50" y="8" font-size="7.5" text-anchor="middle" font-weight="700" fill="#475569">Clarity</text>
+                    <text x="90" y="53" font-size="7.5" text-anchor="start" font-weight="700" fill="#475569">Relevance</text>
+                    <text x="50" y="95" font-size="7.5" text-anchor="middle" font-weight="700" fill="#475569">Confidence</text>
+                    <text x="10" y="53" font-size="7.5" text-anchor="end" font-weight="700" fill="#475569">Comm.</text>
+                    <polygon id="ws-radar-polygon" points="50,50 50,50 50,50 50,50" fill="rgba(29, 158, 117, 0.2)" stroke="var(--active-nav-bg)" stroke-width="1.5" />
+                    <circle id="ws-radar-dot-clarity" cx="50" cy="50" r="2" fill="var(--active-nav-bg)" stroke="#FFF" stroke-width="0.5" />
+                    <circle id="ws-radar-dot-relevance" cx="50" cy="50" r="2" fill="var(--active-nav-bg)" stroke="#FFF" stroke-width="0.5" />
+                    <circle id="ws-radar-dot-confidence" cx="50" cy="50" r="2" fill="var(--active-nav-bg)" stroke="#FFF" stroke-width="0.5" />
+                    <circle id="ws-radar-dot-comm" cx="50" cy="50" r="2" fill="var(--active-nav-bg)" stroke="#FFF" stroke-width="0.5" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Sidebar Detail Cards -->
+          <div class="workspace-sidebar">
+            <!-- Profile Card -->
+            <div class="workspace-card" style="background:#FFF; border:0.5px solid #E8E6E0; border-radius:12px; padding:16px; margin-bottom:14px;">
+              <h3 class="workspace-card-title" style="font-size:11.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:12px;">Candidate Profile</h3>
+              <div style="display:flex; flex-direction:column; gap:8px; font-size:12px;">
+                <div style="display:flex; justify-content:space-between; border-bottom:0.5px solid #EEEAE3; padding-bottom:5px;">
+                  <span style="color:var(--text-secondary);">Phone</span>
+                  <span id="ws-profile-phone" style="font-weight:600;"></span>
+                </div>
+                <div style="display:flex; justify-content:space-between; border-bottom:0.5px solid #EEEAE3; padding-bottom:5px;">
+                  <span style="color:var(--text-secondary);">Location</span>
+                  <span id="ws-profile-location" style="font-weight:600;"></span>
+                </div>
+                <div style="display:flex; gap:12px; justify-content:center; margin-top:4px;">
+                  <a href="#" style="color:var(--sidebar-bg); font-weight:600; text-decoration:none;">LinkedIn</a>
+                  <a href="#" style="color:var(--text-secondary); font-weight:600; text-decoration:none;">Portfolio</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Resume Summary -->
+            <div class="workspace-card" style="background:#FFF; border:0.5px solid #E8E6E0; border-radius:12px; padding:16px; margin-bottom:14px;">
+              <h3 class="workspace-card-title" style="font-size:11.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:10px;">Resume Details</h3>
+              <p id="ws-resume-summary" style="font-size:11px; color:var(--text-secondary); line-height:1.4; margin-bottom:10px;"></p>
+              
+              <a href="#" id="ws-resume-link" style="display:flex; align-items:center; gap:8px; background:#FAF9F6; border:1px dashed #D1D9E8; padding:8px; border-radius:6px; text-decoration:none;" onclick="event.preventDefault(); showToast('Opening resume PDF viewer...');">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#E24B4A" stroke-width="2" style="width:20px; height:20px;"><path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                <div>
+                  <span style="font-size:11px; font-weight:700; color:var(--text-primary); display:block;">resume_attachment.pdf</span>
+                  <span style="font-size:9.5px; color:var(--text-secondary); display:block;">Click to view PDF</span>
+                </div>
+              </a>
+            </div>
+
+            <!-- Skills -->
+            <div class="workspace-card" style="background:#FFF; border:0.5px solid #E8E6E0; border-radius:12px; padding:16px; margin-bottom:14px;">
+              <h3 class="workspace-card-title" style="font-size:11.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:10px;">Core Skills</h3>
+              <div id="ws-skills-container" style="display:flex; gap:5px; flex-wrap:wrap;"></div>
+            </div>
+
+            <!-- Experience -->
+            <div class="workspace-card" style="background:#FFF; border:0.5px solid #E8E6E0; border-radius:12px; padding:16px; margin-bottom:14px;">
+              <h3 class="workspace-card-title" style="font-size:11.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:10px;">Experience History</h3>
+              <div class="experience-timeline" id="ws-experience-container"></div>
+            </div>
+
+            <!-- Sticky Decision Remarks -->
+            <div class="workspace-card" style="background:#FFF; border:1px solid #CBD5E1; border-radius:12px; padding:16px; margin-bottom:14px;">
+              <h3 class="workspace-card-title" style="font-size:11.5px; font-weight:700; color:var(--sidebar-bg); text-transform:uppercase; margin-bottom:10px;">HR Recruitment Decision</h3>
+              
+              <div class="decision-grid" style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+                <button class="decision-button" data-decision="Proceed">
+                  <span class="decision-dot" style="color:#0D7A57;"></span> Proceed (Shortlist)
+                </button>
+                <button class="decision-button" data-decision="On Hold">
+                  <span class="decision-dot" style="color:#378ADD;"></span> On Hold
+                </button>
+                <button class="decision-button" data-decision="Rejected">
+                  <span class="decision-dot" style="color:#E24B4A;"></span> Reject
+                </button>
+                <button class="decision-button" data-decision="Technical">
+                  <span class="decision-dot" style="color:#7C3AED;"></span> Move to Technical Round
+                </button>
+                <button class="decision-button" data-decision="HR">
+                  <span class="decision-dot" style="color:#EC4899;"></span> Move to HR Round
+                </button>
+              </div>
+
+              <div class="form-group" style="margin-bottom:10px;">
+                <label class="form-label" style="font-size:10px;">Recruiter remarks / Remarks</label>
+                <textarea id="ws-decision-notes" class="notes-textarea" placeholder="Add decision remarks..." style="min-height:50px; font-size:11.5px; border-radius:6px;"></textarea>
+              </div>
+              
+              <button class="btn-pill" id="ws-confirm-decision-btn" style="width:100%; height:34px; border-radius:6px;">Confirm Decision</button>
+            </div>
+
+            <!-- Activity -->
+            <div class="workspace-card" style="background:#FFF; border:0.5px solid #E8E6E0; border-radius:12px; padding:16px;">
+              <h3 class="workspace-card-title" style="font-size:11.5px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-bottom:10px;">Activity Timeline</h3>
+              <div class="experience-timeline" id="ws-activity-container"></div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS HOLDER -->
+  <div class="toast-container" id="toast-holder"></div>
+
+  <!-- Javascript -->
+  <script src="candidates.js"></script>
+</body>
+</html>

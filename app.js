@@ -1,3 +1,4 @@
+console.log("=== app.js: Script execution started ===");
 // Initial Recruiter Mock Database
 let candidates = [
   {
@@ -6,7 +7,7 @@ let candidates = [
     phone: "(406) 555-0120",
     email: "dianne.russell@example.com",
     role: "Frontend Developer",
-    status: "Selected",
+    status: "Shortlisted",
     notes: "Excellent performance in coding round. Strong knowledge of React/Next.js and Tailwind CSS.",
     skills: ["React", "Next.js", "TypeScript", "Tailwind CSS", "Redux Toolkit", "Jest", "Webpack", "Responsive Design"],
     experience: [
@@ -24,7 +25,7 @@ let candidates = [
     phone: "(302) 555-0107",
     email: "albert.flores@example.com",
     role: "Backend Engineer",
-    status: "Pending",
+    status: "Resume Received",
     notes: "Awaiting response for technical screening scheduler invitation.",
     skills: ["Node.js", "Express", "PostgreSQL", "Redis", "Docker", "AWS", "REST APIs", "GraphQL"],
     experience: [
@@ -43,7 +44,7 @@ let candidates = [
     email: "kathryn.murphy@example.com",
     role: "HR Executive",
     status: "On Hold",
-    notes: "Candidate has salary expectations slightly above budget. Holding for review with management.",
+    notes: "Applicant has salary expectations slightly above budget. Holding for review with management.",
     skills: ["Talent Acquisition", "Employee Relations", "HRIS Tools", "Negotiation", "Onboarding", "Conflict Resolution"],
     experience: [
       { role: "HR Consultant", company: "Enterprise People Corp", duration: "2023 - Present", desc: "Managed end-to-end recruitment pipelines for technical and operational roles. Implemented new HRIS tool, reducing onboarding delays." },
@@ -77,7 +78,7 @@ let candidates = [
     phone: "(209) 555-0104",
     email: "jane.cooper@example.com",
     role: "Backend Engineer",
-    status: "Cancelled",
+    status: "Under Review",
     notes: "Withdrew candidacy due to relocation issues.",
     skills: ["Python", "Django", "PostgreSQL", "Kubernetes", "MongoDB", "gRPC", "CI/CD Pipelines"],
     experience: [
@@ -167,6 +168,8 @@ const deptData = {
 let currentCandidateCounter = 1029;
 let activeCandidateId = null;
 let currentSearchQuery = "";
+let currentFilterStage = "all";
+let selectedCandidateIds = new Set();
 
 // Gradients for Candidate Avatars to look Premium
 const avatarGradients = [
@@ -189,19 +192,23 @@ const btnBrowseTrigger = document.getElementById("btn-browse-trigger");
 const progressListContainer = document.getElementById("progress-list-container");
 const candidateSearch = document.getElementById("candidate-search");
 const candidatesTableBody = document.getElementById("candidates-table-body");
-const actionsDropdown = document.getElementById("actions-menu-dropdown");
 const toastHolder = document.getElementById("toast-holder");
 
-// Modals
-const notesModal = document.getElementById("notes-modal");
-const notesModalTitle = document.getElementById("notes-modal-title");
+// Collapsible Upload Panel Elements
+const cardUploadResumes = document.getElementById("card-upload-resumes");
+const btnToggleUpload = document.getElementById("btn-toggle-upload");
+const uploadSetupFlow = document.getElementById("upload-setup-flow");
+
+// Drawers & Overlays
+const notesDrawer = document.getElementById("notes-drawer");
+const notesDrawerOverlay = document.getElementById("notes-drawer-overlay");
 const notesTextarea = document.getElementById("notes-textarea");
 const btnSaveNotes = document.getElementById("btn-save-notes");
 const btnCancelNotes = document.getElementById("btn-cancel-notes");
-const closeNotesModal = document.getElementById("close-notes-modal");
+const btnCloseNotesDrawer = document.getElementById("close-notes-drawer");
 
-const profileModal = document.getElementById("profile-modal");
-const profileModalTitle = document.getElementById("profile-modal-title");
+const profileDrawer = document.getElementById("profile-drawer");
+const profileDrawerOverlay = document.getElementById("profile-drawer-overlay");
 const profId = document.getElementById("prof-id");
 const profName = document.getElementById("prof-name");
 const profEmail = document.getElementById("prof-email");
@@ -210,7 +217,20 @@ const profRole = document.getElementById("prof-role");
 const profStatus = document.getElementById("prof-status");
 const profNotes = document.getElementById("prof-notes");
 const btnCloseProfile = document.getElementById("btn-close-profile");
-const closeProfileModal = document.getElementById("close-profile-modal");
+const btnCloseProfileDrawer = document.getElementById("close-profile-drawer");
+const drawerMoveStageSelect = document.getElementById("drawer-move-stage-select");
+
+// Inline Dropdowns
+const stageChangeDropdown = document.getElementById("stage-change-dropdown");
+
+// Bulk actions elements
+const bulkSelectAll = document.getElementById("bulk-select-all");
+const bulkActionsDock = document.getElementById("bulk-actions-dock");
+const bulkSelectedCount = document.getElementById("bulk-selected-count");
+const bulkChangeStageSelect = document.getElementById("bulk-change-stage-select");
+const btnBulkExport = document.getElementById("btn-bulk-export");
+const btnBulkDelete = document.getElementById("btn-bulk-delete");
+const btnClearBulk = document.getElementById("btn-clear-bulk");
 
 // ----------------------------------------------------
 // UI Cascading Select logic
@@ -233,6 +253,8 @@ selectDept.addEventListener("change", (e) => {
   } else {
     selectSubDept.disabled = true;
   }
+  updateStepIndicator();
+  updateDropZoneText();
 });
 
 selectSubDept.addEventListener("change", (e) => {
@@ -252,6 +274,13 @@ selectSubDept.addEventListener("change", (e) => {
   } else {
     selectRole.disabled = true;
   }
+  updateStepIndicator();
+  updateDropZoneText();
+});
+
+selectRole.addEventListener("change", () => {
+  updateStepIndicator();
+  updateDropZoneText();
 });
 
 // ----------------------------------------------------
@@ -263,11 +292,11 @@ function showToast(message, type = "success") {
   
   // Custom border based on toast status
   if (type === "warning") {
-    toast.style.borderLeftColor = "#EF6C00";
+    toast.style.borderLeftColor = "#F59E0B";
   } else if (type === "error") {
-    toast.style.borderLeftColor = "#C62828";
+    toast.style.borderLeftColor = "#E24B4A";
   } else {
-    toast.style.borderLeftColor = "#2A7C4F";
+    toast.style.borderLeftColor = "#1D9E75";
   }
 
   const iconSvg = `
@@ -316,25 +345,31 @@ function getAvatarGradient(name) {
 function renderCandidatesTable() {
   candidatesTableBody.innerHTML = "";
   
-  // Filter list based on search
+  // Filter list based on search and selected stage pill
   const query = currentSearchQuery.trim().toLowerCase();
-  const filteredCandidates = candidates.filter(candidate => {
-    return (
-      candidate.id.toLowerCase().includes(query) ||
-      candidate.name.toLowerCase().includes(query) ||
-      candidate.email.toLowerCase().includes(query) ||
-      candidate.role.toLowerCase().includes(query)
+  const filteredCandidates = candidates.filter(cand => {
+    const matchesSearch = (
+      cand.id.toLowerCase().includes(query) ||
+      cand.name.toLowerCase().includes(query) ||
+      cand.email.toLowerCase().includes(query) ||
+      cand.role.toLowerCase().includes(query)
     );
+    const matchesStage = currentFilterStage === "all" || cand.status.toLowerCase() === currentFilterStage.toLowerCase();
+    return matchesSearch && matchesStage;
   });
+
+  // Check state of bulk select all checkbox
+  bulkSelectAll.checked = filteredCandidates.length > 0 && filteredCandidates.every(cand => selectedCandidateIds.has(cand.id));
 
   if (filteredCandidates.length === 0) {
     candidatesTableBody.innerHTML = `
       <tr>
         <td colspan="7" style="text-align: center; color: var(--text-secondary); height: 120px; font-style: italic;">
-          No matching candidates found. Select categories above to drag-and-drop new resumes.
+          No matching applicants found. Select categories above to drag-and-drop new resumes.
         </td>
       </tr>
     `;
+    updateSummaryCounters();
     return;
   }
 
@@ -342,15 +377,23 @@ function renderCandidatesTable() {
     const tr = document.createElement("tr");
     tr.id = `candidate-row-${cand.id}`;
     
+    // Apply selected class if checked
+    if (selectedCandidateIds.has(cand.id)) {
+      tr.classList.add("selected");
+    }
+    
     // Initials & gradient
     const initials = getInitials(cand.name);
     const grad = getAvatarGradient(cand.name);
 
     // HR Note Tooltip Class
     const noteClass = cand.notes ? "has-notes" : "";
-    const tooltipText = cand.notes ? cand.notes : "No notes yet. Click ⋮ menu to add note.";
+    const tooltipText = cand.notes ? cand.notes : "No notes yet.";
 
     tr.innerHTML = `
+      <td class="col-checkbox" onclick="event.stopPropagation();">
+        <input type="checkbox" class="row-select" data-id="${cand.id}" ${selectedCandidateIds.has(cand.id) ? 'checked' : ''}>
+      </td>
       <td class="col-id">${cand.id}</td>
       <td>
         <div class="col-candidate">
@@ -366,24 +409,72 @@ function renderCandidatesTable() {
         <span class="role-tag">${cand.role}</span>
       </td>
       <td>
-        <span class="status-pill ${cand.status.toLowerCase().replace(" ", "-")}">${cand.status}</span>
+        <span class="status-pill clickable ${cand.status.toLowerCase().replace(" ", "-")}" data-id="${cand.id}">
+          ${cand.status}
+        </span>
       </td>
       <td>
-        <button class="notes-btn ${noteClass}" data-id="${cand.id}" data-tooltip="${tooltipText}">
-          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.75.75 0 01-1.074-.765 6 6 0 001.257-2.737C3.038 16.289 1 14.368 1 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>
-        </button>
-      </td>
-      <td>
-        <div class="actions-cell">
-          <button class="btn-view" data-id="${cand.id}">View</button>
-          <button class="btn-action-trigger" data-id="${cand.id}">
-            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" /></svg>
+        <div class="actions-cell" style="justify-content: flex-end;" onclick="event.stopPropagation();">
+          <button class="btn-action-icon btn-view-drawer" data-id="${cand.id}" title="View Profile">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+          </button>
+          <button class="btn-action-icon btn-note-drawer" data-id="${cand.id}" title="Add Note">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+          </button>
+          <button class="btn-action-icon btn-stage-dropdown" data-id="${cand.id}" title="Change Stage">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" /></svg>
           </button>
         </div>
       </td>
     `;
+    
+    // Clicking row (except check or action buttons) opens profile drawer
+    tr.addEventListener("click", (e) => {
+      openProfileDrawer(cand.id);
+    });
+
+    // Checkbox selection toggle
+    const checkbox = tr.querySelector(".row-select");
+    checkbox.addEventListener("change", (e) => {
+      if (e.target.checked) {
+        selectedCandidateIds.add(cand.id);
+        tr.classList.add("selected");
+      } else {
+        selectedCandidateIds.delete(cand.id);
+        tr.classList.remove("selected");
+      }
+      updateBulkDock();
+      // Re-evaluate select all header
+      bulkSelectAll.checked = filteredCandidates.every(c => selectedCandidateIds.has(c.id));
+    });
+
+    // Inline pill click opens inline dropdown
+    const pill = tr.querySelector(".status-pill");
+    pill.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openInlineStageDropdown(pill, cand.id);
+    });
+
+    // Action buttons inside row
+    tr.querySelector(".btn-view-drawer").addEventListener("click", (e) => {
+      e.stopPropagation();
+      openProfileDrawer(cand.id);
+    });
+
+    tr.querySelector(".btn-note-drawer").addEventListener("click", (e) => {
+      e.stopPropagation();
+      openNotesDrawer(cand.id);
+    });
+
+    tr.querySelector(".btn-stage-dropdown").addEventListener("click", (e) => {
+      e.stopPropagation();
+      openInlineStageDropdown(e.currentTarget, cand.id);
+    });
+
     candidatesTableBody.appendChild(tr);
   });
+  
+  updateSummaryCounters();
 }
 
 // ----------------------------------------------------
@@ -618,7 +709,7 @@ function createParsedCandidate(filename, roleVal) {
     phone: mockPhone,
     email: mockEmail,
     role: roleVal,
-    status: "Pending",
+    status: "Resume Received",
     notes: "",
     skills: skills,
     experience: experience,
@@ -628,187 +719,109 @@ function createParsedCandidate(filename, roleVal) {
 }
 
 // ----------------------------------------------------
-// Action Dropdown Menu & Modals handling
+// Collapsible Upload Resumes Card & Steps Logic
 // ----------------------------------------------------
+btnToggleUpload.addEventListener("click", () => {
+  const isCollapsed = cardUploadResumes.classList.toggle("collapsed");
+  dropZone.classList.toggle("compact", isCollapsed);
+  updateDropZoneText();
+});
 
-// Hide menu function
-function hideActionMenu() {
-  actionsDropdown.style.display = "none";
-  document.querySelectorAll(".btn-action-trigger.active").forEach(btn => {
-    btn.classList.remove("active");
-  });
+function updateDropZoneText() {
+  const isCompact = dropZone.classList.contains("compact");
+  const heading = document.getElementById("upload-zone-heading");
+  const subheading = document.getElementById("upload-zone-subheading");
+  const roleVal = selectRole.value;
+  const deptText = selectDept.options[selectDept.selectedIndex]?.text;
+
+  if (isCompact) {
+    if (roleVal) {
+      heading.innerHTML = `Drag & drop resumes to upload for <strong style="color: var(--active-nav-bg);">${roleVal}</strong> (${deptText})`;
+    } else {
+      heading.innerHTML = `No job selected. Click expand arrow (右上) to select department and role.`;
+    }
+    subheading.style.display = "none";
+  } else {
+    heading.textContent = "Drag & drop resumes here";
+    subheading.textContent = "Supports PDF up to 5MB each.";
+    subheading.style.display = "block";
+  }
 }
 
-// Context Menu triggering
-candidatesTableBody.addEventListener("click", (e) => {
-  // Check if click was view button
-  const viewBtn = e.target.closest(".btn-view");
-  if (viewBtn) {
-    const id = viewBtn.dataset.id;
-    openProfileView(id);
-    return;
+function updateStepIndicator() {
+  const deptVal = selectDept.value;
+  const roleVal = selectRole.value;
+  const badge = document.getElementById("step-indicator-badge");
+  const text = document.getElementById("step-indicator-text");
+  
+  if (!deptVal) {
+    badge.className = "step-badge";
+    badge.textContent = "Step 1 of 2";
+    text.textContent = "Select job department and sub-department";
+  } else if (!roleVal) {
+    badge.className = "step-badge";
+    badge.textContent = "Step 1 of 2";
+    text.textContent = "Select target role for applicant uploads";
+  } else {
+    badge.className = "step-badge complete";
+    badge.textContent = "✓ Step 1 Complete";
+    text.innerHTML = ` &nbsp;|&nbsp; <span class="step-badge">Step 2 of 2</span> Drag and drop applicant resumes below for <strong style="color: var(--active-nav-bg);">${roleVal}</strong>`;
   }
+}
 
-  // Check if click was notes button
-  const noteBtn = e.target.closest(".notes-btn");
-  if (noteBtn) {
-    const id = noteBtn.dataset.id;
-    openNotesEditor(id);
-    return;
-  }
+// ----------------------------------------------------
+// Summary Pill-counters & Filtering
+// ----------------------------------------------------
+function updateSummaryCounters() {
+  const total = candidates.length;
+  const parsed = candidates.filter(c => c.status.toLowerCase() === "resume received").length;
+  const underReview = candidates.filter(c => c.status.toLowerCase() === "under review").length;
+  const onHold = candidates.filter(c => c.status.toLowerCase() === "on hold").length;
 
-  // Check if click was triple-dot button
-  const triggerBtn = e.target.closest(".btn-action-trigger");
-  if (triggerBtn) {
-    e.stopPropagation();
-    const id = triggerBtn.dataset.id;
-    
-    // Toggle active state
-    if (triggerBtn.classList.contains("active")) {
-      hideActionMenu();
-      return;
-    }
-    
-    hideActionMenu();
-    activeCandidateId = id;
-    
-    // Position menu relative to trigger button
-    const rect = triggerBtn.getBoundingClientRect();
-    actionsDropdown.style.display = "block";
-    const dropdownWidth = actionsDropdown.offsetWidth;
-    const top = rect.bottom + window.scrollY + 6;
-    const left = rect.right - dropdownWidth + window.scrollX;
-    
-    actionsDropdown.style.top = `${top}px`;
-    actionsDropdown.style.left = `${left}px`;
-    triggerBtn.classList.add("active");
-  }
-});
+  document.getElementById("count-total").textContent = total;
+  document.getElementById("count-parsed").textContent = parsed;
+  document.getElementById("count-under-review").textContent = underReview;
+  document.getElementById("count-on-hold").textContent = onHold;
+}
 
-// Close actions menu when clicking outside
-document.addEventListener("click", (e) => {
-  if (!actionsDropdown.contains(e.target)) {
-    hideActionMenu();
-  }
-});
-
-// Context Menu Action Listeners
-document.getElementById("menu-view-profile").addEventListener("click", () => {
-  if (activeCandidateId) {
-    openProfileView(activeCandidateId);
-  }
-  hideActionMenu();
-});
-
-document.getElementById("menu-add-note").addEventListener("click", () => {
-  if (activeCandidateId) {
-    openNotesEditor(activeCandidateId);
-  }
-  hideActionMenu();
-});
-
-document.getElementById("menu-remove-candidate").addEventListener("click", () => {
-  if (activeCandidateId) {
-    const targetId = activeCandidateId;
-    const targetRow = document.getElementById(`candidate-row-${targetId}`);
-    
-    if (targetRow) {
-      targetRow.style.opacity = "0.2";
-      targetRow.style.transition = "opacity 0.25s ease";
-      
-      setTimeout(() => {
-        candidates = candidates.filter(cand => cand.id !== targetId);
-        renderCandidatesTable();
-        showToast(`Candidate ${targetId} successfully removed.`, "warning");
-      }, 250);
-    }
-  }
-  hideActionMenu();
-});
-
-// Status change trigger inside context menu
-document.querySelectorAll(".status-change-btn").forEach(btn => {
-  btn.addEventListener("click", (e) => {
-    const statusVal = e.currentTarget.dataset.status;
-    if (activeCandidateId && statusVal) {
-      const cand = candidates.find(c => c.id === activeCandidateId);
-      if (cand) {
-        const oldStatus = cand.status;
-        cand.status = statusVal;
-        renderCandidatesTable();
-        showToast(`Status updated to ${statusVal} for ${cand.name}`, "success");
-      }
-    }
-    hideActionMenu();
+document.querySelectorAll(".summary-pill").forEach(pill => {
+  pill.addEventListener("click", () => {
+    document.querySelectorAll(".summary-pill").forEach(p => p.classList.remove("active"));
+    pill.classList.add("active");
+    currentFilterStage = pill.dataset.filter;
+    renderCandidatesTable();
   });
 });
 
 // ----------------------------------------------------
-// Notes Modal Controller
+// Sliding Side Drawers Control
 // ----------------------------------------------------
-function openNotesEditor(candidateId) {
+
+// Profile Drawer
+function openProfileDrawer(candidateId) {
   const cand = candidates.find(c => c.id === candidateId);
   if (!cand) return;
   
   activeCandidateId = candidateId;
-  notesModalTitle.textContent = `Candidate Notes — ${cand.name} (${cand.id})`;
-  notesTextarea.value = cand.notes || "";
-  
-  notesModal.classList.add("active");
-  notesTextarea.focus();
-}
-
-function closeNotes() {
-  notesModal.classList.remove("active");
-  activeCandidateId = null;
-}
-
-btnSaveNotes.addEventListener("click", () => {
-  if (activeCandidateId) {
-    const cand = candidates.find(c => c.id === activeCandidateId);
-    if (cand) {
-      cand.notes = notesTextarea.value.trim();
-      renderCandidatesTable();
-      showToast(`HR notes updated for ${cand.name}`);
-    }
-  }
-  closeNotes();
-});
-
-btnCancelNotes.addEventListener("click", closeNotes);
-closeNotesModal.addEventListener("click", closeNotes);
-
-// Close modal clicking overlay
-notesModal.addEventListener("click", (e) => {
-  if (e.target === notesModal) closeNotes();
-});
-
-// ----------------------------------------------------
-// Profile Detail Modal Controller
-// ----------------------------------------------------
-function openProfileView(candidateId) {
-  const cand = candidates.find(c => c.id === candidateId);
-  if (!cand) return;
   
   profId.textContent = cand.id;
   profName.textContent = cand.name;
   profEmail.textContent = cand.email;
   profPhone.textContent = cand.phone;
   profRole.textContent = cand.role;
-  profNotes.textContent = cand.notes ? cand.notes : "No recruitment remarks saved yet. Use 'Add HR Note' inside candidate actions to update.";
+  profNotes.textContent = cand.notes ? cand.notes : "No recruitment remarks saved yet.";
   
-  // Color code status inside detail
   profStatus.textContent = cand.status;
   profStatus.className = `status-pill ${cand.status.toLowerCase().replace(" ", "-")}`;
   
-  // Populate avatar initials & background
+  drawerMoveStageSelect.value = cand.status;
+  
   const profAvatar = document.getElementById("prof-avatar");
   if (profAvatar) {
     profAvatar.textContent = getInitials(cand.name);
     profAvatar.style.background = getAvatarGradient(cand.name);
   }
   
-  // Populate parser insights & metadata
   const meta = cand.parsingMetadata || {
     confidence: 90,
     fileName: `${cand.name.replace(/\s+/g, "_")}_Resume.pdf`,
@@ -816,102 +829,299 @@ function openProfileView(candidateId) {
     parsedAt: "2026-06-03 10:00 AM"
   };
   
-  const profConfidence = document.getElementById("prof-confidence");
-  const profConfidenceBar = document.getElementById("prof-confidence-bar");
-  const profFilename = document.getElementById("prof-filename");
-  const profFilesize = document.getElementById("prof-filesize");
-  const profParsedAt = document.getElementById("prof-parsedat");
+  document.getElementById("prof-confidence").textContent = `${meta.confidence}%`;
+  document.getElementById("prof-confidence-bar").style.width = `${meta.confidence}%`;
+  document.getElementById("prof-filename").textContent = meta.fileName;
+  document.getElementById("prof-filesize").textContent = meta.fileSize;
   
-  if (profConfidence) profConfidence.textContent = `${meta.confidence}%`;
-  if (profConfidenceBar) profConfidenceBar.style.width = `${meta.confidence}%`;
-  if (profFilename) {
-    profFilename.textContent = meta.fileName;
-    profFilename.title = meta.fileName;
-  }
-  if (profFilesize) profFilesize.textContent = meta.fileSize;
-  if (profParsedAt) profParsedAt.textContent = meta.parsedAt;
-  
-  // Populate Skills
   const skillsContainer = document.getElementById("prof-skills-container");
-  if (skillsContainer) {
-    skillsContainer.innerHTML = "";
-    const skillsList = cand.skills || ["Communication", "Problem Solving", "Teamwork"];
-    skillsList.forEach(skill => {
-      const tag = document.createElement("span");
-      tag.className = "parsed-skill-tag";
-      tag.textContent = skill;
-      skillsContainer.appendChild(tag);
-    });
-  }
+  skillsContainer.innerHTML = "";
+  const skillsList = cand.skills || [];
+  skillsList.forEach(skill => {
+    const tag = document.createElement("span");
+    tag.className = "parsed-skill-tag";
+    tag.textContent = skill;
+    skillsContainer.appendChild(tag);
+  });
   
-  // Populate Experience Timeline
   const expTimeline = document.getElementById("prof-experience-timeline");
-  if (expTimeline) {
-    expTimeline.innerHTML = "";
-    const experienceList = cand.experience || [
-      { role: cand.role, company: "Previous Company", duration: "2021 - Present", desc: "Successfully performed core job responsibilities." }
-    ];
-    
-    experienceList.forEach(exp => {
-      const item = document.createElement("div");
-      item.className = "parsed-timeline-item";
-      item.innerHTML = `
-        <div class="parsed-timeline-dot"></div>
-        <div class="parsed-timeline-content">
-          <div class="parsed-timeline-header">
-            <h5 class="parsed-timeline-title" style="margin: 0; padding: 0;">${exp.role}</h5>
-            <span class="parsed-timeline-date">${exp.duration}</span>
-          </div>
-          <div class="parsed-timeline-subtitle">${exp.company}</div>
-          <p class="parsed-timeline-desc">${exp.desc}</p>
+  expTimeline.innerHTML = "";
+  const experienceList = cand.experience || [];
+  experienceList.forEach(exp => {
+    const item = document.createElement("div");
+    item.className = "parsed-timeline-item";
+    item.innerHTML = `
+      <div class="parsed-timeline-dot"></div>
+      <div class="parsed-timeline-content">
+        <div class="parsed-timeline-header">
+          <h5 class="parsed-timeline-title" style="margin: 0; padding: 0;">${exp.role}</h5>
+          <span class="parsed-timeline-date">${exp.duration}</span>
         </div>
-      `;
-      expTimeline.appendChild(item);
-    });
-  }
+        <div class="parsed-timeline-subtitle">${exp.company}</div>
+        <p class="parsed-timeline-desc">${exp.desc}</p>
+      </div>
+    `;
+    expTimeline.appendChild(item);
+  });
   
-  // Populate Education
   const eduContainer = document.getElementById("prof-education-container");
-  if (eduContainer) {
-    eduContainer.innerHTML = "";
-    const educationList = cand.education || [
-      { degree: "Bachelor's Degree", school: "Graduated University", year: "2016 - 2020" }
-    ];
-    
-    educationList.forEach(edu => {
-      const card = document.createElement("div");
-      card.className = "parsed-edu-card";
-      card.innerHTML = `
-        <div class="parsed-edu-degree">${edu.degree}</div>
-        <div class="parsed-edu-school">${edu.school}</div>
-        <div class="parsed-edu-year">${edu.year}</div>
-      `;
-      eduContainer.appendChild(card);
-    });
+  eduContainer.innerHTML = "";
+  const educationList = cand.education || [];
+  educationList.forEach(edu => {
+    const card = document.createElement("div");
+    card.className = "parsed-edu-card";
+    card.innerHTML = `
+      <div class="parsed-edu-degree">${edu.degree}</div>
+      <div class="parsed-edu-school">${edu.school}</div>
+      <div class="parsed-edu-year">${edu.year}</div>
+    `;
+    eduContainer.appendChild(card);
+  });
+  
+  profileDrawer.classList.add("active");
+  profileDrawerOverlay.classList.add("active");
+}
+
+function closeProfileDrawer() {
+  profileDrawer.classList.remove("active");
+  profileDrawerOverlay.classList.remove("active");
+  activeCandidateId = null;
+}
+
+btnCloseProfile.addEventListener("click", closeProfileDrawer);
+btnCloseProfileDrawer.addEventListener("click", closeProfileDrawer);
+profileDrawerOverlay.addEventListener("click", closeProfileDrawer);
+
+// Move stage dropdown inside profile drawer
+drawerMoveStageSelect.addEventListener("change", (e) => {
+  const newStage = e.target.value;
+  if (activeCandidateId && newStage) {
+    const cand = candidates.find(c => c.id === activeCandidateId);
+    if (cand) {
+      cand.status = newStage;
+      profStatus.textContent = newStage;
+      profStatus.className = `status-pill ${newStage.toLowerCase().replace(" ", "-")}`;
+      renderCandidatesTable();
+      updateSummaryCounters();
+      showToast(`Pipeline stage updated to ${newStage} for ${cand.name}`);
+    }
+  }
+});
+
+// Notes Drawer
+function openNotesDrawer(candidateId) {
+  const cand = candidates.find(c => c.id === candidateId);
+  if (!cand) return;
+  
+  activeCandidateId = candidateId;
+  document.getElementById("notes-drawer-title").textContent = `Applicant Notes — ${cand.name} (${cand.id})`;
+  notesTextarea.value = cand.notes || "";
+  
+  notesDrawer.classList.add("active");
+  notesDrawerOverlay.classList.add("active");
+  notesTextarea.focus();
+}
+
+function closeNotesDrawer() {
+  notesDrawer.classList.remove("active");
+  notesDrawerOverlay.classList.remove("active");
+  activeCandidateId = null;
+}
+
+btnCancelNotes.addEventListener("click", closeNotesDrawer);
+btnCloseNotesDrawer.addEventListener("click", closeNotesDrawer);
+notesDrawerOverlay.addEventListener("click", closeNotesDrawer);
+
+btnSaveNotes.addEventListener("click", () => {
+  if (activeCandidateId) {
+    const cand = candidates.find(c => c.id === activeCandidateId);
+    if (cand) {
+      cand.notes = notesTextarea.value.trim();
+      renderCandidatesTable();
+      showToast(`HR Notes saved for ${cand.name}`);
+      
+      // Update profile drawer notes text inline if open for the same applicant
+      if (profileDrawer.classList.contains("active") && activeCandidateId === cand.id) {
+        profNotes.textContent = cand.notes || "No recruitment remarks saved yet.";
+      }
+    }
+  }
+  closeNotesDrawer();
+});
+
+// ----------------------------------------------------
+// Absolute Inline Dropdown for Stage Changer
+// ----------------------------------------------------
+let activeStageDropdownCandId = null;
+
+function openInlineStageDropdown(triggerEl, candidateId) {
+  activeStageDropdownCandId = candidateId;
+  const rect = triggerEl.getBoundingClientRect();
+  
+  stageChangeDropdown.style.display = "block";
+  stageChangeDropdown.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  stageChangeDropdown.style.left = `${rect.left + window.scrollX}px`;
+}
+
+function hideInlineStageDropdown() {
+  stageChangeDropdown.style.display = "none";
+  activeStageDropdownCandId = null;
+}
+
+document.querySelectorAll(".stage-dropdown-item").forEach(item => {
+  item.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const newStage = item.dataset.stage;
+    if (activeStageDropdownCandId && newStage) {
+      const cand = candidates.find(c => c.id === activeStageDropdownCandId);
+      if (cand) {
+        cand.status = newStage;
+        renderCandidatesTable();
+        updateSummaryCounters();
+        showToast(`Stage updated to ${newStage} for ${cand.name}`);
+        
+        // Synchronize profile drawer stage if open
+        if (profileDrawer.classList.contains("active") && activeCandidateId === cand.id) {
+          profStatus.textContent = newStage;
+          profStatus.className = `status-pill ${newStage.toLowerCase().replace(" ", "-")}`;
+          drawerMoveStageSelect.value = newStage;
+        }
+      }
+    }
+    hideInlineStageDropdown();
+  });
+});
+
+document.addEventListener("click", (e) => {
+  if (!stageChangeDropdown.contains(e.target) && !e.target.closest(".status-pill") && !e.target.closest(".btn-stage-dropdown")) {
+    hideInlineStageDropdown();
+  }
+});
+
+// ----------------------------------------------------
+// Bulk Selection & Operations Dock Logic
+// ----------------------------------------------------
+bulkSelectAll.addEventListener("change", (e) => {
+  const query = currentSearchQuery.trim().toLowerCase();
+  const visibleCandidates = candidates.filter(cand => {
+    const matchesSearch = (
+      cand.id.toLowerCase().includes(query) ||
+      cand.name.toLowerCase().includes(query) ||
+      cand.email.toLowerCase().includes(query) ||
+      cand.role.toLowerCase().includes(query)
+    );
+    const matchesStage = currentFilterStage === "all" || cand.status.toLowerCase() === currentFilterStage.toLowerCase();
+    return matchesSearch && matchesStage;
+  });
+
+  if (e.target.checked) {
+    visibleCandidates.forEach(cand => selectedCandidateIds.add(cand.id));
+  } else {
+    visibleCandidates.forEach(cand => selectedCandidateIds.delete(cand.id));
   }
   
-  profileModal.classList.add("active");
+  renderCandidatesTable();
+  updateBulkDock();
+});
+
+function updateBulkDock() {
+  const count = selectedCandidateIds.size;
+  bulkSelectedCount.textContent = count;
+  
+  if (count > 0) {
+    bulkActionsDock.classList.add("active");
+  } else {
+    bulkActionsDock.classList.remove("active");
+  }
 }
 
-function closeProfile() {
-  profileModal.classList.remove("active");
-}
+btnClearBulk.addEventListener("click", () => {
+  selectedCandidateIds.clear();
+  renderCandidatesTable();
+  updateBulkDock();
+});
 
-btnCloseProfile.addEventListener("click", closeProfile);
-closeProfileModal.addEventListener("click", closeProfile);
+btnBulkDelete.addEventListener("click", () => {
+  const deletedCount = selectedCandidateIds.size;
+  if (deletedCount === 0) return;
+  
+  candidates = candidates.filter(cand => !selectedCandidateIds.has(cand.id));
+  selectedCandidateIds.clear();
+  renderCandidatesTable();
+  updateSummaryCounters();
+  updateBulkDock();
+  showToast(`Bulk deleted ${deletedCount} applicants.`, "warning");
+});
 
-profileModal.addEventListener("click", (e) => {
-  if (e.target === profileModal) closeProfile();
+bulkChangeStageSelect.addEventListener("change", (e) => {
+  const newStage = e.target.value;
+  if (!newStage) return;
+  
+  let count = 0;
+  candidates.forEach(cand => {
+    if (selectedCandidateIds.has(cand.id)) {
+      cand.status = newStage;
+      count++;
+    }
+  });
+  
+  selectedCandidateIds.clear();
+  bulkChangeStageSelect.selectedIndex = 0; // reset
+  renderCandidatesTable();
+  updateSummaryCounters();
+  updateBulkDock();
+  showToast(`Bulk updated stage to ${newStage} for ${count} applicants.`);
+});
+
+btnBulkExport.addEventListener("click", () => {
+  const selectedList = candidates.filter(c => selectedCandidateIds.has(c.id));
+  if (selectedList.length === 0) return;
+  
+  let csvContent = "data:text/csv;charset=utf-8,";
+  csvContent += "Applicant ID,Applicant,Email,Phone,Role Applied,Pipeline Stage,Notes\n";
+  
+  selectedList.forEach(c => {
+    const row = [
+      c.id,
+      `"${c.name.replace(/"/g, '""')}"`,
+      c.email,
+      `"${c.phone}"`,
+      `"${c.role}"`,
+      c.status,
+      `"${(c.notes || "").replace(/"/g, '""')}"`
+    ].join(",");
+    csvContent += row + "\n";
+  });
+  
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `KadelLabs_ATS_Export_${Date.now()}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  showToast(`Successfully exported CSV file containing ${selectedList.length} applicant records.`);
 });
 
 // ----------------------------------------------------
 // Page Initializer
 // ----------------------------------------------------
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => {
-    renderCandidatesTable();
-  });
-} else {
+function initPage() {
+  // Collapse upload panel by default because candidates already exist in initial DB
+  if (candidates.length > 0) {
+    cardUploadResumes.classList.add("collapsed");
+    dropZone.classList.add("compact");
+  }
+  
+  updateStepIndicator();
+  updateDropZoneText();
   renderCandidatesTable();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initPage);
+} else {
+  initPage();
 }
 

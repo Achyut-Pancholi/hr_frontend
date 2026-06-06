@@ -5,6 +5,421 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Video Bot Screening | KadelLabs ATS</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* AI Assessment collapsible */
+    .ai-assessment-open .ai-assessment-body { display: block !important; }
+    .ai-assessment-open .ai-assessment-chevron { transform: rotate(180deg); }
+
+    /* Expandable transcript answers */
+    .transcript-answer-text {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .transcript-answer-text.expanded {
+      -webkit-line-clamp: unset;
+      overflow: visible;
+    }
+    .transcript-answer-text:hover {
+      color: var(--text-primary);
+    }
+
+    /* ══ Candidate Review Workspace ═════════════════════════ */
+    #candidate-review-workspace {
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+      opacity: 0;
+      transition: opacity 0.22s ease-in-out;
+      width: 100%;
+    }
+    #candidate-review-workspace.active {
+      display: flex;
+      opacity: 1;
+    }
+    .workspace-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #FFFFFF;
+      border: 0.5px solid #E8E6E0;
+      border-radius: var(--radius-card);
+      padding: 16px 24px;
+      box-shadow: var(--shadow-sm);
+    }
+    .workspace-back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 34px;
+      padding: 0 16px;
+      background: #FFFFFF;
+      border: 1.5px solid #D1D9E8;
+      border-radius: var(--radius-pill);
+      color: var(--sidebar-bg);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+      font-family: var(--font-family);
+    }
+    .workspace-back-btn:hover {
+      background: #F0F3FA;
+      border-color: var(--sidebar-bg);
+    }
+    .workspace-back-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2.5;
+    }
+    
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    
+    /* Left column widgets */
+    .workspace-card {
+      background: #FFFFFF;
+      border: 0.5px solid #E8E6E0;
+      border-radius: var(--radius-card);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+    }
+    .workspace-card:last-child {
+      margin-bottom: 0;
+    }
+    .workspace-card-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 0;
+    }
+    .workspace-card-title svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2;
+    }
+    
+    /* Custom Video Player styles */
+    .custom-video-wrapper {
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.15);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .custom-video-screen {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .custom-video-screen video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .custom-video-overlay-play {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 5;
+    }
+    .custom-video-overlay-play.visible {
+      opacity: 1;
+    }
+    .custom-video-overlay-play .play-icon-wrap {
+      width: 56px;
+      height: 56px;
+      background: var(--active-nav-bg);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(29, 158, 117, 0.4);
+      transform: scale(0.9);
+      transition: transform 0.2s;
+    }
+    .custom-video-overlay-play:hover .play-icon-wrap {
+      transform: scale(1);
+    }
+    .custom-video-active-question-banner {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      background: rgba(27, 43, 94, 0.85);
+      backdrop-filter: blur(4px);
+      padding: 10px 16px;
+      border-radius: 8px;
+      border-left: 4px solid var(--active-nav-bg);
+      z-index: 6;
+      color: #fff;
+    }
+    
+    .custom-video-controls {
+      background: rgba(28, 43, 74, 0.95);
+      padding: 12px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 10;
+    }
+    .custom-video-timeline-container {
+      display: flex;
+      align-items: center;
+      position: relative;
+      padding: 4px 0;
+      cursor: pointer;
+    }
+    .custom-video-timeline-bg {
+      height: 6px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 3px;
+      width: 100%;
+      position: relative;
+    }
+    .custom-video-timeline-fill {
+      height: 100%;
+      background: var(--active-nav-bg);
+      width: 0%;
+      border-radius: 3px;
+    }
+    .custom-video-timeline-marker {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      background: #FFFFFF;
+      border: 1.5px solid var(--sidebar-bg);
+      border-radius: 50%;
+      z-index: 2;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      transition: transform 0.15s;
+    }
+    .custom-video-timeline-marker:hover {
+      transform: translate(-50%, -50%) scale(1.3);
+    }
+    
+    .custom-video-control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .video-control-btn {
+      background: none;
+      border: none;
+      color: #FFF;
+      cursor: pointer;
+      opacity: 0.85;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .video-control-btn:hover {
+      opacity: 1;
+      color: var(--active-nav-bg);
+    }
+    .video-control-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+    .speed-select {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 11px;
+      outline: none;
+      cursor: pointer;
+    }
+    .speed-select option {
+      background: var(--sidebar-bg);
+      color: white;
+    }
+    
+    /* Transcript Bubbles overrides */
+    .chat-bubble-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 480px;
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+    .chat-bubble-card {
+      display: flex;
+      gap: 12px;
+      padding: 14px;
+      border-radius: var(--radius-card);
+      border: 1px solid #EEEAE3;
+      transition: all 0.2s;
+    }
+    .chat-bubble-card.bot {
+      background: #F0F3FA;
+      border-color: #D1D9E8;
+    }
+    .chat-bubble-card.candidate {
+      background: #FFFFFF;
+      border-color: #E8E6E0;
+    }
+    .chat-bubble-card.active-highlight {
+      border-color: var(--active-nav-bg);
+      box-shadow: 0 0 0 3px rgba(29,158,117,0.12), var(--shadow-sm);
+    }
+    .chat-bubble-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #FFF;
+      flex-shrink: 0;
+    }
+    .chat-bubble-avatar.bot {
+      background: var(--sidebar-bg);
+    }
+    
+    /* HR Decision Pill Button style */
+    .decision-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .decision-button {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1.5px solid #E2DFD7;
+      background: #FAF9F6;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.18s;
+      text-align: left;
+    }
+    .decision-button:hover {
+      border-color: #C8D6EE;
+      background: #FFF;
+      color: var(--text-primary);
+    }
+    .decision-button.selected[data-decision="Proceed"] {
+      border-color: #0D7A57;
+      background: #E6F7F2;
+      color: #0D7A57;
+    }
+    .decision-button.selected[data-decision="On Hold"] {
+      border-color: #378ADD;
+      background: #EBF4FF;
+      color: #378ADD;
+    }
+    .decision-button.selected[data-decision="Rejected"] {
+      border-color: #E24B4A;
+      background: #FEF0EF;
+      color: #E24B4A;
+    }
+    .decision-button.selected[data-decision="Technical"] {
+      border-color: #7C3AED;
+      background: #F5F3FF;
+      color: #7C3AED;
+    }
+    .decision-button.selected[data-decision="HR"] {
+      border-color: #EC4899;
+      background: #FDF2F8;
+      color: #EC4899;
+    }
+    .decision-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    
+    /* Vertical experience timeline */
+    .experience-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      padding-left: 14px;
+      margin-top: 8px;
+    }
+    .experience-timeline::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 4px;
+      bottom: 4px;
+      width: 1px;
+      background: #E2DFD7;
+    }
+    .experience-item {
+      position: relative;
+    }
+    .experience-item::before {
+      content: '';
+      position: absolute;
+      left: -17px;
+      top: 4px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--active-nav-bg);
+      border: 1px solid #FFF;
+    }
+    .experience-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .experience-company-duration {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 1px;
+    }
+    
+    /* Sticky bottom confirmation widget */
+    .sticky-hr-decision-panel {
+      position: sticky;
+      top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+  </style>
 </head>
 <body>
 
@@ -18,32 +433,26 @@
       
       <nav class="navigation-menu">
         <a href="index.html" class="nav-item">
-          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" /></svg>
-          Resume Upload
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" /></svg>
+          Applicants
+          <span class="nav-badge">3 new</span>
         </a>
         <a href="video-screening.html" class="nav-item active">
-          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
-          Video Bot Screening
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+          Video Screening
+          <span class="nav-badge-dot" style="margin-left: auto;"></span>
         </a>
-        <a href="#" class="nav-item">
-          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" /></svg>
-          Technical Scheduler
+        <a href="scheduler.html" class="nav-item">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+          Interview Scheduler
         </a>
         <a href="reports.html" class="nav-item">
-          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
-          Reports
-        </a>
-        <a href="#" class="nav-item">
-          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" /></svg>
-          Dashboard
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+          Hiring Pipeline
         </a>
         <a href="departments.html" class="nav-item">
-          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg>
-          Department
-        </a>
-        <a href="#" class="nav-item">
-          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.43l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.991l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.645-.869l.214-1.28z" /><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-          Email Settings
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg>
+          Departments
         </a>
       </nav>
       
@@ -58,152 +467,467 @@
     <!-- RIGHT CONTENT AREA -->
     <main class="main-wrapper">
       
-      <!-- TOP BAR -->
-      <header class="top-bar">
-        <h1 class="page-title">Video Bot Screening</h1>
-        
-        <div class="profile-block">
-          <div class="profile-details">
-            <span class="profile-name">Admin</span>
-            <span class="profile-email">careers@kadellabs.com</span>
+      <!-- List View Container -->
+      <div id="screening-list-view">
+        <!-- TOP BAR -->
+        <header class="top-bar">
+          <h1 class="page-title">Video Screening</h1>
+          
+          <div class="profile-block">
+            <div class="profile-details">
+              <span class="profile-name">Admin</span>
+              <span class="profile-email">careers@kadellabs.com</span>
+            </div>
+            <div class="avatar-initials">KL</div>
           </div>
-          <div class="avatar-initials">KL</div>
-        </div>
-      </header>
+        </header>
 
-      <!-- MAIN CONTENT CONTAINER -->
-      <div class="main-content">
-        
-        <!-- CARD 1: SEND VIDEO SCREENING INVITE -->
-        <section class="premium-card" id="card-invite-form">
-          <div class="card-header">
-            <div class="card-title-group">
-              <h2 class="card-title">Send Bot Screening Invite</h2>
-              <p class="card-subtitle">Select a department, role, and candidate to send a bot screening invitation via email.</p>
+        <!-- MAIN CONTENT CONTAINER -->
+        <div class="main-content">
+          
+          <!-- CARD 1: SEND VIDEO INVITE -->
+          <section class="premium-card" id="card-invite-form">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2 class="card-title">Send Video Invite</h2>
+                <p class="card-subtitle">Select a department, role, and applicant to send a video screening invitation via email.</p>
+              </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 2fr 1.2fr; gap: 24px;">
+              <!-- Left: Dropdowns Grid -->
+              <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div class="form-row" style="grid-template-columns: 1fr 1fr; gap: 14px;">
+                  <div class="form-group">
+                    <label class="form-label">Department</label>
+                    <div class="searchable-select" id="select-dept-container">
+                      <div class="select-trigger" id="select-dept-trigger" data-value="">
+                        <span class="select-trigger-text">Select Department</span>
+                        <span class="select-trigger-arrow"></span>
+                      </div>
+                      <div class="select-dropdown-panel">
+                        <input type="text" class="select-search-input" placeholder="Search department...">
+                        <div class="select-options-list" id="select-dept-options"></div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label class="form-label">Sub-Department</label>
+                    <div class="searchable-select" id="select-subdept-container">
+                      <div class="select-trigger" id="select-subdept-trigger" data-value="">
+                        <span class="select-trigger-text">Select Sub-Department</span>
+                        <span class="select-trigger-arrow"></span>
+                      </div>
+                      <div class="select-dropdown-panel">
+                        <input type="text" class="select-search-input" placeholder="Search sub-department...">
+                        <div class="select-options-list" id="select-subdept-options"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-row" style="grid-template-columns: 1fr 1fr; gap: 14px;">
+                  <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <div class="searchable-select" id="select-role-container">
+                      <div class="select-trigger" id="select-role-trigger" data-value="">
+                        <span class="select-trigger-text">Select Role</span>
+                        <span class="select-trigger-arrow"></span>
+                      </div>
+                      <div class="select-dropdown-panel">
+                        <input type="text" class="select-search-input" placeholder="Search role...">
+                        <div class="select-options-list" id="select-role-options"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Applicant</label>
+                    <div class="searchable-select" id="select-candidate-container">
+                      <div class="select-trigger" id="select-candidate-trigger" data-value="">
+                        <span class="select-trigger-text">Select Applicant</span>
+                        <span class="select-trigger-arrow"></span>
+                      </div>
+                      <div class="select-dropdown-panel">
+                        <input type="text" class="select-search-input" placeholder="Search applicant...">
+                        <div class="select-options-list" id="select-candidate-options"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+                  <button class="btn-pill" id="btn-send-invite" disabled style="opacity: 0.6; cursor: not-allowed;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; margin-right: 4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
+                    Send Video Invite
+                  </button>
+                </div>
+              </div>
+
+              <!-- Right: Questions Preview Pane -->
+              <div style="background-color: #F8FAFC; border: 1px dashed #C8D6EE; border-radius: var(--radius-card); padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+                <h4 style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; color: var(--sidebar-bg); letter-spacing: 0.5px; border-bottom: 0.5px solid #E2E8F0; padding-bottom: 6px;">Questions Preview</h4>
+                <div id="questions-preview-list" style="font-size: 12px; color: var(--text-secondary); line-height: 1.45; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; max-height: 140px;">
+                  <span style="font-style: italic; color: #94A3B8;">Select a role to preview questions.</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- CARD 2: BOT SCREENING RESULTS -->
+          <section class="premium-card" id="card-screening-results" style="padding-bottom: 8px;">
+            <div class="card-header">
+              <div class="card-title-group">
+                <h2 class="card-title">Bot Screening Results</h2>
+              </div>
+              
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <!-- Search bar component -->
+                <div class="search-container">
+                  <span class="search-icon">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                  </span>
+                  <input type="text" id="candidate-search" class="search-input" placeholder="Search candidate...">
+                </div>
+                
+                <button class="btn-pill" id="btn-manage-questions" style="font-size: 12px; height: 32px; padding: 0 16px;">
+                  <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" style="width: 14px; height: 14px; stroke-width: 2; margin-right: 4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.43l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.991l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.645-.869l.214-1.28z" /><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                  Manage Screening Questions
+                </button>
+              </div>
+            </div>
+   
+            <!-- Screening Results ATS Table -->
+            <div class="table-responsive" style="border: none;">
+              <table class="ats-table" id="screening-table">
+                <thead>
+                  <tr>
+                    <th class="sort-header" data-sort="name">Candidate Name<span class="sort-icon"></span></th>
+                    <th class="sort-header" data-sort="role">Role Applied<span class="sort-icon"></span></th>
+                    <th class="sort-header" data-sort="status">Bot Screening Status<span class="sort-icon"></span></th>
+                    <th class="sort-header" data-sort="decision">Decision<span class="sort-icon"></span></th>
+                    <th>Notes</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="screening-table-body">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+      <!-- Dedicated Candidate Review Workspace -->
+      <div id="candidate-review-workspace">
+        <!-- Workspace Header -->
+        <header class="workspace-header">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <button class="workspace-back-btn" id="workspace-back-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+              Back to Candidates
+            </button>
+            <div style="display: flex; align-items: center; gap: 12px; border-left: 1px solid #E8E6E0; padding-left: 16px;">
+              <div id="ws-avatar" class="profile-avatar-circle" style="width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; font-size: 13px;"></div>
+              <div>
+                <h2 id="ws-name" style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 0;"></h2>
+                <p style="font-size: 11px; color: var(--text-secondary); margin: 2px 0 0 0;">
+                  <span id="ws-email"></span> · <span id="ws-role" style="font-weight: 600;"></span>
+                </p>
+              </div>
+              <span id="ws-status" class="status-pill"></span>
             </div>
           </div>
           
-          <!-- Dropdown Row -->
-          <div class="form-row" style="grid-template-columns: repeat(4, 1fr);">
-            <div class="form-group">
-              <label class="form-label">Department</label>
-              <div class="searchable-select" id="select-dept-container">
-                <div class="select-trigger" id="select-dept-trigger" data-value="">
-                  <span class="select-trigger-text">Select Department</span>
-                  <span class="select-trigger-arrow"></span>
-                </div>
-                <div class="select-dropdown-panel">
-                  <input type="text" class="select-search-input" placeholder="Search department...">
-                  <div class="select-options-list" id="select-dept-options">
-                    <!-- Populated dynamically -->
-                  </div>
-                </div>
+          <!-- Interview Completion Tracker -->
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 11px; font-weight: 600; color: var(--text-secondary);">Screening Progress:</span>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <div style="width: 100px; height: 6px; background-color: #EEEAE3; border-radius: 3px; overflow: hidden; position: relative;">
+                <div id="ws-progress-bar" style="height: 100%; background-color: var(--active-nav-bg); width: 0%;"></div>
               </div>
-            </div>
-            
-            <div class="form-group">
-              <label class="form-label">Sub-Department</label>
-              <div class="searchable-select" id="select-subdept-container">
-                <div class="select-trigger" id="select-subdept-trigger" data-value="">
-                  <span class="select-trigger-text">Select Sub-Department</span>
-                  <span class="select-trigger-arrow"></span>
-                </div>
-                <div class="select-dropdown-panel">
-                  <input type="text" class="select-search-input" placeholder="Search sub-department...">
-                  <div class="select-options-list" id="select-subdept-options">
-                    <!-- Populated dynamically -->
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label class="form-label">Role</label>
-              <div class="searchable-select" id="select-role-container">
-                <div class="select-trigger" id="select-role-trigger" data-value="">
-                  <span class="select-trigger-text">Select Role</span>
-                  <span class="select-trigger-arrow"></span>
-                </div>
-                <div class="select-dropdown-panel">
-                  <input type="text" class="select-search-input" placeholder="Search role...">
-                  <div class="select-options-list" id="select-role-options">
-                    <!-- Populated dynamically -->
-                  </div>
-                </div>
-              </div>
-              <span class="upload-subheading" style="margin: 4px 0 0 0; font-size: 10px; color: var(--text-secondary); line-height: 1.3;">
-                The selected candidate will receive all bot screening questions configured for this role.
-              </span>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Candidate</label>
-              <div class="searchable-select" id="select-candidate-container">
-                <div class="select-trigger" id="select-candidate-trigger" data-value="">
-                  <span class="select-trigger-text">Select Candidate</span>
-                  <span class="select-trigger-arrow"></span>
-                </div>
-                <div class="select-dropdown-panel">
-                  <input type="text" class="select-search-input" placeholder="Search candidate...">
-                  <div class="select-options-list" id="select-candidate-options">
-                    <!-- Populated dynamically -->
-                  </div>
-                </div>
-              </div>
+              <span id="ws-progress-text" style="font-size: 11px; font-weight: 700; color: var(--text-primary);">0%</span>
             </div>
           </div>
+        </header>
 
-          <div style="display: flex; justify-content: flex-end; margin-top: 4px;">
-            <button class="btn-pill" id="btn-send-invite" disabled style="opacity: 0.6; cursor: not-allowed;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; margin-right: 4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" /></svg>
-              Send Screening Invite
-            </button>
-          </div>
-        </section>
-
-        <!-- CARD 2: BOT SCREENING RESULTS -->
-        <section class="premium-card" id="card-screening-results" style="padding-bottom: 8px;">
-          <div class="card-header">
-            <div class="card-title-group">
-              <h2 class="card-title">Bot Screening Results</h2>
-            </div>
+        <!-- Workspace Grid Layout -->
+        <div class="workspace-grid">
+          <!-- Left Column (70%) -->
+          <div class="workspace-main">
             
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <!-- Search bar component -->
-              <div class="search-container">
-                <span class="search-icon">
-                  <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
-                </span>
-                <input type="text" id="candidate-search" class="search-input" placeholder="Search candidate...">
+            <!-- Custom Video Player Card -->
+            <div class="workspace-card" style="padding: 0; overflow: hidden;">
+              <div class="custom-video-wrapper">
+                <div class="custom-video-screen">
+                  <!-- Styled custom video screen -->
+                  <div id="ws-video-placeholder" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #111; color: #FFF; position: relative;">
+                    <div id="ws-playback-state-icon" style="background-color: rgba(29, 158, 117, 0.95); width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s;">
+                      <svg viewBox="0 0 24 24" fill="currentColor" style="width: 28px; height: 28px; color: #FFFFFF; margin-left: 3px;" id="ws-play-svg"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                    
+                    <!-- Floating Question Banner inside Video screen -->
+                    <div class="custom-video-active-question-banner">
+                      <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #1D9E75; display: block; letter-spacing: 0.5px;">Question</span>
+                      <span id="ws-video-active-question-text" style="font-size: 13.5px; font-weight: 500; display: block; margin-top: 3px; line-height: 1.3;">What is the exception handling</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Video Controls Panel -->
+                <div class="custom-video-controls">
+                  <!-- Custom Progress Timeline Container -->
+                  <div class="custom-video-timeline-container" id="ws-vid-timeline">
+                    <div class="custom-video-timeline-bg">
+                      <div class="custom-video-timeline-fill" id="ws-vid-timeline-fill"></div>
+                    </div>
+                    <!-- Markers are rendered dynamically via JS -->
+                  </div>
+                  
+                  <div class="custom-video-control-row">
+                    <!-- Play, Elapsed time -->
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <button class="video-control-btn" id="ws-vid-btn-play-toggle">
+                        <svg viewBox="0 0 24 24" fill="currentColor" id="ws-vid-btn-play-svg"><path d="M8 5v14l11-7z"/></svg>
+                      </button>
+                      <span id="ws-vid-time-display" style="color: #FFF; font-size: 12px; font-family: var(--font-mono);">0:00 / 0:00</span>
+                    </div>
+                    
+                    <!-- Question Nav, Speed, Fullscreen -->
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                      <!-- Prev/Next Q buttons -->
+                      <div style="display: flex; gap: 6px; align-items: center; background: rgba(255, 255, 255, 0.08); padding: 3px 8px; border-radius: 4px; border: 0.5px solid rgba(255,255,255,0.12);">
+                        <button class="video-control-btn" id="ws-vid-prev-q" style="font-size: 11px; font-weight: 600;">&lt; Prev</button>
+                        <span id="ws-vid-q-badge" style="color: #FFF; font-size: 11.5px; font-weight: 700; padding: 0 4px;">Q1</span>
+                        <button class="video-control-btn" id="ws-vid-next-q" style="font-size: 11px; font-weight: 600;">Next &gt;</button>
+                      </div>
+                      
+                      <!-- Speed Multiplier Select -->
+                      <select class="speed-select" id="ws-vid-speed-select">
+                        <option value="1">1.0x</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2">2.0x</option>
+                      </select>
+                      
+                      <!-- Fullscreen Toggle -->
+                      <button class="video-control-btn" id="ws-vid-fullscreen-btn" title="Toggle Fullscreen">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M20.25 3.75v4.5m0-4.5h-4.5m4.5 0L15 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 20.25v-4.5m0 4.5h-4.5m4.5 0L15 15" /></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
+            </div>
+
+            <!-- Question Navigation Pills -->
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;" id="ws-question-pills">
+              <!-- Pills injected dynamically -->
+            </div>
+
+            <!-- Transcript Panel -->
+            <div class="workspace-card">
+              <h3 class="workspace-card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                Dialogue Transcript
+              </h3>
+              <div class="chat-bubble-container" id="ws-transcript-container">
+                <!-- Bubbles injected dynamically -->
+              </div>
+            </div>
+
+            <!-- AI Summary Section -->
+            <div class="workspace-card">
+              <h3 class="workspace-card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l8.904-4.473L21 9l-3.473-3.473L9.813 15.904zM9.01 19.01L15 13M9 15l3 3M6.5 10A1.5 1.5 0 115 8.5c0-.825.675-1.5 1.5-1.5M19 19a2 2 0 11-4 0m2-2h-2m-8-2h.01"/></svg>
+                AI Summary & Evaluation
+              </h3>
+              <div style="background-color: #FAF9F6; border: 0.5px solid #E2DFD7; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                <h4 style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin: 0 0 8px 0;">Observations Summary</h4>
+                <p id="ws-ai-summary" style="font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; margin: 0;"></p>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div style="background-color: #F0FDF4; border: 0.5px solid #BBF7D0; border-radius: 8px; padding: 14px;">
+                  <h4 style="font-size: 12px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 0.4px; margin: 0 0 8px 0;">Key Strengths</h4>
+                  <ul id="ws-strengths" style="font-size: 12px; color: #1E293B; padding-left: 18px; margin: 0; display: flex; flex-direction: column; gap: 6px;"></ul>
+                </div>
+                <div style="background-color: #FFFBEB; border: 0.5px solid #FDE68A; border-radius: 8px; padding: 14px;">
+                  <h4 style="font-size: 12px; font-weight: 700; color: #92400E; text-transform: uppercase; letter-spacing: 0.4px; margin: 0 0 8px 0;">Areas to Explore</h4>
+                  <ul id="ws-improvements" style="font-size: 12px; color: #1E293B; padding-left: 18px; margin: 0; display: flex; flex-direction: column; gap: 6px;"></ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Competency snapshot & Overall Score -->
+            <div class="workspace-card">
+              <h3 class="workspace-card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+                Competency Assessment
+              </h3>
+              <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; align-items: center;">
+                <!-- Screening Score Radial Rating -->
+                <div style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 20px; background-color: #FAF9F6; border: 0.5px solid #E8E6E0; border-radius: 12px; box-shadow: var(--shadow-sm);">
+                  <span style="font-size: 10px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">Screening Score</span>
+                  <div style="position: relative; width: 100px; height: 100px;">
+                    <svg viewBox="0 0 36 36" style="width: 100%; height: 100%; transform: rotate(-90deg);">
+                      <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#EEEAE3" stroke-width="2.5" />
+                      <circle id="ws-radial-progress" cx="18" cy="18" r="15.9155" fill="none" stroke="var(--active-nav-bg)" stroke-width="2.5" stroke-dasharray="0, 100" />
+                    </svg>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center;">
+                      <span id="ws-score-percent" style="font-size: 20px; font-weight: 700; color: var(--text-primary);">0%</span>
+                    </div>
+                  </div>
+                  <span id="ws-score-badge" style="background-color: #FEF3C7; color: #D97706; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px; margin-top: 14px;"></span>
+                  
+                  <!-- AI Recommendation Badge -->
+                  <div style="margin-top: 14px; width: 100%; border-top: 0.5px solid #E8E6E0; padding-top: 12px; display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                    <span style="font-size: 9px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">AI Recommendation</span>
+                    <span id="ws-ai-recommendation" style="font-size: 11.5px; font-weight: 700; padding: 4px 12px; border-radius: 6px; display: inline-block;"></span>
+                  </div>
+                </div>
+
+                <!-- Competency Snapshot Radar Chart (Labels properly visible) -->
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px; background: #FAF9F6; border: 0.5px solid #E8E6E0; border-radius: 12px; height: 100%; box-shadow: var(--shadow-sm);">
+                  <span style="font-size: 10px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Competency Snapshot</span>
+                  <svg viewBox="-24 -18 148 136" style="width: 145px; height: 145px; overflow: visible;" id="ws-radar-svg">
+                    <!-- Grid polygons -->
+                    <polygon points="50,15 85,50 50,85 15,50" fill="none" stroke="#E2DFD7" stroke-width="0.6" />
+                    <polygon points="50,26.3 73.7,50 50,73.7 26.3,50" fill="none" stroke="#E2DFD7" stroke-width="0.5" />
+                    <polygon points="50,38.3 61.7,50 50,61.7 38.3,50" fill="none" stroke="#E2DFD7" stroke-width="0.5" />
+                    <!-- Axis lines -->
+                    <line x1="50" y1="15" x2="50" y2="85" stroke="#E2DFD7" stroke-width="0.6" />
+                    <line x1="15" y1="50" x2="85" y2="50" stroke="#E2DFD7" stroke-width="0.6" />
+                    <!-- Labels -->
+                    <text x="50" y="8" font-size="7.5" text-anchor="middle" font-weight="700" fill="#475569">Clarity</text>
+                    <text x="91" y="53" font-size="7.5" text-anchor="start" font-weight="700" fill="#475569">Relevance</text>
+                    <text x="50" y="97" font-size="7.5" text-anchor="middle" font-weight="700" fill="#475569">Confidence</text>
+                    <text x="9" y="53" font-size="7.5" text-anchor="end" font-weight="700" fill="#475569">Comm.</text>
+                    <!-- Data polygon & dots -->
+                    <polygon id="ws-radar-polygon" points="50,50 50,50 50,50 50,50" fill="rgba(29, 158, 117, 0.2)" stroke="var(--active-nav-bg)" stroke-width="1.5" />
+                    <circle id="ws-radar-dot-clarity" cx="50" cy="50" r="2.5" fill="var(--active-nav-bg)" stroke="#FFF" stroke-width="0.5" />
+                    <circle id="ws-radar-dot-relevance" cx="50" cy="50" r="2.5" fill="var(--active-nav-bg)" stroke="#FFF" stroke-width="0.5" />
+                    <circle id="ws-radar-dot-confidence" cx="50" cy="50" r="2.5" fill="var(--active-nav-bg)" stroke="#FFF" stroke-width="0.5" />
+                    <circle id="ws-radar-dot-comm" cx="50" cy="50" r="2.5" fill="var(--active-nav-bg)" stroke="#FFF" stroke-width="0.5" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column (30%) - Sidebar Widgets -->
+          <div class="workspace-sidebar">
+            
+            <!-- Candidate Profile widget -->
+            <div class="workspace-card" style="padding: 16px;">
+              <h3 class="workspace-card-title" style="margin-bottom: 12px;">Candidate Profile</h3>
+              <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12px; color: var(--text-primary);">
+                <div style="display: flex; justify-content: space-between; border-bottom: 0.5px solid #EEEAE3; padding-bottom: 6px;">
+                  <span style="color: var(--text-secondary);">Phone</span>
+                  <span id="ws-profile-phone" style="font-weight: 600;"></span>
+                </div>
+                <div style="display: flex; justify-content: space-between; border-bottom: 0.5px solid #EEEAE3; padding-bottom: 6px;">
+                  <span style="color: var(--text-secondary);">Location</span>
+                  <span id="ws-profile-location" style="font-weight: 600;"></span>
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: center; margin-top: 4px;">
+                  <a href="#" style="color: var(--sidebar-bg); display: flex; align-items: center; gap: 4px; font-weight: 600; text-decoration: none;">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 14px; height: 14px;"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.8v8.37h2.8v-4.67c0-.25.02-.5.1-.68a1.14 1.14 0 0 1 1-.77c.76 0 1 .58 1 1.42v4.7h2.8M6.5 8.37a1.37 1.37 0 1 0 0-2.75 1.37 1.37 0 0 0 0 2.75M8 18.5V10.13H5.2v8.37H8z"/></svg>
+                    LinkedIn
+                  </a>
+                  <a href="#" style="color: var(--text-secondary); display: flex; align-items: center; gap: 4px; font-weight: 600; text-decoration: none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-.778.099-1.533.284-2.253" /></svg>
+                    Portfolio
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Resume Widget with Clickable PDF -->
+            <div class="workspace-card" style="padding: 16px;">
+              <h3 class="workspace-card-title" style="margin-bottom: 12px;">Resume Details</h3>
+              <p id="ws-resume-summary" style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.4; margin: 0 0 12px 0;"></p>
               
-              <button class="btn-pill" id="btn-manage-questions" style="font-size: 12px; height: 32px; padding: 0 16px;">
-                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" style="width: 14px; height: 14px; stroke-width: 2; margin-right: 4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.43l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.991l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.645-.869l.214-1.28z" /><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                Manage Screening Questions
-              </button>
+              <!-- PDF Resume Mockup -->
+              <a href="#" id="ws-resume-link" style="display: flex; align-items: center; gap: 10px; background: #FAF9F6; border: 1px dashed #D1D9E8; padding: 10px; border-radius: 8px; text-decoration: none; transition: background 0.15s;" onclick="event.preventDefault(); showToast('Opening resume PDF viewer...');">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#E24B4A" stroke-width="2" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                <div style="display: flex; flex-direction: column; gap: 2px;">
+                  <span style="font-size: 11px; font-weight: 700; color: var(--text-primary);">resume_attachment.pdf</span>
+                  <span style="font-size: 10px; color: var(--text-secondary);">Click to view PDF</span>
+                </div>
+              </a>
             </div>
-          </div>
- 
-          <!-- Screening Results ATS Table -->
-          <div class="table-responsive" style="border: none;">
-            <table class="ats-table" id="screening-table">
-              <thead>
-                <tr>
-                  <th class="sort-header" data-sort="name">Candidate Name<span class="sort-icon"></span></th>
-                  <th class="sort-header" data-sort="role">Role Applied<span class="sort-icon"></span></th>
-                  <th class="sort-header" data-sort="status">Bot Screening Status<span class="sort-icon"></span></th>
-                  <th class="sort-header" data-sort="decision">Decision<span class="sort-icon"></span></th>
-                  <th>Notes</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="screening-table-body">
-                <!-- Injected via JavaScript -->
-              </tbody>
-            </table>
-          </div>
-        </section>
 
+            <!-- Core Skills Widget -->
+            <div class="workspace-card" style="padding: 16px;">
+              <h3 class="workspace-card-title" style="margin-bottom: 12px;">Core Skills</h3>
+              <div id="ws-skills-container" style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <!-- Tags injected dynamically -->
+              </div>
+            </div>
+
+            <!-- Experience History Timeline -->
+            <div class="workspace-card" style="padding: 16px;">
+              <h3 class="workspace-card-title" style="margin-bottom: 12px;">Experience History</h3>
+              <div class="experience-timeline" id="ws-experience-container">
+                <!-- Items injected dynamically -->
+              </div>
+            </div>
+
+            <!-- Sticky Decision Widget -->
+            <div class="sticky-hr-decision-panel">
+              <div class="workspace-card" style="padding: 16px; border-color: #CBD5E1; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+                <h3 class="workspace-card-title" style="margin-bottom: 12px; color: var(--sidebar-bg);">HR Recruitment Decision</h3>
+                
+                <!-- Decision selection cards -->
+                <div class="decision-grid" style="margin-bottom: 12px;">
+                  <button class="decision-button" data-decision="Proceed">
+                    <span class="decision-dot" style="color: #0D7A57;"></span>
+                    Proceed (Shortlist)
+                  </button>
+                  <button class="decision-button" data-decision="On Hold">
+                    <span class="decision-dot" style="color: #378ADD;"></span>
+                    On Hold
+                  </button>
+                  <button class="decision-button" data-decision="Rejected">
+                    <span class="decision-dot" style="color: #E24B4A;"></span>
+                    Reject
+                  </button>
+                  <button class="decision-button" data-decision="Technical">
+                    <span class="decision-dot" style="color: #7C3AED;"></span>
+                    Move to Technical Round
+                  </button>
+                  <button class="decision-button" data-decision="HR">
+                    <span class="decision-dot" style="color: #EC4899;"></span>
+                    Move to HR Round
+                  </button>
+                </div>
+
+                <!-- Decision Notes textarea -->
+                <div class="form-group" style="margin-bottom: 12px;">
+                  <label class="form-label" style="font-size: 10.5px; font-weight: 600;">Decision remarks / Feedback</label>
+                  <textarea id="ws-decision-notes" class="notes-textarea" placeholder="Add observations, interview remarks, or status reminders..." style="min-height: 70px; font-size: 12px; background-color: #FAF9F6; border: 1px solid #E2DFD7;"></textarea>
+                </div>
+
+                <button class="btn-primary-pill" id="ws-confirm-decision-btn" style="width: 100%; height: 38px; border-radius: 8px; font-size: 13px; font-weight: 600;">
+                  Confirm Decision
+                </button>
+              </div>
+
+              <!-- Activity Timeline -->
+              <div class="workspace-card" style="padding: 16px;">
+                <h3 class="workspace-card-title" style="margin-bottom: 12px;">Activity Timeline</h3>
+                <div class="experience-timeline" id="ws-activity-container" style="margin-top: 6px;">
+                  <!-- Injected dynamically -->
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
       </div>
     </main>
   </div>

@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interview Scheduler | KadelLabs ATS</title>
+  <meta name="description" content="Schedule and manage candidate interviews across all departments with KadelLabs Interview Scheduler.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ══ Layout ══════════════════════════════════════════════ */
+    .sched-layout { display:flex; gap:20px; align-items:flex-start; flex:1; min-height:0; }
+    .calendar-col { flex:1 1 0; min-width:0; display:flex; flex-direction:column; gap:16px; }
+    .sched-sidebar { width:360px; flex-shrink:0; display:flex; flex-direction:column; gap:14px; }
+
+    /* ══ Stats bar ══════════════════════════════════════════ */
+    .stats-bar { display:flex; gap:12px; margin-bottom:18px; flex-shrink:0; }
+    .stat-pill {
+      display:flex; flex-direction:column; align-items:center; gap:2px;
+      background:#FFFFFF; border:0.5px solid #E8E6E0; border-radius:12px; padding:10px 22px;
+      cursor:pointer; transition:all 0.2s; box-shadow:var(--shadow-sm); min-width:120px; user-select:none;
+    }
+    .stat-pill:hover { transform:translateY(-1px); border-color:var(--active-nav-bg); }
+    .stat-pill.active { background:var(--sidebar-bg); border-color:var(--sidebar-bg); }
+    .stat-pill .stat-num { font-size:22px; font-weight:700; color:var(--text-primary); line-height:1.1; letter-spacing:-0.5px; }
+    .stat-pill .stat-label { font-size:10px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.4px; }
+    .stat-pill.active .stat-num,.stat-pill.active .stat-label { color:#FFF; }
+    .stat-pill.active .stat-label { color:rgba(255,255,255,0.7); }
+    .stat-pill.confirmed .stat-num { color:var(--active-nav-bg); }
+    .stat-pill.pending   .stat-num { color:#B45309; }
+    .stat-pill.completed .stat-num { color:#1d4ed8; }
+
+    /* ══ Calendar card wrapper ══════════════════════════════ */
+    .calendar-card {
+      background:#FFFFFF; border:0.5px solid #E8E6E0; border-radius:12px;
+      box-shadow:var(--shadow-sm); overflow:hidden; display:flex; flex-direction:column;
+    }
+    .calendar-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 20px; border-bottom:0.5px solid #EEEAE3; background:#FAFAF8; flex-shrink:0;
+    }
+    .cal-month-label { font-size:15px; font-weight:700; color:var(--text-primary); }
+    .cal-nav-btns { display:flex; gap:4px; }
+    .cal-nav-btn {
+      background:none; border:1px solid #E8E6E0; border-radius:6px;
+      width:28px; height:28px; display:flex; align-items:center; justify-content:center;
+      cursor:pointer; color:var(--text-secondary); transition:all 0.18s;
+    }
+    .cal-nav-btn:hover { border-color:var(--active-nav-bg); color:var(--active-nav-bg); background:rgba(26,122,74,0.04); }
+    .cal-nav-btn svg { width:14px; height:14px; stroke-width:2; }
+    .cal-view-toggle { display:flex; gap:2px; background:#F0EEE8; border-radius:6px; padding:2px; }
+    .cal-view-btn { border:none; background:none; padding:4px 12px; font-size:11px; font-weight:600; color:var(--text-secondary); border-radius:4px; cursor:pointer; transition:all 0.18s; }
+    .cal-view-btn.active { background:#FFFFFF; color:var(--text-primary); box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+
+    /* ══ Calendar grid container ════════════════════════════ */
+    .cal-grid { padding:0 14px 14px; overflow:auto; flex:1; }
+
+    /* ══ Day-name header row ════════════════════════════════ */
+    .cal-day-headers {
+      display:grid; grid-template-columns:repeat(7,1fr); gap:2px;
+      margin-bottom:4px; position:sticky; top:0; background:#FFF; z-index:2; padding-top:8px;
+    }
+    .cal-day-hdr {
+      text-align:center; font-size:10px; font-weight:700; color:var(--text-secondary);
+      text-transform:uppercase; letter-spacing:0.5px; padding:6px 0;
+    }
+
+    /* ══ Month view — day cells ═════════════════════════════ */
+    .cal-days {
+      display:grid; grid-template-columns:repeat(7,1fr); gap:1px;
+      background:#EEEAE3; border-radius:8px; overflow:hidden;
+    }
+    .cal-day {
+      min-height:90px; background:#FFFFFF; padding:6px 5px 5px;
+      display:flex; flex-direction:column; gap:2px; position:relative;
+      transition:background 0.15s;
+    }
+    .cal-day:hover { background:#FAF9F6; }
+    .cal-day.other-month { background:#FAFAF8; }
+    .cal-day.other-month .cal-day-num { color:#C8C5BD !important; }
+    .cal-day.weekend { background:#FAFAF9; }
+    .cal-day.weekend:hover { background:#F5F3EF; }
+
+    /* Day number */
+    .cal-day-num-wrap { display:flex; align-items:center; gap:4px; margin-bottom:2px; }
+    .cal-day-num {
+      font-size:12px; font-weight:600; color:var(--text-primary);
+      width:24px; height:24px; display:flex; align-items:center; justify-content:center;
+      border-radius:50%; line-height:1; flex-shrink:0;
+    }
+    .cal-day-num.today-badge {
+      background:var(--active-nav-bg); color:#FFF;
+    }
+    .cal-day.other-month .cal-day-num { color:#C8C5BD; }
+
+    /* Event chips in month view */
+    .cal-event {
+      border-radius:5px; padding:2px 6px 2px 5px; font-size:10px; font-weight:600;
+      cursor:pointer; transition:all 0.15s; display:flex; flex-direction:column;
+      gap:0; overflow:hidden; border-left:3px solid transparent;
+    }
+    .cal-event:hover { filter:brightness(0.93); transform:translateX(1px); }
+    .cal-event.confirmed { background:rgba(26,122,74,0.1);  color:#14532d; border-left-color:#1D9E75; }
+    .cal-event.pending   { background:rgba(245,158,11,0.11); color:#92400e; border-left-color:#F59E0B; }
+    .cal-event.cancelled { background:rgba(239,68,68,0.09);  color:#991b1b; border-left-color:#EF4444; }
+    .cal-event-time { font-size:9px; font-weight:700; opacity:0.7; letter-spacing:0.2px; line-height:1.2; }
+    .cal-event-name { font-size:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.3; }
+    .cal-more { font-size:9px; color:var(--text-secondary); font-weight:600; padding:1px 5px; cursor:pointer; }
+    .cal-event-dot { width:5px; height:5px; border-radius:50%; background:#F59E0B; flex-shrink:0; }
+
+    /* ══ Week view grid ═════════════════════════════════════ */
+    .cal-days.week-grid {
+      display:grid;
+      grid-template-columns: 52px repeat(7, 1fr);
+      gap:0; background:#E8E6E0; border-radius:8px; overflow:auto; max-height:520px;
+    }
+    /* week column headers */
+    .cal-day-headers.week-headers {
+      grid-template-columns: 52px repeat(7, 1fr);
+      background:#FAFAF8; border-bottom:1px solid #EEEAE3;
+    }
+    .week-time-col { background:#FAFAF8; }
+    .week-col-hdr {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:2px; padding:8px 4px; background:#FAFAF8;
+    }
+    .week-col-hdr.today-col-hdr { background:rgba(26,122,74,0.05); }
+    .week-hdr-day { font-size:9px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.4px; }
+    .week-hdr-num { font-size:14px; font-weight:700; color:var(--text-primary); width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:50%; }
+    .week-hdr-num.today-badge { background:var(--active-nav-bg); color:#FFF; }
+
+    /* Time label column cells */
+    .week-time-cell {
+      background:#FAFAF8; font-size:10px; font-weight:600; color:var(--text-secondary);
+      padding:4px 6px 0; text-align:right; border-bottom:1px solid #EEEAE3;
+      border-right:1px solid #EEEAE3; height:52px; line-height:1; min-width:52px;
+    }
+
+    /* Day slot cells */
+    .week-slot {
+      background:#FFFFFF; border-bottom:1px solid #F0EEE8; border-right:1px solid #F0EEE8;
+      position:relative; height:52px;
+    }
+    .week-slot:hover { background:#FAF9F7; }
+    .week-slot.today-slot { background:#F0FAF5; border-color:#D8F0E6; }
+    .week-slot.weekend-slot { background:#FAFAF8; }
+    .week-slot.weekend-slot:hover { background:#F5F3EF; }
+
+    /* Events in week view */
+    .week-event {
+      position:absolute; left:2px; right:2px; border-radius:5px; padding:3px 5px;
+      font-size:10px; font-weight:600; cursor:pointer; overflow:hidden;
+      display:flex; flex-direction:column; gap:1px; z-index:2;
+      transition:filter 0.15s, box-shadow 0.15s; border-left:3px solid transparent;
+    }
+    .week-event:hover { filter:brightness(0.9); box-shadow:0 2px 8px rgba(0,0,0,0.1); z-index:3; }
+    .week-event.confirmed { background:rgba(26,122,74,0.14);  color:#14532d; border-left-color:#1D9E75; }
+    .week-event.pending   { background:rgba(245,158,11,0.14); color:#92400e; border-left-color:#F59E0B; }
+    .week-event.cancelled { background:rgba(239,68,68,0.12);  color:#991b1b; border-left-color:#EF4444; }
+    .week-ev-time { font-size:9px; opacity:0.75; font-weight:700; letter-spacing:0.1px; }
+    .week-ev-name { font-size:10px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .week-ev-role { font-size:9px; opacity:0.7; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    /* ══ Sidebar panels ═════════════════════════════════════ */
+    .sidebar-panel { background:#FFFFFF; border:0.5px solid #E8E6E0; border-radius:12px; box-shadow:var(--shadow-sm); overflow:hidden; }
+    .sidebar-panel-header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background:#FAFAF8; cursor:pointer; border-bottom:0.5px solid #EEEAE3; user-select:none; }
+    .sidebar-panel-header:hover { background:#F5F3EF; }
+    .sidebar-panel-title { font-size:12px; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px; }
+    .sidebar-panel-title .count-badge { font-size:10px; background:var(--sidebar-bg); color:#FFF; border-radius:999px; padding:1px 7px; font-weight:700; }
+    .collapse-arrow { width:16px; height:16px; stroke-width:2.5; color:var(--text-secondary); transition:transform 0.2s; }
+    .sidebar-panel.collapsed .collapse-arrow { transform:rotate(-90deg); }
+    .sidebar-panel-body { overflow:hidden; transition:max-height 0.3s cubic-bezier(0.4,0,0.2,1); max-height:800px; }
+    .sidebar-panel.collapsed .sidebar-panel-body { max-height:0; }
+
+    /* ══ Panel availability ══════════════════════════════════ */
+    .panelist-row { display:flex; align-items:center; gap:10px; padding:10px 16px; border-bottom:0.5px solid #F3F1EC; cursor:pointer; transition:background 0.15s; position:relative; }
+    .panelist-row:last-child { border-bottom:none; }
+    .panelist-row:hover { background:#FAF9F6; }
+    .panelist-avail-bar { flex:1; display:flex; gap:2px; }
+    .avail-slot { height:8px; flex:1; border-radius:2px; }
+    .avail-slot.free { background:rgba(26,122,74,0.18); }
+    .avail-slot.busy { background:rgba(239,68,68,0.18); }
+    .panelist-avatar-sm { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#FFF; flex-shrink:0; }
+    .panelist-name-sm { font-size:12px; font-weight:600; color:var(--text-primary); min-width:90px; }
+    .panelist-title-sm { font-size:10px; color:var(--text-secondary); }
+    .panelist-tooltip { position:absolute; left:100%; top:0; z-index:999; width:220px; background:#1a2744; color:#FFF; border-radius:10px; padding:12px; box-shadow:0 8px 24px rgba(28,43,74,0.25); font-size:11px; display:none; pointer-events:none; margin-left:6px; }
+    .panelist-row:hover .panelist-tooltip { display:block; }
+    .panelist-tooltip h6 { margin:0 0 8px; font-size:12px; color:#FFF; font-weight:700; }
+    .avail-day-row { display:flex; align-items:center; gap:6px; margin-bottom:5px; }
+    .avail-day-label { font-size:10px; width:28px; color:rgba(255,255,255,0.6); font-weight:600; }
+    .avail-day-slots { display:flex; gap:2px; flex:1; }
+    .avail-day-slot { width:12px; height:12px; border-radius:2px; }
+    .avail-day-slot.free { background:rgba(26,122,74,0.55); }
+    .avail-day-slot.busy { background:rgba(239,68,68,0.45); }
+    .tooltip-legend { display:flex; gap:10px; margin-top:8px; }
+    .tooltip-legend span { display:flex; align-items:center; gap:4px; font-size:9px; color:rgba(255,255,255,0.6); }
+    .legend-dot { width:8px; height:8px; border-radius:2px; }
+
+    /* ══ Upcoming interviews ════════════════════════════════ */
+    .upcoming-item { padding:12px 16px; border-bottom:0.5px solid #F3F1EC; display:flex; flex-direction:column; gap:6px; transition:background 0.15s; cursor:pointer; }
+    .upcoming-item:last-child { border-bottom:none; }
+    .upcoming-item:hover { background:#FAF9F6; }
+    .upcoming-item-top { display:flex; align-items:center; justify-content:space-between; }
+    .upcoming-cand-name { font-size:13px; font-weight:600; color:var(--text-primary); }
+    .upcoming-status-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .upcoming-status-dot.confirmed { background:var(--active-nav-bg); }
+    .upcoming-status-dot.pending   { background:#F59E0B; }
+    .upcoming-status-dot.cancelled { background:#EF4444; }
+    .upcoming-meta { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .upcoming-meta-tag { font-size:10.5px; color:var(--text-secondary); display:flex; align-items:center; gap:4px; }
+    .upcoming-meta-tag svg { width:11px; height:11px; stroke-width:2; }
+    .upcoming-actions { display:flex; gap:6px; align-items:center; }
+    .btn-join-sm { background:var(--active-nav-bg); color:#FFF; border:none; border-radius:6px; padding:4px 12px; font-size:11px; font-weight:600; cursor:pointer; transition:background 0.18s; }
+    .btn-join-sm:hover { background:#1a6840; }
+    .btn-more-sm { background:none; border:1px solid #E8E6E0; border-radius:6px; width:26px; height:26px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-secondary); transition:all 0.18s; position:relative; }
+    .btn-more-sm:hover { background:#F3F1EC; border-color:#D5D1C9; color:var(--text-primary); }
+    .btn-more-sm svg { width:14px; height:14px; }
+    .more-dropdown { position:absolute; left:0; top:calc(100% + 4px); z-index:500; background:#FFF; border:0.5px solid #E8E6E0; border-radius:10px; box-shadow:0 6px 20px rgba(28,43,74,0.1); padding:5px; min-width:160px; display:none; }
+    .more-dropdown.open { display:block; }
+    .more-dd-item { display:flex; align-items:center; gap:8px; padding:8px 12px; border:none; background:none; width:100%; text-align:left; font-size:12px; font-weight:500; color:var(--text-primary); border-radius:6px; cursor:pointer; transition:background 0.15s; }
+    .more-dd-item:hover { background:#FAF9F6; }
+    .more-dd-item.danger { color:#C62828; }
+    .more-dd-item.danger:hover { background:#FFEBEE; }
+    .more-dd-item svg { width:13px; height:13px; stroke-width:2; color:var(--text-secondary); }
+    .more-dd-item.danger svg { color:#C62828; }
+    .more-dd-divider { height:1px; background:#F3F1EC; margin:3px 0; }
+    .upcoming-empty { padding:20px; text-align:center; font-size:12px; color:var(--text-secondary); font-style:italic; }
+
+    /* ══ Event detail popup ══════════════════════════════════ */
+    .event-popup-overlay { position:fixed; inset:0; z-index:1100; display:flex; align-items:center; justify-content:center; background:rgba(28,43,74,0.35); backdrop-filter:blur(3px); opacity:0; pointer-events:none; transition:opacity 0.2s; }
+    .event-popup-overlay.active { opacity:1; pointer-events:auto; }
+    .event-popup { background:#FFF; border-radius:14px; width:440px; max-width:95vw; box-shadow:0 20px 60px rgba(28,43,74,0.2); border:0.5px solid #E8E6E0; transform:scale(0.96) translateY(10px); transition:transform 0.22s cubic-bezier(0.4,0,0.2,1); overflow:hidden; }
+    .event-popup-overlay.active .event-popup { transform:scale(1) translateY(0); }
+    .event-popup-header { padding:16px 20px; background:#FAFAF8; border-bottom:0.5px solid #EEEAE3; display:flex; align-items:center; justify-content:space-between; }
+    .event-popup-title { font-size:15px; font-weight:700; color:var(--text-primary); }
+    .popup-role-tag { font-size:11px; color:var(--text-secondary); font-weight:500; }
+    .event-popup-body { padding:18px 20px; display:flex; flex-direction:column; gap:14px; }
+    .popup-detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .popup-detail-item { display:flex; flex-direction:column; gap:3px; }
+    .popup-detail-label { font-size:10px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.4px; }
+    .popup-detail-value { font-size:13px; font-weight:600; color:var(--text-primary); }
+    .popup-panelists { display:flex; gap:6px; flex-wrap:wrap; }
+    .popup-panelist-chip { background:#F0F9F4; border:0.5px solid #BBE5CE; color:#14532d; border-radius:999px; padding:3px 10px; font-size:11px; font-weight:600; }
+    .popup-footer { display:flex; gap:10px; padding:14px 20px; border-top:0.5px solid #EEEAE3; background:#FAFAF8; }
+    .btn-popup-join { background:var(--active-nav-bg); color:#FFF; border:none; border-radius:8px; padding:8px 20px; font-size:13px; font-weight:600; cursor:pointer; transition:background 0.18s; flex:1; }
+    .btn-popup-join:hover { background:#1a6840; }
+    .btn-popup-reschedule,.btn-popup-cancel { border:1px solid #E8E6E0; background:#FFF; border-radius:8px; padding:8px 14px; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.18s; color:var(--text-primary); }
+    .btn-popup-reschedule:hover { border-color:#D5D1C9; background:#F5F3EF; }
+    .btn-popup-cancel { color:#C62828; border-color:#FFCDD2; }
+    .btn-popup-cancel:hover { background:#FFEBEE; }
+
+    /* ══ Schedule Interview Modal ════════════════════════════ */
+    .schedule-modal-overlay { position:fixed; inset:0; z-index:1200; display:flex; align-items:center; justify-content:center; background:rgba(28,43,74,0.4); backdrop-filter:blur(4px); opacity:0; pointer-events:none; transition:opacity 0.22s; }
+    .schedule-modal-overlay.active { opacity:1; pointer-events:auto; }
+    .schedule-modal { background:#FFF; border-radius:16px; width:580px; max-width:96vw; max-height:92vh; overflow-y:auto; box-shadow:0 24px 64px rgba(28,43,74,0.22); border:0.5px solid #E8E6E0; transform:translateY(20px) scale(0.97); transition:transform 0.24s cubic-bezier(0.4,0,0.2,1); display:flex; flex-direction:column; }
+    .schedule-modal-overlay.active .schedule-modal { transform:translateY(0) scale(1); }
+    .schedule-modal-header { padding:18px 24px; border-bottom:0.5px solid #EEEAE3; background:#FAFAF8; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:1; }
+    .schedule-modal-title { font-size:16px; font-weight:700; color:var(--text-primary); }
+    .schedule-modal-body { padding:24px; display:flex; flex-direction:column; gap:18px; flex:1; }
+    .modal-form-section { display:flex; flex-direction:column; gap:6px; }
+    .modal-form-label { font-size:12px; font-weight:600; color:var(--text-primary); }
+    .modal-input { height:40px; background:#FAF9F6; border:1px solid #E2DFD7; border-radius:10px; padding:0 14px; font-size:13px; font-weight:500; color:var(--text-primary); outline:none; width:100%; transition:all 0.18s; font-family:var(--font-family); }
+    .modal-input:focus { border-color:var(--active-nav-bg); background:#FFF; box-shadow:0 0 0 3px rgba(26,122,74,0.08); }
+    .modal-form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .panelist-selector { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+    .panelist-chip-sel { display:flex; align-items:center; gap:6px; background:#F0F9F4; border:1px solid #BBE5CE; color:#14532d; border-radius:999px; padding:5px 12px; font-size:11.5px; font-weight:600; cursor:pointer; transition:all 0.15s; user-select:none; }
+    .panelist-chip-sel:hover { background:#DFF3EB; }
+    .panelist-chip-sel.selected { background:var(--active-nav-bg); color:#FFF; border-color:var(--active-nav-bg); }
+    .platform-btns { display:flex; gap:8px; }
+    .platform-btn { flex:1; padding:9px 0; border:1.5px solid #E2DFD7; background:#FAF9F6; border-radius:8px; font-size:12px; font-weight:600; color:var(--text-secondary); cursor:pointer; transition:all 0.18s; display:flex; align-items:center; justify-content:center; gap:6px; }
+    .platform-btn:hover { border-color:#D5D1C9; color:var(--text-primary); }
+    .platform-btn.selected { border-color:var(--active-nav-bg); background:rgba(26,122,74,0.06); color:var(--active-nav-bg); }
+    .schedule-modal-footer { padding:14px 24px; border-top:0.5px solid #EEEAE3; background:#FAFAF8; display:flex; justify-content:flex-end; gap:10px; position:sticky; bottom:0; }
+
+    /* ══ Schedule button ════════════════════════════════════ */
+    .btn-schedule-interview { display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 16px; background:var(--active-nav-bg); color:#FFF; border:none; border-radius:var(--radius-pill); font-size:12px; font-weight:600; cursor:pointer; transition:background 0.18s; }
+    .btn-schedule-interview:hover { background:#1a6840; }
+    .btn-schedule-interview svg { width:14px; height:14px; stroke-width:2.5; }
+
+    /* ══ Active filter badge ════════════════════════════════ */
+    .active-filter-badge { background:rgba(26,122,74,0.1); color:var(--active-nav-bg); border:1px solid rgba(26,122,74,0.2); border-radius:999px; padding:2px 10px; font-size:10px; font-weight:600; margin-left:8px; }
+
+    /* ══ Manage Panelists Button ════════════════════════════ */
+    .btn-manage-panelists {
+      display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 16px;
+      background:#FFFFFF; color:var(--sidebar-bg); border:1.5px solid #D1D9E8;
+      border-radius:var(--radius-pill); font-size:12px; font-weight:600;
+      cursor:pointer; transition:all 0.18s; font-family:var(--font-family);
+    }
+    .btn-manage-panelists:hover { border-color:var(--sidebar-bg); background:#F0F3FA; }
+    .btn-manage-panelists svg { width:14px; height:14px; stroke-width:2.5; }
+
+    /* ══ Panel Management Dashboard ════════════════════════ */
+    .pm-dashboard {
+      background:#FFFFFF; border:0.5px solid #E8E6E0; border-radius:12px;
+      box-shadow:var(--shadow-sm); padding:16px 20px; margin-bottom:18px;
+    }
+    .pm-dashboard-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+    .pm-dashboard-title { font-size:13px; font-weight:600; color:var(--text-primary); display:flex; align-items:center; gap:8px; }
+    .pm-dashboard-title svg { width:15px; height:15px; stroke-width:2; color:var(--active-nav-bg); }
+    .pm-kpi-row { display:flex; gap:10px; flex-wrap:wrap; }
+    .pm-kpi-card {
+      flex:1; min-width:100px; background:#F9FAFB; border:0.5px solid #E8E6E0;
+      border-radius:10px; padding:12px 14px; display:flex; flex-direction:column; gap:2px;
+    }
+    .pm-kpi-val { font-size:20px; font-weight:700; color:var(--text-primary); line-height:1; }
+    .pm-kpi-label { font-size:10px; font-weight:600; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.4px; margin-top:2px; }
+    .pm-kpi-card.kpi-available .pm-kpi-val { color:#0D7A57; }
+    .pm-kpi-card.kpi-busy .pm-kpi-val { color:#F59E0B; }
+    .pm-kpi-card.kpi-leave .pm-kpi-val { color:#E24B4A; }
+    .pm-kpi-card.kpi-week .pm-kpi-val { color:#378ADD; }
+    .pm-dept-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:12px; }
+    .pm-dept-chip {
+      display:inline-flex; align-items:center; gap:5px;
+      background:#F3F4F6; border:0.5px solid #E2E8F0;
+      border-radius:999px; padding:3px 10px; font-size:11px; font-weight:500; color:var(--text-secondary);
+    }
+    .pm-dept-chip .dept-dot { width:7px; height:7px; border-radius:50%; }
+
+    /* ══ Panelist Directory ═════════════════════════════════ */
+    .panelist-directory {
+      background:#FFFFFF; border:0.5px solid #E8E6E0; border-radius:12px;
+      box-shadow:var(--shadow-sm); overflow:hidden; margin-top:16px;
+    }
+    .dir-header { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:0.5px solid #EEEAE3; background:#FAFAF8; }
+    .dir-title { font-size:13px; font-weight:600; color:var(--text-primary); display:flex; align-items:center; gap:8px; }
+    .dir-title .count-badge { font-size:10px; background:var(--sidebar-bg); color:#FFF; border-radius:999px; padding:1px 7px; font-weight:700; }
+    .dir-filters { display:flex; gap:8px; align-items:center; }
+    .dir-search {
+      height:30px; background:#F5F6FA; border:1px solid #E2DFD7;
+      border-radius:8px; padding:0 10px 0 30px; font-size:12px; font-weight:500;
+      color:var(--text-primary); outline:none; width:180px; font-family:var(--font-family);
+      transition:all 0.18s; position:relative;
+    }
+    .dir-search:focus { border-color:var(--active-nav-bg); background:#FFF; box-shadow:0 0 0 2px rgba(29,158,117,0.1); }
+    .dir-search-wrap { position:relative; }
+    .dir-search-wrap svg { position:absolute; left:8px; top:50%; transform:translateY(-50%); width:13px; height:13px; stroke-width:2; color:var(--text-secondary); pointer-events:none; }
+    .dir-filter-select {
+      height:30px; background:#F5F6FA; border:1px solid #E2DFD7; border-radius:8px;
+      padding:0 28px 0 10px; font-size:11.5px; font-weight:500; color:var(--text-secondary);
+      outline:none; appearance:none; cursor:pointer; font-family:var(--font-family);
+    }
+    .dir-filter-select:focus { border-color:var(--active-nav-bg); }
+    .dir-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:14px; padding:16px 20px; }
+    .dir-card {
+      background:#FAFAFA; border:0.5px solid #E8E6E0; border-radius:10px;
+      padding:14px; display:flex; flex-direction:column; gap:10px;
+      transition:all 0.18s; position:relative;
+    }
+    .dir-card:hover { border-color:#C8D6EE; box-shadow:0 2px 12px rgba(27,43,94,0.08); background:#FFF; }
+    .dir-card-top { display:flex; align-items:flex-start; gap:10px; }
+    .dir-avatar {
+      width:38px; height:38px; border-radius:50%; display:flex; align-items:center;
+      justify-content:center; font-size:13px; font-weight:700; color:#FFF; flex-shrink:0;
+    }
+    .dir-card-info { flex:1; min-width:0; }
+    .dir-card-name { font-size:13px; font-weight:600; color:var(--text-primary); line-height:1.2; }
+    .dir-card-role { font-size:11px; color:var(--text-secondary); font-weight:500; margin-top:1px; }
+    .dir-card-dept { font-size:10px; color:#378ADD; font-weight:600; background:#EBF4FF; border-radius:4px; padding:1px 7px; display:inline-block; margin-top:3px; }
+    .dir-avail-badge {
+      display:inline-flex; align-items:center; gap:4px;
+      border-radius:999px; padding:3px 8px; font-size:10px; font-weight:700;
+      flex-shrink:0;
+    }
+    .dir-avail-badge.available { background:#E6F7F2; color:#0D7A57; }
+    .dir-avail-badge.busy       { background:#FEF3C7; color:#B45309; }
+    .dir-avail-badge.on-leave   { background:#FEF0EF; color:#E24B4A; }
+    .dir-avail-dot { width:6px; height:6px; border-radius:50%; background:currentColor; }
+    .dir-skills { display:flex; gap:5px; flex-wrap:wrap; }
+    .dir-skill-chip {
+      background:#F0F3FA; color:#1B2B5E; border-radius:999px;
+      padding:2px 8px; font-size:10px; font-weight:600;
+    }
+    .dir-card-footer { display:flex; align-items:center; justify-content:space-between; margin-top:2px; }
+    .dir-upcoming-count { font-size:11px; color:var(--text-secondary); font-weight:500; display:flex; align-items:center; gap:4px; }
+    .dir-upcoming-count svg { width:12px; height:12px; stroke-width:2; }
+    .dir-actions { display:flex; gap:4px; }
+    .dir-action-btn {
+      width:26px; height:26px; background:none; border:1px solid #E8E6E0;
+      border-radius:6px; display:flex; align-items:center; justify-content:center;
+      cursor:pointer; color:var(--text-secondary); transition:all 0.15s;
+    }
+    .dir-action-btn:hover { background:#F0F3FA; border-color:#C8D6EE; color:var(--sidebar-bg); }
+    .dir-action-btn.danger:hover { background:#FEF0EF; border-color:#F9BFBE; color:#E24B4A; }
+    .dir-action-btn svg { width:13px; height:13px; stroke-width:2; }
+    .dir-interview-types { display:flex; gap:4px; flex-wrap:wrap; }
+    .dir-type-chip { background:#F5F6FA; color:var(--text-secondary); border-radius:4px; padding:1px 6px; font-size:9.5px; font-weight:600; text-transform:uppercase; letter-spacing:0.3px; }
+
+    /* ══ Enhanced Panel Availability ═══════════════════════ */
+    .pa-controls { display:flex; gap:6px; align-items:center; padding:10px 14px 0; }
+    .pa-search-wrap { position:relative; flex:1; }
+    .pa-search-wrap svg { position:absolute; left:7px; top:50%; transform:translateY(-50%); width:12px; height:12px; color:var(--text-secondary); pointer-events:none; stroke-width:2; }
+    .pa-search {
+      height:28px; width:100%; background:#F5F6FA; border:1px solid #E2DFD7;
+      border-radius:7px; padding:0 8px 0 25px; font-size:11.5px; font-weight:500;
+      color:var(--text-primary); outline:none; font-family:var(--font-family);
+    }
+    .pa-search:focus { border-color:var(--active-nav-bg); background:#FFF; }
+    .pa-filter {
+      height:28px; background:#F5F6FA; border:1px solid #E2DFD7; border-radius:7px;
+      padding:0 8px; font-size:11px; font-weight:500; color:var(--text-secondary);
+      outline:none; appearance:none; cursor:pointer; font-family:var(--font-family);
+    }
+    .pa-add-btn {
+      width:28px; height:28px; background:var(--active-nav-bg); border:none;
+      border-radius:7px; display:flex; align-items:center; justify-content:center;
+      cursor:pointer; color:#FFF; transition:background 0.18s; flex-shrink:0;
+    }
+    .pa-add-btn:hover { background:#178a65; }
+    .pa-add-btn svg { width:14px; height:14px; stroke-width:2.5; }
+    .panelist-row-enhanced { display:flex; align-items:center; gap:9px; padding:9px 14px; border-bottom:0.5px solid #F3F1EC; transition:background 0.15s; }
+    .panelist-row-enhanced:last-child { border-bottom:none; }
+    .panelist-row-enhanced:hover { background:#FAF9F6; }
+    .pa-avail-indicator { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+    .pa-avail-indicator.available { background:#0D7A57; box-shadow:0 0 0 2px rgba(13,122,87,0.2); }
+    .pa-avail-indicator.busy       { background:#F59E0B; box-shadow:0 0 0 2px rgba(245,158,11,0.2); }
+    .pa-avail-indicator.on-leave   { background:#E24B4A; box-shadow:0 0 0 2px rgba(226,75,74,0.2); }
+    .pa-workload-wrap { flex:1; display:flex; flex-direction:column; gap:3px; }
+    .pa-workload-bar-bg { height:5px; background:#F0EEE8; border-radius:3px; overflow:hidden; }
+    .pa-workload-bar-fill { height:5px; border-radius:3px; transition:width 0.4s; }
+    .pa-workload-label { font-size:9.5px; font-weight:600; color:var(--text-secondary); }
+
+    /* ══ Panelist Avatars in Upcoming ══════════════════════ */
+    .panelist-avatars { display:flex; align-items:center; }
+    .pa-mini-avatar {
+      width:20px; height:20px; border-radius:50%; border:1.5px solid #FFF;
+      display:flex; align-items:center; justify-content:center;
+      font-size:8px; font-weight:700; color:#FFF; margin-left:-5px; flex-shrink:0;
+    }
+    .pa-mini-avatar:first-child { margin-left:0; }
+    .pa-mini-overflow {
+      width:20px; height:20px; border-radius:50%; border:1.5px solid #FFF;
+      background:#E8E6E0; color:var(--text-secondary); font-size:8px; font-weight:700;
+      display:flex; align-items:center; justify-content:center; margin-left:-5px;
+    }
+
+    /* ══ Manage Panelists Drawer ════════════════════════════ */
+    .mp-drawer-overlay {
+      position:fixed; inset:0; z-index:1300;
+      background:rgba(27,43,94,0.35); backdrop-filter:blur(3px);
+      opacity:0; pointer-events:none; transition:opacity 0.22s;
+    }
+    .mp-drawer-overlay.active { opacity:1; pointer-events:auto; }
+    .mp-drawer {
+      position:fixed; top:0; right:-640px; width:620px; height:100vh;
+      background:#FFFFFF; box-shadow:-8px 0 40px rgba(27,43,94,0.15);
+      z-index:1301; display:flex; flex-direction:column;
+      transition:right 0.3s cubic-bezier(0.4,0,0.2,1);
+      border-left:0.5px solid #E2E8F0;
+    }
+    .mp-drawer-overlay.active .mp-drawer { right:0; }
+    .mp-drawer-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 24px; border-bottom:0.5px solid #EEEAE3;
+      background:#FAFAF8; flex-shrink:0;
+    }
+    .mp-drawer-title { font-size:15px; font-weight:600; color:var(--text-primary); }
+    .mp-drawer-subtitle { font-size:12px; color:var(--text-secondary); margin-top:2px; }
+    .mp-drawer-body { flex:1; overflow-y:auto; padding:0; display:flex; flex-direction:column; }
+    .mp-drawer-section { padding:20px 24px; border-bottom:0.5px solid #EEEAE3; }
+    .mp-section-title { font-size:12px; font-weight:700; color:var(--text-primary); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:14px; }
+    .mp-form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .mp-form-group { display:flex; flex-direction:column; gap:5px; }
+    .mp-form-label { font-size:11.5px; font-weight:600; color:var(--text-primary); }
+    .mp-form-label span { color:#E24B4A; margin-left:2px; }
+    .mp-input {
+      height:36px; background:#F9FAFB; border:1px solid #E2DFD7; border-radius:8px;
+      padding:0 12px; font-size:13px; font-weight:500; color:var(--text-primary);
+      outline:none; font-family:var(--font-family); transition:all 0.18s; width:100%;
+    }
+    .mp-input:focus { border-color:var(--active-nav-bg); background:#FFF; box-shadow:0 0 0 3px rgba(29,158,117,0.1); }
+    .mp-select {
+      height:36px; background:#F9FAFB; border:1px solid #E2DFD7; border-radius:8px;
+      padding:0 12px; font-size:13px; font-weight:500; color:var(--text-primary);
+      outline:none; font-family:var(--font-family); appearance:none; cursor:pointer; width:100%;
+    }
+    .mp-select:focus { border-color:var(--active-nav-bg); background:#FFF; }
+    .mp-tag-input-wrap { display:flex; flex-wrap:wrap; gap:5px; align-items:center; min-height:36px; background:#F9FAFB; border:1px solid #E2DFD7; border-radius:8px; padding:5px 10px; transition:all 0.18s; }
+    .mp-tag-input-wrap:focus-within { border-color:var(--active-nav-bg); background:#FFF; box-shadow:0 0 0 3px rgba(29,158,117,0.1); }
+    .mp-tag { display:inline-flex; align-items:center; gap:4px; background:#1B2B5E; color:#FFF; border-radius:999px; padding:2px 8px; font-size:11px; font-weight:600; }
+    .mp-tag button { background:none; border:none; color:rgba(255,255,255,0.7); cursor:pointer; padding:0; font-size:12px; line-height:1; display:flex; }
+    .mp-tag button:hover { color:#FFF; }
+    .mp-tag-bare { border:none; background:none; outline:none; font-size:12px; font-family:var(--font-family); color:var(--text-primary); min-width:80px; flex:1; }
+    .mp-interview-types { display:flex; gap:6px; flex-wrap:wrap; }
+    .mp-type-btn {
+      padding:5px 12px; border:1.5px solid #E2DFD7; background:#F9FAFB;
+      border-radius:8px; font-size:11.5px; font-weight:600; color:var(--text-secondary);
+      cursor:pointer; transition:all 0.18s; font-family:var(--font-family);
+    }
+    .mp-type-btn:hover { border-color:#C8D6EE; color:var(--sidebar-bg); }
+    .mp-type-btn.active { border-color:var(--sidebar-bg); background:#EBF0FA; color:var(--sidebar-bg); }
+    .mp-avail-btns { display:flex; gap:8px; }
+    .mp-avail-btn {
+      flex:1; padding:7px 0; border:1.5px solid #E2DFD7; background:#F9FAFB;
+      border-radius:8px; font-size:12px; font-weight:600; color:var(--text-secondary);
+      cursor:pointer; transition:all 0.18s; font-family:var(--font-family);
+      display:flex; align-items:center; justify-content:center; gap:5px;
+    }
+    .mp-avail-btn:hover { border-color:#D5D1C9; }
+    .mp-avail-btn.active-avail   { border-color:#0D7A57; background:#E6F7F2; color:#0D7A57; }
+    .mp-avail-btn.active-busy    { border-color:#F59E0B; background:#FEF3C7; color:#B45309; }
+    .mp-avail-btn.active-leave   { border-color:#E24B4A; background:#FEF0EF; color:#E24B4A; }
+    .mp-avail-dot-btn { width:7px; height:7px; border-radius:50%; background:currentColor; }
+    .mp-drawer-footer { padding:14px 24px; border-top:0.5px solid #EEEAE3; background:#FAFAF8; display:flex; gap:10px; justify-content:flex-end; flex-shrink:0; }
+    .mp-dir-section { padding:16px 24px; flex:1; }
+    .mp-dir-inner-grid { display:grid; grid-template-columns:1fr; gap:10px; }
+    .mp-dir-item {
+      display:flex; align-items:center; gap:10px; background:#F9FAFB; border:0.5px solid #E8E6E0;
+      border-radius:9px; padding:10px 12px; transition:all 0.15s;
+    }
+    .mp-dir-item:hover { background:#FFF; border-color:#C8D6EE; }
+    .mp-dir-item-info { flex:1; min-width:0; }
+    .mp-dir-item-name { font-size:12.5px; font-weight:600; color:var(--text-primary); }
+    .mp-dir-item-meta { font-size:11px; color:var(--text-secondary); margin-top:1px; }
+    .mp-dir-item-actions { display:flex; gap:4px; flex-shrink:0; }
+
+    /* ══ Conflict Warning ══════════════════════════════════ */
+    .conflict-warning {
+      display:none; background:#FEF3C7; border:1px solid #F59E0B;
+      border-radius:8px; padding:8px 12px; font-size:11.5px; color:#92400e;
+      font-weight:500; align-items:center; gap:6px; margin-top:6px;
+    }
+    .conflict-warning.show { display:flex; }
+    .conflict-warning svg { width:14px; height:14px; stroke-width:2; flex-shrink:0; }
+    .panelist-chip-sel.recommended::after { content:'⭐'; margin-left:3px; font-size:9px; }
+    .panelist-chip-sel.conflict { background:#FEF0EF !important; border-color:#E24B4A !important; color:#E24B4A !important; }
+  </style>
+
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- LEFT SIDEBAR NAV -->
+    <aside class="sidebar">
+      <div class="logo-area">
+        <span class="logo-title">KadelLabs</span>
+        <span class="logo-subtitle">serving through technology</span>
+      </div>
+      <nav class="navigation-menu">
+        <a href="index.html" class="nav-item">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" /></svg>
+          Applicants
+          <span class="nav-badge">3 new</span>
+        </a>
+        <a href="video-screening.html" class="nav-item">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+          Video Screening
+          <span class="nav-badge-dot" style="margin-left: auto;"></span>
+        </a>
+        <a href="scheduler.html" class="nav-item active">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+          Interview Scheduler
+        </a>
+        <a href="reports.html" class="nav-item">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+          Hiring Pipeline
+        </a>
+        <a href="departments.html" class="nav-item">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg>
+          Departments
+        </a>
+      </nav>
+      <div class="sidebar-bottom">
+        <button class="logout-btn">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
+          Logout
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-wrapper">
+      <!-- TOP BAR -->
+      <header class="top-bar">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <h1 class="page-title">Interview Scheduler</h1>
+          <span id="active-filter-label" class="active-filter-badge" style="display:none;"></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <button class="btn-manage-panelists" id="btn-open-mp-drawer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg>
+            Manage Panelists
+          </button>
+          <button class="btn-schedule-interview" id="btn-open-schedule-modal">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+            Schedule Interview
+          </button>
+          <div class="profile-block">
+            <div class="profile-details">
+              <span class="profile-name">Admin</span>
+              <span class="profile-email">careers@kadellabs.com</span>
+            </div>
+            <div class="avatar-initials">KL</div>
+          </div>
+        </div>
+      </header>
+
+      <!-- MAIN CONTENT -->
+      <div class="main-content" style="gap:0;padding:18px 24px;">
+
+        <!-- PANEL MANAGEMENT DASHBOARD -->
+        <div class="pm-dashboard" id="pm-dashboard">
+          <div class="pm-dashboard-header">
+            <div class="pm-dashboard-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zm9.75-9.75c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v16.5c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V3.375zm-9.75 9.75c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75z" /></svg>
+              Panel Management Dashboard
+            </div>
+            <span style="font-size:11px;color:var(--text-secondary);">Live availability · Updated just now</span>
+          </div>
+          <div class="pm-kpi-row">
+            <div class="pm-kpi-card">
+              <span class="pm-kpi-val" id="pm-total">4</span>
+              <span class="pm-kpi-label">Total Panelists</span>
+            </div>
+            <div class="pm-kpi-card kpi-available">
+              <span class="pm-kpi-val" id="pm-available">2</span>
+              <span class="pm-kpi-label">Available Today</span>
+            </div>
+            <div class="pm-kpi-card kpi-busy">
+              <span class="pm-kpi-val" id="pm-busy">1</span>
+              <span class="pm-kpi-label">Busy Today</span>
+            </div>
+            <div class="pm-kpi-card kpi-leave">
+              <span class="pm-kpi-val" id="pm-leave">1</span>
+              <span class="pm-kpi-label">On Leave</span>
+            </div>
+            <div class="pm-kpi-card kpi-week">
+              <span class="pm-kpi-val" id="pm-week-assigned">8</span>
+              <span class="pm-kpi-label">Assigned This Week</span>
+            </div>
+          </div>
+          <div class="pm-dept-row" id="pm-dept-row"></div>
+        </div>
+
+        <!-- STATS BAR -->
+        <div class="stats-bar">
+          <div class="stat-pill confirmed" id="stat-week" data-filter="week">
+            <span class="stat-num" id="stat-week-num">8</span>
+            <span class="stat-label">Scheduled This Week</span>
+          </div>
+          <div class="stat-pill pending" id="stat-pending" data-filter="pending">
+            <span class="stat-num" id="stat-pending-num">3</span>
+            <span class="stat-label">Pending Confirmation</span>
+          </div>
+          <div class="stat-pill completed" id="stat-completed" data-filter="completed">
+            <span class="stat-num" id="stat-completed-num">12</span>
+            <span class="stat-label">Completed</span>
+          </div>
+          <div class="stat-pill" id="stat-all" data-filter="all" style="margin-left:auto;">
+            <span class="stat-num" id="stat-all-num">23</span>
+            <span class="stat-label">All Interviews</span>
+          </div>
+        </div>
+
+        <!-- CALENDAR + SIDEBAR -->
+        <div class="sched-layout">
+
+          <!-- CALENDAR COLUMN -->
+          <div class="calendar-col">
+            <div class="calendar-card">
+              <div class="calendar-header">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div class="cal-nav-btns">
+                    <button class="cal-nav-btn" id="cal-prev">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+                    </button>
+                    <button class="cal-nav-btn" id="cal-next">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                    </button>
+                  </div>
+                  <span class="cal-month-label" id="cal-month-label">June 2026</span>
+                  <button class="cal-nav-btn" id="cal-today" style="padding:0 10px;width:auto;font-size:11px;font-weight:600;">Today</button>
+                </div>
+                <div class="cal-view-toggle">
+                  <button class="cal-view-btn active" data-view="month">Month</button>
+                  <button class="cal-view-btn" data-view="week">Week</button>
+                </div>
+              </div>
+              <div class="cal-grid">
+                <div class="cal-day-headers" id="cal-day-headers">
+                  <div class="cal-day-hdr">Sun</div>
+                  <div class="cal-day-hdr">Mon</div>
+                  <div class="cal-day-hdr">Tue</div>
+                  <div class="cal-day-hdr">Wed</div>
+                  <div class="cal-day-hdr">Thu</div>
+                  <div class="cal-day-hdr">Fri</div>
+                  <div class="cal-day-hdr">Sat</div>
+                </div>
+                <div class="cal-days" id="cal-days"></div>
+              </div>
+            </div>
+
+            <!-- PANELIST DIRECTORY -->
+            <div class="panelist-directory">
+              <div class="dir-header">
+                <div class="dir-title">
+                  Panelist Directory
+                  <span class="count-badge" id="dir-count-badge">0</span>
+                </div>
+                <div class="dir-filters">
+                  <div class="dir-search-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    <input type="text" class="dir-search" id="dir-search-input" placeholder="Search panelists...">
+                  </div>
+                  <select class="dir-filter-select" id="dir-filter-dept">
+                    <option value="all">All Departments</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="HR">HR</option>
+                    <option value="Product">Product</option>
+                    <option value="Design">Design</option>
+                    <option value="Marketing">Marketing</option>
+                  </select>
+                </div>
+              </div>
+              <div class="dir-grid" id="dir-grid">
+                <!-- Cards rendered dynamically by JS -->
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT SIDEBAR -->
+          <div class="sched-sidebar">
+
+            <!-- Panel Availability -->
+            <div class="sidebar-panel" id="panel-avail-card">
+              <div class="sidebar-panel-header" id="panel-avail-toggle">
+                <div class="sidebar-panel-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg>
+                  Panel Availability
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;" onclick="event.stopPropagation();">
+                  <button class="pa-add-btn" id="btn-quick-add-panelist" title="Add Panelist" style="width:24px;height:24px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                  </button>
+                  <svg class="collapse-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                </div>
+              </div>
+              <div class="sidebar-panel-body" id="panel-avail-body">
+                <div class="pa-controls" style="margin-bottom: 8px;">
+                  <div class="pa-search-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    <input type="text" class="pa-search" id="pa-search-input" placeholder="Search name or skill...">
+                  </div>
+                  <select class="pa-filter" id="pa-filter-dept" style="width: 100px;">
+                    <option value="all">All Depts</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="HR">HR</option>
+                    <option value="Product">Product</option>
+                    <option value="Design">Design</option>
+                    <option value="Marketing">Marketing</option>
+                  </select>
+                </div>
+                <div id="panelists-list"></div>
+              </div>
+            </div>
+
+            <!-- Upcoming Interviews -->
+            <div class="sidebar-panel" id="upcoming-card">
+              <div class="sidebar-panel-header" id="upcoming-toggle">
+                <div class="sidebar-panel-title">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" /></svg>
+                  Upcoming Interviews
+                  <span class="count-badge" id="upcoming-count-badge">0</span>
+                </div>
+                <svg class="collapse-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+              </div>
+              <div class="sidebar-panel-body" id="upcoming-body">
+                <div id="upcoming-list" style="max-height: 420px; overflow-y: auto;"></div>
+              </div>
+            </div>
+
+          </div><!-- /sched-sidebar -->
+        </div><!-- /sched-layout -->
+      </div><!-- /main-content -->
+    </main>
+  </div>
+
+  <!-- EVENT DETAIL POPUP -->
+  <div class="event-popup-overlay" id="event-popup-overlay">
+    <div class="event-popup" id="event-popup">
+      <div class="event-popup-header">
+        <div>
+          <div class="event-popup-title" id="popup-candidate-name">Applicant Name</div>
+          <div class="popup-role-tag" id="popup-role-tag">Role Applied</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="status-pill" id="popup-status-badge">Confirmed</span>
+          <button class="modal-close-btn" id="close-event-popup">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="event-popup-body">
+        <div class="popup-detail-grid">
+          <div class="popup-detail-item">
+            <span class="popup-detail-label">Date &amp; Time</span>
+            <span class="popup-detail-value" id="popup-datetime">—</span>
+          </div>
+          <div class="popup-detail-item">
+            <span class="popup-detail-label">Duration</span>
+            <span class="popup-detail-value" id="popup-duration">—</span>
+          </div>
+          <div class="popup-detail-item">
+            <span class="popup-detail-label">Platform</span>
+            <span class="popup-detail-value" id="popup-platform">—</span>
+          </div>
+          <div class="popup-detail-item">
+            <span class="popup-detail-label">Interviewer(s)</span>
+            <div class="popup-panelists" id="popup-panelists"></div>
+          </div>
+        </div>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-popup-join" id="popup-btn-join">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;display:inline;margin-right:4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+          Join Meeting
+        </button>
+        <button class="btn-popup-reschedule" id="popup-btn-reschedule">Reschedule</button>
+        <button class="btn-popup-cancel" id="popup-btn-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHEDULE INTERVIEW MODAL -->
+  <div class="schedule-modal-overlay" id="schedule-modal-overlay">
+    <div class="schedule-modal">
+      <div class="schedule-modal-header">
+        <span class="schedule-modal-title">Schedule Interview</span>
+        <button class="modal-close-btn" id="close-schedule-modal">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="schedule-modal-body">
+        <!-- Applicant Search -->
+        <div class="modal-form-section">
+          <label class="modal-form-label">Applicant <span style="color:#C62828">*</span></label>
+          <input type="text" class="modal-input" id="modal-applicant" placeholder="Search applicant name or ID…" list="applicant-datalist">
+          <datalist id="applicant-datalist">
+            <option value="Dianne Russell – Frontend Developer">
+            <option value="Albert Flores – Backend Engineer">
+            <option value="Jane Cooper – Backend Engineer">
+            <option value="Courtney Henry – Frontend Developer">
+            <option value="Unnati Sutradhar – Python Developer">
+          </datalist>
+        </div>
+        <!-- Date & Time -->
+        <div class="modal-form-row">
+          <div class="modal-form-section">
+            <label class="modal-form-label">Date <span style="color:#C62828">*</span></label>
+            <input type="date" class="modal-input" id="modal-date">
+          </div>
+          <div class="modal-form-section">
+            <label class="modal-form-label">Time <span style="color:#C62828">*</span></label>
+            <input type="time" class="modal-input" id="modal-time">
+          </div>
+        </div>
+        <!-- Duration -->
+        <div class="modal-form-section">
+          <label class="modal-form-label">Duration</label>
+          <select class="modal-input" id="modal-duration" style="appearance:none;cursor:pointer;">
+            <option value="30">30 minutes</option>
+            <option value="45">45 minutes</option>
+            <option value="60" selected>60 minutes</option>
+            <option value="90">90 minutes</option>
+            <option value="120">2 hours</option>
+          </select>
+        </div>
+        <!-- Platform -->
+        <div class="modal-form-section">
+          <label class="modal-form-label">Platform <span style="color:#C62828">*</span></label>
+          <div class="platform-btns" id="platform-btns">
+            <button class="platform-btn selected" data-platform="Google Meet">🎥 Google Meet</button>
+            <button class="platform-btn" data-platform="Zoom">💻 Zoom</button>
+            <button class="platform-btn" data-platform="MS Teams">🖥 MS Teams</button>
+            <button class="platform-btn" data-platform="In-Person">📍 In-Person</button>
+          </div>
+        </div>
+        <!-- Interviewers -->
+        <div class="modal-form-section">
+          <label class="modal-form-label">Interviewer(s) <span style="color:#C62828">*</span></label>
+          <input type="text" class="modal-input" id="modal-panelist-search" placeholder="Filter interviewers by name or skill..." style="height:32px; margin-bottom:8px; font-size:12px;">
+          <div class="panelist-selector" id="modal-panelist-selector"></div>
+          <div class="conflict-warning" id="modal-conflict-warning"></div>
+        </div>
+        <!-- Notes -->
+        <div class="modal-form-section">
+          <label class="modal-form-label">Notes (optional)</label>
+          <textarea class="modal-input" id="modal-notes" rows="2" style="height:auto;padding:10px 14px;resize:vertical;" placeholder="Add any pre-interview notes or instructions…"></textarea>
+        </div>
+      </div>
+      <div class="schedule-modal-footer">
+        <button class="btn-secondary-pill" id="modal-cancel-btn">Cancel</button>
+        <button class="btn-primary-pill" id="modal-submit-btn" style="height:36px;padding:0 20px;">
+          Schedule Interview
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANAGE PANELISTS DRAWER -->
+  <div class="mp-drawer-overlay" id="mp-drawer-overlay">
+    <div class="mp-drawer">
+      <div class="mp-drawer-header">
+        <div>
+          <h2 class="mp-drawer-title" id="mp-form-title">Add New Panelist</h2>
+          <div class="mp-drawer-subtitle">Add or edit interview panel members and their availability</div>
+        </div>
+        <button class="modal-close-btn" id="close-mp-drawer">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" style="width:18px;height:18px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="mp-drawer-body">
+        <!-- Form Section -->
+        <div class="mp-drawer-section">
+          <form id="mp-form" onsubmit="event.preventDefault();">
+            <input type="hidden" id="mp-edit-id" value="">
+            <div class="mp-form-row" style="margin-bottom: 12px;">
+              <div class="mp-form-group">
+                <label class="mp-form-label">Full Name <span style="color:#E24B4A">*</span></label>
+                <input type="text" class="mp-input" id="mp-name" placeholder="e.g. Ravi Mehta" required>
+              </div>
+              <div class="mp-form-group">
+                <label class="mp-form-label">Designation / Role <span style="color:#E24B4A">*</span></label>
+                <input type="text" class="mp-input" id="mp-role" placeholder="e.g. Sr. Frontend Engineer" required>
+              </div>
+            </div>
+            <div class="mp-form-row" style="margin-bottom: 12px;">
+              <div class="mp-form-group">
+                <label class="mp-form-label">Department <span style="color:#E24B4A">*</span></label>
+                <select class="mp-select" id="mp-dept" required>
+                  <option value="">Select Department</option>
+                  <option value="Engineering">Engineering</option>
+                  <option value="HR">HR</option>
+                  <option value="Product">Product</option>
+                  <option value="Design">Design</option>
+                  <option value="Marketing">Marketing</option>
+                </select>
+              </div>
+              <div class="mp-form-group">
+                <label class="mp-form-label">Email Address <span style="color:#E24B4A">*</span></label>
+                <input type="email" class="mp-input" id="mp-email" placeholder="e.g. ravi@kadellabs.com" required>
+              </div>
+            </div>
+            <div class="mp-form-group" style="margin-bottom: 12px;">
+              <label class="mp-form-label">Skills / Expertise Tags (press Comma or Enter to add)</label>
+              <div class="mp-tag-input-wrap" id="mp-skills-wrap">
+                <input type="text" class="mp-tag-bare" id="mp-skills-input" placeholder="Type skill and press comma...">
+              </div>
+            </div>
+            <div class="mp-form-group" style="margin-bottom: 12px;">
+              <label class="mp-form-label">Interview Type Coverage <span style="color:#E24B4A">*</span></label>
+              <div class="mp-interview-types" id="mp-interview-types">
+                <button type="button" class="mp-type-btn" data-type="HR">HR</button>
+                <button type="button" class="mp-type-btn" data-type="Technical">Technical</button>
+                <button type="button" class="mp-type-btn" data-type="Managerial">Managerial</button>
+                <button type="button" class="mp-type-btn" data-type="Final Round">Final Round</button>
+              </div>
+            </div>
+            <div class="mp-form-row" style="margin-bottom: 12px;">
+              <div class="mp-form-group">
+                <label class="mp-form-label">Time Zone <span style="color:#E24B4A">*</span></label>
+                <select class="mp-select" id="mp-timezone" required>
+                  <option value="IST" selected>India Standard Time (IST)</option>
+                  <option value="EST">Eastern Standard Time (EST)</option>
+                  <option value="PST">Pacific Standard Time (PST)</option>
+                  <option value="GMT">Greenwich Mean Time (GMT)</option>
+                </select>
+              </div>
+              <div class="mp-form-group">
+                <label class="mp-form-label">Availability Status <span style="color:#E24B4A">*</span></label>
+                <div class="mp-avail-btns">
+                  <button type="button" class="mp-avail-btn active-avail" data-status="available">
+                    <span class="mp-avail-dot-btn"></span>Available
+                  </button>
+                  <button type="button" class="mp-avail-btn" data-status="busy">
+                    <span class="mp-avail-dot-btn"></span>Busy
+                  </button>
+                  <button type="button" class="mp-avail-btn" data-status="on-leave">
+                    <span class="mp-avail-dot-btn"></span>On Leave
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
+              <button type="button" class="btn-secondary-pill" id="mp-clear-btn">Cancel</button>
+              <button type="submit" class="btn-primary-pill" id="mp-save-btn" style="height:34px;padding:0 18px;">Save Panelist</button>
+            </div>
+          </form>
+        </div>
+        <!-- Panelist list in Drawer -->
+        <div class="mp-dir-section">
+          <div class="mp-section-title">Panelist Quick View</div>
+          <div class="mp-dir-inner-grid" id="mp-dir-inner-grid">
+            <!-- Dynamic list of panelists with small details + Quick Edit / Remove -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST HOLDER -->
+  <div class="toast-container" id="toast-holder"></div>
+
+  <script src="scheduler.js"></script>
+</body>
+</html>
