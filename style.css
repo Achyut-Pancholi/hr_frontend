@@ -3377,3 +3377,101 @@ body {
 .toast-error    { border-left-color: #EF4444; }
 .toast-info     { border-left-color: #60a5fa; }
 
+
+
+/* Reports V2 Dashboard */
+#reports-v2-dashboard {
+  display: flex;
+  flex-direction: column;
+}
+.rpv2-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 16px;
+}
+.v2-card {
+  background: #FFF;
+  border: 1px solid #E8E6E0;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  display: flex;
+  flex-direction: column;
+}
+.v2-score-card {
+  background: #FFF;
+  border: 1px solid #E8E6E0;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+/* --- REPORTS V2 STRICT NO-SCROLL LAYOUT --- */
+#reports-v2-dashboard {
+  height: 100vh;
+  overflow: hidden !important; /* Force no scrolling on the container */
+  padding: 16px 24px !important;
+  display: flex;
+  flex-direction: column;
+}
+
+#reports-v2-dashboard .rpv2-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: 80px 180px 180px 1fr; /* Fixed dense rows */
+  gap: 12px;
+  flex: 1;
+  min-height: 0; /* Let grid shrink */
+}
+
+/* Ensure cards handle their own internal scroll if content overflows */
+#reports-v2-dashboard .v2-card, #reports-v2-dashboard .v2-score-card {
+  min-height: 0;
+  overflow: hidden;
+}
+
+#reports-v2-dashboard .v2-card > div,
+#reports-v2-dashboard .v2-card > ul {
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+/* Remove default margins to fit tighter */
+#reports-v2-dashboard h2,
+#reports-v2-dashboard h3,
+#reports-v2-dashboard h4 {
+  margin-top: 0;
+  margin-bottom: 8px !important;
+}
+
+/* Video specific sizing to fit dense grid */
+#reports-v2-dashboard #v2-video-player {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+
+/* ====== V2 REPORT DASHBOARD ====== */
+#reports-v2-dashboard { display: none; flex-direction: column; overflow: hidden; }
+
+/* Tab panels: hidden by default, shown as grid when active */
+.v2-tab-panel { display: none !important; }
+.v2-tab-panel.v2-active { display: grid !important; }
+
+/* Tab button hover */
+.v2-tab-btn:hover { color: #111827 !important; background: #F9FAFB; }
+
+/* Scrollbar styling for transcript areas */
+#v2-video-transcript::-webkit-scrollbar,
+#v2-tech-transcript::-webkit-scrollbar,
+#v2-tab-resume::-webkit-scrollbar { width: 4px; }
+#v2-video-transcript::-webkit-scrollbar-thumb,
+#v2-tech-transcript::-webkit-scrollbar-thumb,
+#v2-tab-resume::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 4px; }
+

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hiring Pipeline | Elasticrew ATS</title>
+  <title>Reports V2 | Elasticrew ATS</title>
   <link rel="stylesheet" href="style.css">
   <style>
     /* Make table rows clickable */
@@ -526,11 +526,11 @@
           <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
           Interview Scheduler
         </a>
-        <a href="reports.html" class="nav-item active">
+        <a href="reports.html" class="nav-item">
           <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
           Reports
         </a>
-        <a href="reports-v2.html" class="nav-item">
+        <a href="reports-v2.html" class="nav-item active">
           <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
           Reports V2
         </a>
@@ -553,7 +553,7 @@
       
       <!-- TOP BAR -->
       <header class="top-bar">
-        <h1 class="page-title">Reports</h1>
+        <h1 class="page-title">Reports V2</h1>
         
         <div class="profile-block">
           <div class="profile-details">
@@ -800,229 +800,217 @@
   </div>
 
   <!-- ═══════════════════════════════════════════════════════ -->
-  <!-- FULL-PAGE CANDIDATE REPORT (image-matched design)       -->
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <div id="full-report-page" style="display:none; position:fixed; top:0; bottom:0; right:0; background:#F0F2F5; z-index:400; overflow:hidden; left:220px; font-family:'Inter','Segoe UI',sans-serif;">
-    <style>
-      #full-report-page{--rp-green:#1a7a4a;--rp-blue:#2563EB;--rp-border:#E5E7EB;--rp-text:#111827;--rp-label:#6B7280}
-      .rp-breadcrumb{display:flex;align-items:center;gap:6px;font-size:11px;color:#6B7280;padding:10px 24px 0}
-      .rp-breadcrumb a{color:#6B7280;text-decoration:none;cursor:pointer}.rp-breadcrumb a:hover{color:var(--rp-green)}.rp-breadcrumb span{color:#374151;font-weight:600}
-      .rp-header-card{background:#FFF;border-bottom:1px solid var(--rp-border);padding:14px 24px 0}
-      .rp-profile-top{display:flex;align-items:flex-start;gap:16px;margin-bottom:10px;flex-wrap:wrap}
-      .rp-avatar-lg{width:72px;height:72px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#FFF;box-shadow:0 2px 8px rgba(0,0,0,.1)}
-      .rp-name{font-size:18px;font-weight:800;color:var(--rp-text);margin:0 0 2px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-      .rp-active-badge{border-radius:999px;padding:2px 8px;font-size:10px;font-weight:700}
-      .rp-role-line{color:var(--rp-green);font-size:13px;font-weight:700;margin:0 0 4px}
-      .rp-meta-line{font-size:11.5px;color:#6B7280;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
-      .rp-contact-line{font-size:11px;color:#374151;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-      .rp-contact-item{display:flex;align-items:center;gap:4px}
-      .rp-stat-cards{display:flex;border-left:1px solid var(--rp-border);margin-left:auto;flex-shrink:0}
-      .rp-stat-card{padding:10px 16px;text-align:center;border-right:1px solid var(--rp-border);min-width:110px}
-      .rp-stat-card:last-child{border-right:none}
-      .rp-stat-icon{width:22px;height:22px;margin:0 auto 4px;color:var(--rp-blue)}
-      .rp-stat-label{font-size:9px;color:#9CA3AF;text-transform:uppercase;font-weight:600;letter-spacing:.4px;margin-bottom:2px}
-      .rp-stat-val{font-size:12px;font-weight:700;color:var(--rp-text)}
-      .rp-header-actions{display:flex;gap:6px;margin-top:2px;align-items:center;flex-wrap:wrap}
-      .rp-tab-bar{display:flex;gap:0;border-top:1px solid var(--rp-border);margin-top:8px}
-      .rp-tab{display:flex;align-items:center;gap:6px;padding:10px 14px;font-size:12px;font-weight:600;color:#6B7280;cursor:pointer;border-bottom:2.5px solid transparent;transition:all .15s;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none}
-      .rp-tab:hover{color:var(--rp-text)}.rp-tab.active{color:var(--rp-blue);border-bottom-color:var(--rp-blue)}.rp-tab svg{width:14px;height:14px}
-      .rp-body{padding:12px 24px;display:flex;gap:16px;align-items:stretch;flex:1;min-height:0;overflow:hidden;}
-      .rp-left{flex:1.3;min-width:0;display:flex;flex-direction:column;gap:12px;height:100%;overflow-y:auto;scrollbar-width:thin;padding-bottom:12px;}
-      .rp-right{width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:12px;height:100%;overflow-y:auto;scrollbar-width:thin;padding-bottom:12px;}
-      .rp-card{background:#FFF;border:1px solid var(--rp-border);border-radius:8px;padding:12px;display:flex;flex-direction:column;min-height:0;}
-      .rp-card-title{font-size:12px;font-weight:700;color:var(--rp-text);margin:0 0 8px;display:flex;align-items:center;gap:6px;flex-shrink:0;}
-      .rp-card-title svg{width:14px;height:14px;color:var(--rp-blue);flex-shrink:0;}
-      .rp-summary-text{font-size:11.5px;color:#374151;line-height:1.5;margin:0}
-      .rp-skill-tag{display:inline-flex;background:#EBF4FF;color:#1D4ED8;border-radius:999px;padding:3px 9px;font-size:10.5px;font-weight:600;margin:2px 3px 2px 0}
-      .rp-exp-item{display:flex;gap:10px;padding:6px 0;border-bottom:1px solid #F3F4F6}.rp-exp-item:last-child{border-bottom:none}
-      .rp-exp-period{font-size:10px;color:#6B7280;white-space:nowrap;min-width:85px;padding-top:2px}
-      .rp-exp-title{font-size:11.5px;font-weight:700;color:var(--rp-text);margin:0 0 2px}
-      .rp-exp-company{font-size:11px;color:#6B7280;margin:0 0 4px}
-      .rp-exp-bullet{font-size:11px;color:#374151;margin:2px 0 2px 12px;position:relative;line-height:1.4}.rp-exp-bullet::before{content:'•';position:absolute;left:-8px;color:#9CA3AF}
-      .rp-edu-degree{font-size:11.5px;font-weight:700;color:var(--rp-text);margin:0 0 2px}
-      .rp-edu-inst{font-size:11px;color:#6B7280;margin:0 0 6px}
-      .rp-cert-item{font-size:11px;color:#374151;padding:3px 0;display:flex;align-items:center;gap:6px}.rp-cert-item::before{content:'•';color:var(--rp-green);font-size:12px}
-      .rp-info-row{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid #F3F4F6;font-size:11px}.rp-info-row:last-child{border-bottom:none}
-      .rp-info-icon{width:14px;height:14px;color:#9CA3AF;flex-shrink:0;margin-top:1px}
-      .rp-info-label{color:#6B7280;width:95px;flex-shrink:0;font-size:11px}
-      .rp-info-val{color:var(--rp-text);font-weight:600;flex:1}
-      .rp-ai-badge{background:#EBF4FF;color:#2563EB;border-radius:999px;padding:2px 7px;font-size:9px;font-weight:700}
-      .rp-resume-file{background:#F9FAFB;border:1px solid var(--rp-border);border-radius:6px;padding:8px 10px;margin-bottom:8px}
-      .rp-resume-file-name{font-size:11.5px;font-weight:700;color:var(--rp-text);margin:0 0 2px}
-      .rp-resume-file-sub{font-size:10px;color:#9CA3AF;margin:0}
-      .rp-tab-panel{display:none}.rp-tab-panel.active{display:flex;flex-direction:column;flex:1;min-height:0;}
-      .rp-back-btn{display:inline-flex;align-items:center;gap:4px;background:none;border:1px solid var(--rp-border);border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;color:#374151;cursor:pointer;transition:all .15s}.rp-back-btn:hover{background:#F3F4F6}
-      .rp-share-btn{display:inline-flex;align-items:center;gap:4px;background:var(--rp-green);border:none;border-radius:6px;padding:6px 14px;font-size:11px;font-weight:600;color:#FFF;cursor:pointer;transition:opacity .15s}.rp-share-btn:hover{opacity:.88}
-      .rp-comp-bar-wrap{display:flex;flex-direction:column;gap:3px;margin-bottom:8px}
-      .rp-comp-bar-track{background:#F3F4F6;border-radius:999px;height:5px;overflow:hidden}
-      .rp-timeline-item-rp{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #F9FAFB}.rp-timeline-item-rp:last-child{border-bottom:none}
-      .rp-tl-dot{width:8px;height:8px;border-radius:50%;background:var(--rp-green);flex-shrink:0;margin-top:3px}
-      #full-report-page[style*="block"] { display: flex !important; flex-direction: column; }
-    </style>
-
-    <div class="rp-breadcrumb">
-      <a onclick="closeFullReport()">Reports</a>
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-      <span>Candidate Details</span>
-    </div>
-
-    <div class="rp-header-card">
-      <div class="rp-profile-top">
-        <div id="rp-avatar-lg" class="rp-avatar-lg">DR</div>
-        <div style="flex:1;min-width:200px;">
-          <div class="rp-name"><span id="rp-full-name">Dianne Russell</span><span class="rp-active-badge" id="rp-stage-badge" style="background:#E6F7EF;color:#0D7A57;">Active</span></div>
-          <div class="rp-role-line" id="rp-full-role">Frontend Developer</div>
-          <div class="rp-meta-line"><span id="rp-full-company">—</span><span>•</span><span id="rp-full-exp">—</span><span>•</span><span id="rp-stat-qual-inline">—</span></div>
-          <div class="rp-contact-line">
-            <div class="rp-contact-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg><span id="rp-full-email">—</span></div>
-            <div class="rp-contact-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg><span id="rp-full-phone">—</span></div>
-            <span id="rp-full-id" style="font-size:11px;background:#F3F4F6;border-radius:999px;padding:2px 8px;font-weight:700;color:#374151;font-family:monospace;"></span>
-          </div>
-          <div class="rp-header-actions">
-            <button class="rp-back-btn" onclick="closeFullReport()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>Back to Reports</button>
-            <button class="rp-share-btn" id="rp-gen-link-btn"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>Generate Share Link</button>
-          </div>
-        </div>
-        <div class="rp-stat-cards">
-          <div class="rp-stat-card"><svg class="rp-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.073a2.25 2.25 0 01-2.25 2.25h-12a2.25 2.25 0 01-2.25-2.25V14.15M15.75 18v-5.25m0 0a3 3 0 10-7.5 0"/></svg><div class="rp-stat-label">Current Company</div><div class="rp-stat-val" id="rp-stat-company">—</div></div>
-          <div class="rp-stat-card"><svg class="rp-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25"/></svg><div class="rp-stat-label">Total Experience</div><div class="rp-stat-val" id="rp-stat-exp">—</div></div>
-          <div class="rp-stat-card"><svg class="rp-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443"/></svg><div class="rp-stat-label">Qualification</div><div class="rp-stat-val" id="rp-stat-qual">—</div></div>
-        </div>
-      </div>
-      <div class="rp-tab-bar">
-        <button class="rp-tab active" data-rptab="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75"/></svg>Overview</button>
-        <button class="rp-tab" data-rptab="resume"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>ElastiCrew Resume</button>
-        <button class="rp-tab" data-rptab="screening"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"/></svg>Video Bot Interview</button>
-        <button class="rp-tab" data-rptab="assessment"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>HR Assessment</button>
-        <button class="rp-tab" data-rptab="technical"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>Technical Round</button>
+  <!-- FULL-PAGE CANDIDATE REPORT V2 -->
+  <div id="reports-v2-dashboard" style="display:none; position:fixed; top:0; bottom:0; right:0; left:220px; background:#F8F9FB; z-index:400; font-family:'Inter','Segoe UI',sans-serif; overflow:hidden; display:none; flex-direction:column;">
+    
+    <!-- TOP HEADER BAR -->
+    <div style="flex-shrink:0; background:#fff; border-bottom:1px solid #E5E7EB; padding:0 24px; height:52px; display:flex; align-items:center; justify-content:space-between;">
+      <button onclick="closeV2Report()" style="display:flex; align-items:center; gap:6px; background:transparent; border:1px solid #E5E7EB; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; color:#374151; transition:all 0.15s;" onmouseenter="this.style.background='#F3F4F6'" onmouseleave="this.style.background='transparent'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+        Back to Candidates
+      </button>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span id="v2-hiring-stage-badge" style="font-size:11px; font-weight:700; padding:4px 12px; border-radius:20px; background:#DCFCE7; color:#15803D;">Bot Screening Done</span>
+        <button id="v2-share-btn" onclick="generateShareLink(window._v2CurrentId)" style="background:#111827; color:#fff; border:none; padding:8px 16px; border-radius:6px; font-weight:600; font-size:12px; cursor:pointer; display:flex; align-items:center; gap:6px; transition:opacity 0.15s;" onmouseenter="this.style.opacity='0.85'" onmouseleave="this.style.opacity='1'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+          Share Report
+        </button>
       </div>
     </div>
 
-    <!-- TAB: OVERVIEW -->
-    <div class="rp-tab-panel active" id="rptab-overview">
-      <div class="rp-body">
-        <div class="rp-left">
-          <div class="rp-card"><div class="rp-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0"/></svg>Professional Summary</div><p class="rp-summary-text" id="rp-summary-text">No summary available.</p></div>
-          <div class="rp-card"><div class="rp-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>Key Skills</div><div id="rp-skills-tags"></div></div>
-          <div class="rp-card"><div class="rp-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.073a2.25 2.25 0 01-2.25 2.25h-12a2.25 2.25 0 01-2.25-2.25V14.15M15.75 18v-5.25m0 0a3 3 0 10-7.5 0"/></svg>Experience</div><div id="rp-experience-list"></div></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-            <div class="rp-card"><div class="rp-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813"/></svg>Education</div><div id="rp-education-list"></div></div>
-            <div class="rp-card"><div class="rp-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Certifications</div><div id="rp-certs-list"></div></div>
+    <!-- PROFILE + SCORES STRIP -->
+    <div style="flex-shrink:0; background:#fff; border-bottom:1px solid #E5E7EB; padding:16px 24px; display:flex; align-items:center; gap:24px;">
+      <!-- Avatar + Info -->
+      <div style="display:flex; align-items:center; gap:14px; flex:1; min-width:0;">
+        <div id="v2-avatar" style="width:48px; height:48px; border-radius:50%; background:#1D9E75; color:#fff; display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:800; flex-shrink:0;">DR</div>
+        <div style="min-width:0;">
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <h2 id="v2-name" style="margin:0; font-size:16px; font-weight:800; color:#111827; white-space:nowrap;">Dianne Russell</h2>
+            <span id="v2-candidate-id" style="font-size:11px; color:#9CA3AF; font-family:monospace;">CAN-1024</span>
+          </div>
+          <div id="v2-role" style="font-size:12px; font-weight:600; color:#1D9E75; margin:2px 0;">Frontend Developer</div>
+          <div style="font-size:11px; color:#6B7280; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <span id="v2-email">dianne@example.com</span>
+            <span style="color:#D1D5DB;">•</span>
+            <span id="v2-phone">(406) 555-0120</span>
           </div>
         </div>
-        <div class="rp-right">
-          <div class="rp-card"><div class="rp-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>Resume Information</div><div class="rp-resume-file"><div class="rp-resume-file-name" id="rp-resume-filename">resume.pdf</div><div class="rp-resume-file-sub">Original Resume • Uploaded</div></div><div class="rp-resume-file"><div class="rp-resume-file-name" id="rp-ec-resume-filename">elasticrew_resume.pdf</div><div class="rp-resume-file-sub">ElastiCrew Resume — AI Generated</div></div></div>
-          <div class="rp-card"><div class="rp-card-title" style="justify-content:space-between;"><span style="display:flex;align-items:center;gap:7px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3"/></svg>Extracted Information</span><span class="rp-ai-badge">AI Extracted</span></div><div id="rp-extracted-info"></div><div style="background:#EBF4FF;border-radius:7px;padding:10px 12px;font-size:11.5px;color:#2563EB;margin-top:10px;display:flex;gap:6px;align-items:flex-start;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px;"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>Information extracted from resume. You can update data in HR Assessment section if required.</div></div>
-          <div class="rp-card"><div class="rp-card-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v5.25c0 .621-.504 1.125-1.125 1.125h-2.25A1.125 1.125 0 013 18.375v-5.25z"/></svg>Assessment Scores</div><div id="rp-score-cards" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div></div>
+      </div>
+      <!-- Score Pills -->
+      <div style="display:flex; gap:10px; flex-shrink:0;">
+        <div style="text-align:center; padding:10px 18px; border:1px solid #E5E7EB; border-radius:10px; min-width:100px;">
+          <div style="font-size:10px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Resume</div>
+          <div id="v2-score-resume" style="font-size:14px; font-weight:800; color:#1D9E75;">Strong Match</div>
+        </div>
+        <div style="text-align:center; padding:10px 18px; border:1px solid #E5E7EB; border-radius:10px; min-width:100px;">
+          <div style="font-size:10px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Video Screen</div>
+          <div id="v2-score-video" style="font-size:14px; font-weight:800; color:#2563EB;">Good Match</div>
+        </div>
+        <div style="text-align:center; padding:10px 18px; border:1px solid #E5E7EB; border-radius:10px; min-width:100px;">
+          <div style="font-size:10px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Technical</div>
+          <div id="v2-score-tech" style="font-size:14px; font-weight:800; color:#F59E0B;">Moderate</div>
+        </div>
+        <div style="text-align:center; padding:10px 18px; border:1px solid #E5E7EB; border-radius:10px; min-width:100px;">
+          <div style="font-size:10px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Overall</div>
+          <div id="v2-score-overall" style="font-size:14px; font-weight:800; color:#8B5CF6;">Strong Match</div>
         </div>
       </div>
     </div>
 
-    <!-- TAB: RESUME -->
-    <div class="rp-tab-panel" id="rptab-resume"><div class="rp-body"><div class="rp-card" style="flex:1;"><div class="rp-card-title">ElastiCrew Resume (AI-Formatted)</div><div id="rp-resume-full" style="font-size:13px;color:#374151;line-height:1.7;"></div></div></div></div>
-
-    <!-- TAB: SCREENING -->
-    <div class="rp-tab-panel" id="rptab-screening">
-      <div class="rp-body" style="flex-direction:row; align-items:stretch;">
-        <div class="rp-card" style="flex:1; display:flex; flex-direction:column; min-height:0; padding:0; overflow:hidden;">
-          <div class="rp-card-title" style="padding:12px 12px 0;">Video Bot Interview Recording</div>
-          <video id="rp-video-player" controls style="width:100%; max-height:220px; flex-shrink:0; object-fit:cover; background:#000;"><source src="" type="video/mp4"></video>
-          <div id="rp-video-summary-container" style="flex:1; overflow-y:auto; padding:12px; scrollbar-width:thin;"></div>
-        </div>
-        <div class="rp-card" style="flex:1; display:flex; flex-direction:column; min-height:0;">
-          <div class="rp-card-title">Transcript</div>
-          <div id="rp-transcript-list" style="flex:1; overflow-y:auto; scrollbar-width:thin; display:flex; flex-direction:column; gap:10px;"></div>
-        </div>
-        <div class="rp-card" style="width:270px; flex-shrink:0; display:flex; flex-direction:column; min-height:0;">
-          <div class="rp-card-title">Communication Metrics</div>
-          <div id="rp-comm-metrics" style="flex:1; overflow-y:auto; scrollbar-width:thin;"></div>
-        </div>
-      </div>
+    <!-- TAB NAVIGATION -->
+    <div style="flex-shrink:0; background:#fff; border-bottom:1px solid #E5E7EB; padding:0 24px; display:flex; gap:0;">
+      <button class="v2-tab-btn active" data-v2tab="resume" onclick="switchV2Tab('resume', this)" style="padding:14px 20px; font-size:13px; font-weight:600; border:none; background:transparent; cursor:pointer; color:#111827; border-bottom:2px solid #111827; display:flex; align-items:center; gap:6px; transition:all 0.15s;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+        Resume
+      </button>
+      <button class="v2-tab-btn" data-v2tab="video" onclick="switchV2Tab('video', this)" style="padding:14px 20px; font-size:13px; font-weight:600; border:none; background:transparent; cursor:pointer; color:#6B7280; border-bottom:2px solid transparent; display:flex; align-items:center; gap:6px; transition:all 0.15s;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"/></svg>
+        Video Bot Screening
+      </button>
+      <button class="v2-tab-btn" data-v2tab="tech" onclick="switchV2Tab('tech', this)" style="padding:14px 20px; font-size:13px; font-weight:600; border:none; background:transparent; cursor:pointer; color:#6B7280; border-bottom:2px solid transparent; display:flex; align-items:center; gap:6px; transition:all 0.15s;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5"/></svg>
+        Technical Interview
+      </button>
     </div>
 
-    <!-- TAB: HR ASSESSMENT -->
-    <div class="rp-tab-panel" id="rptab-assessment">
-      <div class="rp-body">
-        <div class="rp-card" style="flex:1;">
-          <div class="rp-card-title">HR Notes &amp; Remarks</div>
-          <textarea id="rp-hr-notes-ta" style="width:100%;min-height:120px;border:1px solid #E5E7EB;border-radius:8px;padding:10px 12px;font-size:13px;resize:vertical;outline:none;font-family:inherit;" placeholder="Add HR notes, interview feedback, or assessment remarks here..."></textarea>
-          <button onclick="saveRpHrNotes()" style="margin-top:8px;background:#1a7a4a;color:#FFF;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;">Save Notes</button>
-          <div class="rp-card-title" style="margin-top:20px;">Process Timeline</div>
-          <div id="rp-timeline-list"></div>
-        </div>
-      </div>
-    </div>
+    <!-- TAB CONTENT AREA -->
+    <div style="flex:1; min-height:0; overflow:hidden; position:relative;">
 
-    <!-- TAB: TECHNICAL -->
-    <div class="rp-tab-panel" id="rptab-technical">
-      <div class="rp-body" style="flex-wrap:nowrap; align-items:stretch;">
-        <!-- Left: Video & Transcript -->
-        <div class="rp-left" style="flex:1; min-width:300px;">
-          <div class="rp-card" style="padding:0; overflow:hidden; background:#000; flex-shrink:0;">
-            <video id="rp-tech-video" controls style="width:100%; display:block; height:200px; object-fit:cover;"></video>
-          </div>
-          <div class="rp-card" style="flex:1; min-height:0;">
-            <div class="rp-card-title">Technical Interview Transcript</div>
-            <div id="rp-tech-transcript" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; padding-right:4px;"></div>
-          </div>
+      <!-- TAB: RESUME -->
+      <div id="v2-tab-resume" class="v2-tab-panel" style="height:100%; overflow-y:auto; padding:24px; display:grid; grid-template-columns:1fr 1fr; gap:16px; align-content:start;">
+        <!-- AI Summary -->
+        <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:20px; grid-column:1/-1;">
+          <h3 style="margin:0 0 10px; font-size:13px; font-weight:700; color:#111827; display:flex; align-items:center; gap:6px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+            AI Resume Summary
+          </h3>
+          <p id="v2-resume-summary" style="margin:0; font-size:13px; color:#374151; line-height:1.7; background:#F9FAFB; padding:12px 14px; border-radius:8px; border-left:3px solid #8B5CF6;"></p>
         </div>
-        <!-- Right: Code, Competencies, Insights -->
-        <div class="rp-right" style="flex:1.2; min-width:320px;">
-          <div class="rp-card" style="flex-shrink:0;">
-            <div class="rp-card-title">Coding Challenge Submission</div>
-            <pre id="rp-tech-code" style="background:#1E1E1E; color:#D4D4D4; padding:12px; border-radius:6px; font-family:'Consolas','Courier New',monospace; font-size:11px; overflow-x:auto; line-height:1.4; margin:0; max-height:150px;"></pre>
-          </div>
-          <div style="display:flex; gap:12px; flex:1; min-height:0;">
-            <div class="rp-card" style="flex:1; min-height:0;">
-              <div class="rp-card-title">Technical Competencies</div>
-              <div id="rp-tech-competencies" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
-            </div>
-            <div class="rp-card" style="flex:1; min-height:0;">
-              <div class="rp-card-title">Evidence-Based Insights</div>
-              <div id="rp-tech-insights" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px;"></div>
-            </div>
+        <!-- Key Qualifications -->
+        <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:20px;">
+          <h3 style="margin:0 0 12px; font-size:13px; font-weight:700; color:#111827;">Key Qualifications</h3>
+          <ul id="v2-resume-quals" style="margin:0; padding-left:16px; font-size:12.5px; color:#374151; line-height:1.8; display:flex; flex-direction:column; gap:4px;"></ul>
+        </div>
+        <!-- Tech Stack -->
+        <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:20px;">
+          <h3 style="margin:0 0 12px; font-size:13px; font-weight:700; color:#111827;">Tech Stack</h3>
+          <div id="v2-tech-stack" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+          <div style="margin-top:16px;">
+            <h4 style="margin:0 0 8px; font-size:12px; font-weight:700; color:#6B7280; text-transform:uppercase; letter-spacing:0.3px;">Application Timeline</h4>
+            <div id="v2-timeline" style="display:flex; flex-direction:column; gap:8px;"></div>
           </div>
         </div>
       </div>
+
+      <!-- TAB: VIDEO BOT SCREENING -->
+      <div id="v2-tab-video" class="v2-tab-panel" style="height:100%; overflow:hidden; padding:24px; gap:20px; display:none; grid-template-columns:1fr 1fr; grid-template-rows:1fr auto; align-content:start;">
+        <!-- Video Player -->
+        <div style="background:#111827; border-radius:12px; overflow:hidden; display:flex; flex-direction:column;">
+          <div style="padding:12px 16px; border-bottom:1px solid #374151; display:flex; align-items:center; gap:6px;">
+            <div style="width:8px; height:8px; border-radius:50%; background:#EF4444;"></div>
+            <div style="width:8px; height:8px; border-radius:50%; background:#F59E0B;"></div>
+            <div style="width:8px; height:8px; border-radius:50%; background:#22C55E;"></div>
+            <span style="font-size:11px; color:#9CA3AF; margin-left:6px;">AI Video Screening Recording</span>
+          </div>
+          <div style="flex:1; display:flex; align-items:center; justify-content:center; background:#0F172A; min-height:200px;">
+            <video id="v2-video-player" controls style="width:100%; max-height:280px; object-fit:contain; display:block;"></video>
+          </div>
+        </div>
+        <!-- Transcript -->
+        <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:20px; display:flex; flex-direction:column; overflow:hidden;">
+          <h3 style="margin:0 0 12px; font-size:13px; font-weight:700; color:#111827; flex-shrink:0;">Interview Transcript</h3>
+          <div id="v2-video-transcript" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding-right:4px; font-size:12px;"></div>
+        </div>
+        <!-- AI Summary - spans full width -->
+        <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:20px; grid-column:1/-1;">
+          <h3 style="margin:0 0 10px; font-size:13px; font-weight:700; color:#111827; display:flex; align-items:center; gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            AI Screening Summary
+          </h3>
+          <div id="v2-video-insights" style="font-size:12.5px; color:#374151; line-height:1.7; background:#F0FDF4; padding:12px 14px; border-radius:8px; border-left:3px solid #1D9E75;"></div>
+        </div>
+      </div>
+
+      <!-- TAB: TECHNICAL INTERVIEW -->
+      <div id="v2-tab-tech" class="v2-tab-panel" style="height:100%; overflow:hidden; padding:24px; gap:20px; display:none; grid-template-columns:1fr 1fr; grid-template-rows:1fr auto; align-content:start;">
+        <!-- Tech Video Player -->
+        <div style="background:#111827; border-radius:12px; overflow:hidden; display:flex; flex-direction:column;">
+          <div style="padding:12px 16px; border-bottom:1px solid #374151; display:flex; align-items:center; gap:6px;">
+            <div style="width:8px; height:8px; border-radius:50%; background:#EF4444;"></div>
+            <div style="width:8px; height:8px; border-radius:50%; background:#F59E0B;"></div>
+            <div style="width:8px; height:8px; border-radius:50%; background:#22C55E;"></div>
+            <span style="font-size:11px; color:#9CA3AF; margin-left:6px;">Technical Interview Recording</span>
+          </div>
+          <div style="flex:1; display:flex; align-items:center; justify-content:center; background:#0F172A; min-height:200px;">
+            <video id="v2-tech-video-player" controls style="width:100%; max-height:280px; object-fit:contain; display:block;"></video>
+          </div>
+          <!-- Competency bars below video -->
+          <div style="padding:14px 16px; border-top:1px solid #374151;">
+            <div style="font-size:10px; font-weight:700; color:#6B7280; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">Competency Scores</div>
+            <div id="v2-tech-competencies" style="display:flex; flex-direction:column; gap:6px;"></div>
+          </div>
+        </div>
+        <!-- Tech Transcript -->
+        <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:20px; display:flex; flex-direction:column; overflow:hidden;">
+          <h3 style="margin:0 0 12px; font-size:13px; font-weight:700; color:#111827; flex-shrink:0;">Technical Interview Transcript</h3>
+          <div id="v2-tech-transcript" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding-right:4px; font-size:12px;"></div>
+        </div>
+        <!-- Tech AI Summary - spans full width -->
+        <div style="background:#fff; border:1px solid #E5E7EB; border-radius:12px; padding:20px; grid-column:1/-1;">
+          <h3 style="margin:0 0 10px; font-size:13px; font-weight:700; color:#111827; display:flex; align-items:center; gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            AI Technical Assessment Summary
+          </h3>
+          <div id="v2-tech-insights" style="font-size:12.5px; color:#374151; line-height:1.7; background:#FFFBEB; padding:12px 14px; border-radius:8px; border-left:3px solid #F59E0B;"></div>
+        </div>
+      </div>
+
     </div>
+  </div>
 
-  </div><!-- /#full-report-page -->
-
-  <!-- CONTEXTUAL ACTION MENU (ABSOLUTE POP-OVER DROPDOWN) -->
-
-  <div class="action-dropdown" id="actions-menu-dropdown">
-    <button class="dropdown-item" id="menu-view-report">
-      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
-      View Candidate Report
+<!-- PIPELINE STAGE CHANGE DROPDOWN (ABSOLUTE POP-OVER) -->
+  <div class="action-dropdown" id="stage-change-dropdown" style="width: 190px; display: none; position: absolute; z-index: 2100; box-shadow: var(--shadow-lg);">
+    <button class="dropdown-item" data-stage="Applied">
+      <span class="status-dot applied" style="background-color: #94a3b8; width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px;"></span> Applied
     </button>
-    <div class="dropdown-divider"></div>
-    <button class="dropdown-item" id="menu-add-note">
-      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
-      Add HR Note
+    <button class="dropdown-item" data-stage="Bot Screening Invited">
+      <span class="status-dot bot-screening-invited" style="background-color: #8b5cf6; width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px;"></span> Bot Screening Invited
     </button>
-    <button class="dropdown-item" id="menu-export-data">
-      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-      Export Candidate Data
+    <button class="dropdown-item" data-stage="Bot Screening Done">
+      <span class="status-dot bot-screening-done" style="background-color: #3b82f6; width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px;"></span> Bot Screening Done
     </button>
-    <div class="dropdown-divider"></div>
-    <button class="dropdown-item remove-action" id="menu-remove-candidate">
-      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M14.74 9l-.346 9m-4.788 0L9 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
-      Remove
+    <button class="dropdown-item" data-stage="Tech Scheduled">
+      <span class="status-dot tech-scheduled" style="background-color: #f59e0b; width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px;"></span> Tech Scheduled
+    </button>
+    <button class="dropdown-item" data-stage="Tech Done">
+      <span class="status-dot tech-done" style="background-color: #10b981; width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px;"></span> Tech Done
+    </button>
+    <button class="dropdown-item" data-stage="Shortlisted">
+      <span class="status-dot shortlisted" style="background-color: #1a7a4a; width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px;"></span> Shortlisted
+    </button>
+    <button class="dropdown-item" data-stage="Offer Extended">
+      <span class="status-dot offer-extended" style="background-color: #4f46e5; width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px;"></span> Offer Extended
+    </button>
+    <button class="dropdown-item" data-stage="Rejected">
+      <span class="status-dot rejected" style="background-color: #c62828; width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 6px;"></span> Rejected
     </button>
   </div>
 
-  <!-- HR NOTES MODAL -->
-  <!-- SHAREABLE READ-ONLY REPORT OVERLAY -->
-  <div id="share-view-overlay" style="display:none; position:fixed; inset:0; background:#F4F6F9; z-index:9999; overflow-y:auto; padding:32px;">
-    <div style="max-width:900px; margin:0 auto;">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <span style="font-size:20px; font-weight:800; color:#1a7a4a; letter-spacing:-0.5px;">ElastiCrew</span>
-          <span style="font-size:11px; background:#E6F7F2; color:#0D7A57; border-radius:999px; padding:3px 10px; font-weight:700;">Read-Only Report</span>
-        </div>
-        <span id="share-view-candidate-id" style="font-size:11px; color:#6B7280; font-family:monospace;"></span>
+  <!-- RAW SCORES MODAL -->
+  <div class="modal-overlay" id="raw-scores-modal" style="z-index: 2500; backdrop-filter: blur(4px); background-color: rgba(28, 43, 74, 0.4);">
+    <div class="modal-card" style="max-width: 500px; width: 95%; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; max-height: 80vh;">
+      <div class="modal-header" style="padding: 16px 20px; border-bottom: 1px solid #EEEAE3; display: flex; justify-content: space-between; align-items: center; background-color: #FFFFFF;">
+        <h3 class="modal-title" style="font-size: 15px; font-weight: 700; margin: 0; color: var(--text-primary);">Raw Database Scores</h3>
+        <button class="modal-close-btn" id="close-raw-scores-modal" style="background: none; border: none; cursor: pointer; color: var(--text-secondary);">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" style="width: 20px; height: 20px; stroke-width: 2;"><path d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
       </div>
-      <div id="share-view-body" style="display:flex; flex-direction:column; gap:20px;"></div>
+      <div class="modal-body" style="padding: 20px; background-color: var(--page-bg); overflow-y: auto; flex: 1;">
+        <pre id="raw-scores-pre" style="background-color: #FAF9F6; border: 0.5px solid #E2DFD7; padding: 16px; border-radius: 8px; font-family: var(--font-mono); font-size: 11px; overflow: auto; white-space: pre-wrap; margin: 0; line-height: 1.4; color: var(--text-primary);"></pre>
+      </div>
+      <div class="modal-footer" style="padding: 12px 20px; border-top: 1px solid #EEEAE3; background-color: #FFFFFF;">
+        <button class="btn-primary-pill" id="close-raw-scores-btn" style="width: 100%; height: 38px;">Close Raw Scores</button>
+      </div>
     </div>
   </div>
 
@@ -1493,9 +1481,472 @@
     </div>
   </div>
 
+  <!-- CONTEXTUAL ACTION MENU (ABSOLUTE POP-OVER DROPDOWN) -->
+
+  <div class="action-dropdown" id="actions-menu-dropdown">
+    <button class="dropdown-item" id="menu-view-report">
+      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+      View Candidate Report
+    </button>
+    <div class="dropdown-divider"></div>
+    <button class="dropdown-item" id="menu-add-note">
+      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
+      Add HR Note
+    </button>
+    <button class="dropdown-item" id="menu-export-data">
+      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+      Export Candidate Data
+    </button>
+    <div class="dropdown-divider"></div>
+    <button class="dropdown-item remove-action" id="menu-remove-candidate">
+      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M14.74 9l-.346 9m-4.788 0L9 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+      Remove
+    </button>
+  </div>
+
+  <!-- HR NOTES MODAL -->
+  <!-- SHAREABLE READ-ONLY REPORT OVERLAY -->
+  <div id="share-view-overlay" style="display:none; position:fixed; inset:0; background:#F4F6F9; z-index:9999; overflow-y:auto; padding:32px;">
+    <div style="max-width:900px; margin:0 auto;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="font-size:20px; font-weight:800; color:#1a7a4a; letter-spacing:-0.5px;">ElastiCrew</span>
+          <span style="font-size:11px; background:#E6F7F2; color:#0D7A57; border-radius:999px; padding:3px 10px; font-weight:700;">Read-Only Report</span>
+        </div>
+        <span id="share-view-candidate-id" style="font-size:11px; color:#6B7280; font-family:monospace;"></span>
+      </div>
+      <div id="share-view-body" style="display:flex; flex-direction:column; gap:20px;"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="notes-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="notes-modal-title">Candidate Notes</h3>
+        <button class="modal-close-btn" id="close-notes-modal">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="card-subtitle" style="margin-bottom: 4px;">Recruiter notes will be saved to the candidate profile. Hover over the notes icon on the candidate list to quick-read.</p>
+        <textarea id="notes-textarea" class="notes-textarea" placeholder="Type recruitment updates, interview remarks, or status reminders here..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary-pill" id="btn-cancel-notes">Cancel</button>
+        <button class="btn-primary-pill" id="btn-save-notes">Save Notes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAILED CANDIDATE REPORT MODAL (UNIFIED PROFILE DRAWER) -->
+  <!-- DETAILED CANDIDATE REPORT MODAL (UNIFIED PROFILE DRAWER) -->
+  <div class="side-drawer wide" id="report-modal">
+    
+    <!-- STICKY FROZEN EXECUTIVE SUMMARY HEADER -->
+    <div class="side-drawer-header report-sticky-header" style="position: sticky; top: 0; background-color: #FFFFFF; border-bottom: 1px solid #EEEAE3; z-index: 100; padding: 20px 24px 16px 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); display: flex; flex-direction: column; gap: 16px; width: 100%;">
+      <div class="header-main-info" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; position: relative; padding-right: 32px;">
+        <!-- Candidate Summary -->
+        <div class="candidate-summary-block" style="display: flex; align-items: center; gap: 16px; flex: 1;">
+          <div id="rep-avatar" style="width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-weight: 700; font-size: 22px; box-shadow: var(--shadow-sm); flex-shrink: 0;">DR</div>
+          <div class="candidate-metadata" style="display: flex; flex-direction: column; gap: 6px;">
+            <h2 id="rep-name" style="font-size: 20px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.5px; line-height: 1.2;">Dianne Russell</h2>
+            <div class="metadata-meta-grid" style="display: flex; flex-wrap: wrap; gap: 12px 18px; font-size: 12px; color: var(--text-secondary);">
+              <div><span style="font-weight: 600; color: var(--text-primary);">Role:</span> <span id="rep-role">Frontend Developer</span></div>
+              <div><span style="font-weight: 600; color: var(--text-primary);">Experience:</span> <span id="rep-experience">5.5 Years</span></div>
+              <div><span style="font-weight: 600; color: var(--text-primary);">Qualification:</span> <span id="rep-qualification">B.Tech in CS</span></div>
+              <div><span style="font-weight: 600; color: var(--text-primary);">Report Date:</span> <span id="rep-date">2026-05-23</span></div>
+              <div><span style="font-weight: 600; color: var(--text-primary);">Candidate ID:</span> <span id="rep-id" style="font-family: var(--font-family); font-weight: 700;">CAN-1024</span></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Hiring Decision Badge & Overall Match Score Card -->
+        <div class="header-status-metrics" style="display: flex; align-items: center; gap: 20px;">
+          <div class="decision-badge-container" style="text-align: right;">
+            <span style="display: block; font-size: 10px; text-transform: uppercase; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.5px; margin-bottom: 4px;">Hiring Decision</span>
+            <span id="rep-decision-badge" class="status-pill" style="font-size: 12px; padding: 6px 12px; font-weight: 700;">Strongly Recommended</span>
+          </div>
+          
+          <div class="overall-card-metric" style="display: flex; align-items: center; gap: 14px; background-color: #FAF9F6; border: 0.5px solid #E2DFD7; padding: 8px 16px; border-radius: 8px;">
+            <div class="metric-score-display" style="text-align: center; border-right: 1px solid #EEEAE3; padding-right: 14px;">
+              <span class="score-num" id="rep-overall-score" style="font-size: 26px; font-weight: 800; color: var(--active-nav-bg); line-height: 1.1; display: block;">89%</span>
+              <span class="score-lbl" style="font-size: 9px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Match Score</span>
+            </div>
+            <div class="metric-status-sub" style="font-size: 11px; display: flex; flex-direction: column; gap: 2px;">
+              <div>Risk: <span id="rep-risk-level" style="font-weight: 700; color: #EF6C00;">Low Risk</span></div>
+              <div>Status: <span id="rep-completion-status" style="font-weight: 700; color: var(--active-nav-bg);">Complete</span></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Close Button -->
+        <button class="modal-close-btn" id="close-report-modal" style="background: none; border: none; cursor: pointer; color: var(--text-secondary); transition: var(--transition-normal); position: absolute; right: 0; top: 0; padding: 4px;">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" style="width: 20px; height: 20px; stroke-width: 2;"><path d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      
+      <!-- ACTION BAR -->
+      <div class="report-control-bar" style="display: flex; justify-content: space-between; align-items: center; border-top: 0.5px solid #EEEAE3; padding-top: 12px; gap: 16px; flex-wrap: wrap; width: 100%;">
+        <div class="action-buttons-group" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; position: relative;">
+          <button class="btn-primary-pill" id="btn-pdf-report" style="height: 32px; font-size: 11.5px; padding: 0 14px;">Download PDF</button>
+          <button class="btn-secondary-pill" id="btn-export-report" style="height: 32px; font-size: 11.5px; padding: 0 14px;">Export JSON</button>
+          <button class="btn-secondary-pill" id="btn-generate-share-link" style="height: 32px; font-size: 11.5px; padding: 0 14px; display:inline-flex; align-items:center; gap:5px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>
+            Generate Share Link
+          </button>
+          <button class="btn-secondary-pill" id="btn-print-report" style="height: 32px; font-size: 11.5px; padding: 0 14px;">Print</button>
+          
+          <div class="more-actions-dropdown-container" style="position: relative;">
+            <button class="btn-secondary-pill" id="btn-more-actions" style="height: 32px; font-size: 11.5px; padding: 0 14px;">More Actions ▼</button>
+            <div class="action-dropdown" id="more-actions-panel" style="display: none; position: absolute; top: calc(100% + 4px); left: 0; z-index: 110; width: 200px; box-shadow: var(--shadow-dropdown);">
+              <button class="dropdown-item" id="act-dl-resume">Download Resume</button>
+              <button class="dropdown-item" id="act-dl-transcript">Download Transcript</button>
+              <button class="dropdown-item" id="act-view-raw">View Raw Scores</button>
+              <button class="dropdown-item" id="act-view-recording">View Interview Recording</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="filters-view-group" style="display: flex; align-items: center; gap: 16px;">
+          <div class="filter-dropdown-item" style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+            <span style="font-weight: 600; color: var(--text-secondary);">Section:</span>
+            <select id="report-section-filter" class="custom-select" style="height: 28px; width: 180px; padding: 0 10px; font-size: 11.5px; border-radius: 6px; border: 0.5px solid #E2DFD7; background-color: #FAF9F6; outline: none; font-weight: 600; cursor: pointer;">
+              <option value="summary">Executive Summary</option>
+              <option value="resume">Resume Profile</option>
+              <option value="screening">Video Screening</option>
+              <option value="technical">Technical Assessment</option>
+              <option value="notes-history">Notes & History</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+       <!-- DRAWER BODY CONTAINER (DYNAMIC ONE-PAGE LAYOUT) -->
+    <div class="side-drawer-body report-modal-body" style="padding: 20px 24px; overflow: hidden; flex-grow: 1; background-color: var(--page-bg); display: flex; flex-direction: column; height: 100%; min-height: 0;">
+      
+      <!-- TAB 1: OVERVIEW & MATCH PANEL -->
+      <div class="main-report-panel active" id="main-panel-overview" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; height: 100%; min-height: 0;">
+        <div style="display: flex; flex-direction: column; gap: 20px; height: 100%; min-height: 0;">
+          <!-- 1. Executive Hiring Summary -->
+          <section class="premium-card report-section-card" id="sec-exec-summary" style="padding: 20px; gap: 16px; display: flex; flex-direction: column; min-height: 0; flex-shrink: 0;">
+            <h3 class="card-title" style="font-size: 14px; border-bottom: 0.5px solid #EEEAE3; padding-bottom: 8px; margin: 0;">1. Executive Hiring Summary</h3>
+            <div class="kpi-score-cards-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="score-kpi-card" id="kpi-card-resume" style="background: #FAF9F6; border: 0.5px solid #E2DFD7; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; transition: var(--transition-normal);">
+                <span style="display: block; font-size: 10px; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">Resume Score</span>
+                <span class="kpi-card-val" id="rep-resume-score" style="font-size: 20px; font-weight: 800; color: var(--text-primary);">85%</span>
+                <div style="font-size: 8.5px; color: var(--active-nav-bg); font-weight: 600; margin-top: 4px;">View Details →</div>
+              </div>
+              <div class="score-kpi-card" id="kpi-card-screening" style="background: #FAF9F6; border: 0.5px solid #E2DFD7; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; transition: var(--transition-normal);">
+                <span style="display: block; font-size: 10px; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">Screening Score</span>
+                <span class="kpi-card-val" id="rep-screening-score" style="font-size: 20px; font-weight: 800; color: var(--text-primary);">90%</span>
+                <div style="font-size: 8.5px; color: var(--active-nav-bg); font-weight: 600; margin-top: 4px;">View Evidence →</div>
+              </div>
+              <div class="score-kpi-card" id="kpi-card-technical" style="background: #FAF9F6; border: 0.5px solid #E2DFD7; padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; transition: var(--transition-normal);">
+                <span style="display: block; font-size: 10px; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">Technical Score</span>
+                <span class="kpi-card-val" id="rep-technical-score" style="font-size: 20px; font-weight: 800; color: var(--text-primary);">92%</span>
+                <div style="font-size: 8.5px; color: var(--active-nav-bg); font-weight: 600; margin-top: 4px;">View Evidence →</div>
+              </div>
+              <div class="score-kpi-card highlighted" id="kpi-card-final" style="background: #E8F5E9; border: 1px solid var(--active-nav-bg); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; transition: var(--transition-normal);">
+                <span style="display: block; font-size: 10px; color: var(--active-nav-bg); text-transform: uppercase; font-weight: 700; margin-bottom: 4px;">Final Match</span>
+                <span class="kpi-card-val" id="rep-final-score" style="font-size: 20px; font-weight: 800; color: var(--active-nav-bg);">89%</span>
+                <div style="font-size: 8.5px; color: var(--active-nav-bg); font-weight: 700; margin-top: 4px;">View Breakdown →</div>
+              </div>
+            </div>
+          </section>
+          
+          <!-- 2. Assessment Breakdown -->
+          <section class="premium-card report-section-card" id="sec-assessment-breakdown" style="padding: 20px; gap: 14px; display: flex; flex-direction: column; min-height: 0; flex: 1;">
+            <h3 class="card-title" style="font-size: 14px; border-bottom: 0.5px solid #EEEAE3; padding-bottom: 8px; margin: 0;">2. Assessment Breakdown</h3>
+            <div class="table-responsive" style="border: none; margin: 0; overflow-y: auto; flex: 1; min-height: 0;">
+              <table class="ats-table" style="width: 100%; font-size: 12px; margin: 0;">
+                <thead>
+                  <tr style="background-color: #FAF9F6; position: sticky; top: 0; z-index: 1;">
+                    <th style="padding: 8px; font-weight: 700;">Assessment</th>
+                    <th style="padding: 8px; text-align: center; font-weight: 700;">Score</th>
+                    <th style="padding: 8px; text-align: center; font-weight: 700;">Weight</th>
+                    <th style="padding: 8px; text-align: center; font-weight: 700;">Contribution</th>
+                  </tr>
+                </thead>
+                <tbody id="breakdown-table-body">
+                  <!-- Javascript populated -->
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 20px; height: 100%; min-height: 0;">
+          <!-- 8. Hiring Recommendation -->
+          <section class="premium-card report-section-card" id="sec-hiring-recommendation" style="padding: 20px; gap: 14px; display: flex; flex-direction: column; min-height: 0; flex-shrink: 0;">
+            <h3 class="card-title" style="font-size: 14px; border-bottom: 0.5px solid #EEEAE3; padding-bottom: 8px; margin: 0;">8. Hiring Recommendation</h3>
+            <div class="recommendation-result-container" style="display: flex; flex-direction: column; gap: 12px;">
+              <div id="rep-rec-badge-display" style="font-size: 14px; font-weight: 700; text-align: center; padding: 10px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Strongly Recommended</div>
+              <div style="background-color: #FAF9F6; border: 0.5px solid #E2DFD7; padding: 12px; border-radius: 8px;">
+                <h4 style="font-size: 11.5px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.2px; margin-top: 0;">Reasoning Metrics:</h4>
+                <p id="rep-rec-reasoning" style="font-size: 12px; color: var(--text-secondary); line-height: 1.45; white-space: pre-line; margin: 0;"></p>
+              </div>
+            </div>
+          </section>
+
+          <!-- 7. Evidence-Based Insights -->
+          <section class="premium-card report-section-card" id="sec-evidence-insights" style="padding: 20px; gap: 14px; display: flex; flex-direction: column; min-height: 0; flex: 1;">
+            <h3 class="card-title" style="font-size: 14px; border-bottom: 0.5px solid #EEEAE3; padding-bottom: 8px; margin: 0;">7. Evidence-Based Insights</h3>
+            <div id="evidence-insights-list" style="display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; min-height: 0; scrollbar-width: thin;">
+              <!-- Populated dynamically -->
+            </div>
+          </section>
+        </div>
+      </div>
+      
+      <!-- TAB 2: RESUME PROFILE PANEL -->
+      <div class="main-report-panel" id="main-panel-resume" style="display: none; height: 100%; min-height: 0; width: 100%; flex-direction: column;">
+        <!-- 3. Resume Evaluation -->
+        <section class="premium-card report-section-card" id="sec-resume-evaluation" style="padding: 20px; gap: 14px; display: flex; flex-direction: column; height: 100%; min-height: 0; flex: 1;">
+          <div class="section-card-header-actions" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid #EEEAE3; padding-bottom: 8px; flex-wrap: wrap; gap: 8px; flex-shrink: 0;">
+            <h3 class="card-title" style="font-size: 14px; border: none; padding: 0; margin: 0;">3. Resume Evaluation</h3>
+            <div class="resume-header-buttons" style="display: flex; gap: 6px;">
+              <button class="btn-secondary-pill" id="btn-view-resume-modal" style="height: 24px; padding: 0 10px; font-size: 10.5px;">View Resume</button>
+              <button class="btn-secondary-pill" id="btn-download-resume-modal" style="height: 24px; padding: 0 10px; font-size: 10.5px;">Download Resume</button>
+            </div>
+          </div>
+          
+          <!-- Collapsible tabs inside Resume section -->
+          <div class="collapsible-tabs-container" style="display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0;">
+            <div class="tab-triggers" style="display: flex; border-bottom: 1px solid #EEEAE3; gap: 2px; flex-shrink: 0;">
+              <button class="tab-trigger active" data-tab="edu" style="flex:1; background:none; border:none; padding: 6px 0; font-size: 11.5px; font-weight: 600; color: var(--text-secondary); cursor:pointer; border-bottom: 2px solid transparent; outline:none; transition:var(--transition-normal);">Education</button>
+              <button class="tab-trigger" data-tab="skills" style="flex:1; background:none; border:none; padding: 6px 0; font-size: 11.5px; font-weight: 600; color: var(--text-secondary); cursor:pointer; border-bottom: 2px solid transparent; outline:none; transition:var(--transition-normal);">Skills</button>
+              <button class="tab-trigger" data-tab="exp" style="flex:1; background:none; border:none; padding: 6px 0; font-size: 11.5px; font-weight: 600; color: var(--text-secondary); cursor:pointer; border-bottom: 2px solid transparent; outline:none; transition:var(--transition-normal);">Experience</button>
+              <button class="tab-trigger" data-tab="certs" style="flex:1; background:none; border:none; padding: 6px 0; font-size: 11.5px; font-weight: 600; color: var(--text-secondary); cursor:pointer; border-bottom: 2px solid transparent; outline:none; transition:var(--transition-normal);">Certs</button>
+            </div>
+            
+            <div class="tab-content-panels" style="flex: 1; overflow-y: auto; min-height: 0; padding-right: 4px; scrollbar-width: thin;">
+              <!-- Education panel -->
+              <div class="tab-panel active" id="panel-edu" style="display: block;">
+                <!-- Javascript populated -->
+              </div>
+              <!-- Skills panel -->
+              <div class="tab-panel" id="panel-skills" style="display: none;">
+                <!-- Javascript populated -->
+              </div>
+              <!-- Experience panel -->
+              <div class="tab-panel" id="panel-exp" style="display: none;">
+                <!-- Javascript populated -->
+              </div>
+              <!-- Certifications panel -->
+              <div class="tab-panel" id="panel-certs" style="display: none;">
+                <!-- Javascript populated -->
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+      
+      <!-- TAB 3: VIDEO SCREENING PANEL -->
+      <div class="main-report-panel" id="main-panel-screening" style="display: none; grid-template-columns: 1.3fr 1fr; gap: 20px; align-items: stretch; height: 100%; min-height: 0; width: 100%;">
+        <!-- 4. Video Screening Analysis -->
+        <section class="premium-card report-section-card" id="sec-video-screening" style="padding: 20px; gap: 14px; display: flex; flex-direction: column; height: 100%; min-height: 0; flex: 1;">
+          <h3 class="card-title" style="font-size: 14px; border-bottom: 0.5px solid #EEEAE3; padding-bottom: 8px; margin: 0; flex-shrink: 0;">4. Video Screening Analysis</h3>
+          
+          <!-- Video player -->
+          <div class="sticky-video-player-container" style="position: relative; border-radius: 8px; overflow: hidden; border: 0.5px solid #E2DFD7; background-color: #000000; box-shadow: var(--shadow-sm); flex-shrink: 0;">
+            <video id="report-video-player" controls style="width:100%; height: 165px; display: block; object-fit: cover;">
+              <source src="" type="video/mp4">
+            </video>
+            <div class="video-overlay-unavail" id="video-unavail-overlay" style="display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.85); color: #FFF; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; gap: 6px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><path d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25c0 .621.504 1.125 1.125 1.125h13.5A1.125 1.125 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" /></svg>
+              <span>Video Not Available</span>
+            </div>
+          </div>
+          
+          <!-- Transcript box -->
+          <div class="transcript-outer-panel" style="border: 0.5px solid #E2DFD7; border-radius: 8px; background-color: #FAF9F6; display: flex; flex-direction: column; overflow: hidden; flex: 1; min-height: 0;">
+            <div class="transcript-header-controls" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid #EEEAE3; padding: 8px 10px; gap: 8px; background-color: #FFFFFF; flex-shrink: 0;">
+              <div style="position: relative; flex: 1;">
+                <input type="text" id="transcript-search-input" placeholder="Search transcript..." class="search-input" style="width: 100%; height: 28px; padding-left: 24px; font-size: 11.5px; border-radius: 6px; border: 0.5px solid #E2DFD7; outline:none; background-color:#FAF9F6;">
+                <span style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); width:12px; height:12px; display:inline-flex;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                </span>
+              </div>
+              <button class="btn-secondary-pill" id="btn-copy-transcript" style="height: 28px; padding: 0 10px; font-size: 11px; display: flex; align-items: center; gap: 4px;">Copy</button>
+              <button class="btn-secondary-pill" id="btn-dl-transcript" style="height: 28px; padding: 0 10px; font-size: 11px; display: flex; align-items: center; gap: 4px;">Download</button>
+            </div>
+            
+            <div class="transcript-scroll-area" id="transcript-scroll-area" style="flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; scrollbar-width: thin; min-height: 0;">
+              <!-- Dynamic dialogue bubbles -->
+            </div>
+            
+            <div class="transcript-footer-actions" style="display: flex; justify-content: space-between; align-items: center; border-top: 0.5px solid #EEEAE3; padding: 6px 12px; background-color: #FFFFFF; flex-shrink: 0;">
+              <button class="btn-text-only" id="btn-view-full-transcript" style="background: none; border: none; font-size: 11px; font-weight: 700; color: var(--active-nav-bg); cursor: pointer;">View Full Transcript</button>
+              <button class="btn-text-only" id="btn-export-transcript" style="background: none; border: none; font-size: 11px; font-weight: 700; color: var(--active-nav-bg); cursor: pointer;">Export Transcript</button>
+            </div>
+          </div>
+        </section>
+        
+        <!-- 5. Communication Assessment -->
+        <section class="premium-card report-section-card" id="sec-communication-assessment" style="padding: 20px; gap: 14px; display: flex; flex-direction: column; height: 100%; min-height: 0; flex: 1;">
+          <h3 class="card-title" style="font-size: 14px; border-bottom: 0.5px solid #EEEAE3; padding-bottom: 8px; margin: 0; flex-shrink: 0;">5. Communication Assessment</h3>
+          <div class="communication-metrics-list" id="communication-metrics-list" style="display: flex; flex-direction: column; gap: 12px; flex: 1; overflow-y: auto; min-height: 0; padding-right: 4px; scrollbar-width: thin;">
+            <!-- progress bars render here -->
+          </div>
+        </section>
+      </div>
+      
+      <!-- TAB 4: TECHNICAL ASSESSMENT PANEL -->
+      <div class="main-report-panel" id="main-panel-technical" style="display: none; height: 100%; min-height: 0; width: 100%; flex-direction: column;">
+        <!-- 6. Technical Interview Analysis -->
+        <section class="premium-card report-section-card" id="sec-tech-analysis" style="padding: 20px; gap: 14px; display: flex; flex-direction: column; height: 100%; min-height: 0; flex: 1;">
+          <h3 class="card-title" style="font-size: 14px; border-bottom: 0.5px solid #EEEAE3; padding-bottom: 8px; margin: 0; flex-shrink: 0;">6. Technical Interview Analysis</h3>
+          
+          <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; align-items: stretch; flex: 1; min-height: 0;">
+            <!-- Radar Chart container -->
+            <div class="radar-chart-outer-container" style="display: flex; flex-direction: column; align-items: center; gap: 12px; background: #FAF9F6; border: 0.5px solid #E2DFD7; padding: 12px; border-radius: 8px; height: 100%; min-height: 0;">
+              <div class="radar-chart-wrapper" style="width: 100%; display: flex; justify-content: center; position: relative; flex: 1; min-height: 0;">
+                <svg id="radar-chart-svg" viewBox="0 0 300 280" style="width: 280px; height: 100%; min-height: 180px;"></svg>
+              </div>
+              <div class="radar-chart-legend" id="radar-chart-legend" style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; font-size: 10.5px; font-weight: 600; color: var(--text-secondary); flex-shrink: 0;">
+                <!-- Clickable legends will render here -->
+              </div>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 14px; height: 100%; min-height: 0;">
+              <div class="competency-table-wrapper" style="border: 0.5px solid #E2DFD7; border-radius: 8px; overflow: hidden; flex-shrink: 0;">
+                <table class="ats-table" style="width: 100%; font-size: 12px; margin: 0;">
+                  <thead>
+                    <tr style="background-color: #FAF9F6;">
+                      <th style="padding: 8px; font-weight:700;">Skill Area</th>
+                      <th style="padding: 8px; text-align: center; width: 80px; font-weight:700;">Score</th>
+                    </tr>
+                  </thead>
+                  <tbody id="competency-table-body">
+                    <!-- Dynamic rows -->
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Click evidence container -->
+              <div class="competency-evidence-panel" id="competency-evidence-panel" style="display:none; background-color: #E8F5E9; border: 0.5px solid var(--active-nav-bg); padding: 12px; border-radius: 8px; transition: var(--transition-normal); flex: 1; overflow-y: auto; min-height: 0;">
+                <h4 class="evidence-panel-header" id="evidence-panel-header" style="font-size: 11px; font-weight: 700; color: var(--active-nav-bg); text-transform: uppercase; margin-bottom: 4px; margin-top: 0;">Competency Evidence</h4>
+                <p class="evidence-panel-body" id="evidence-panel-body" style="font-size: 12px; color: var(--text-primary); line-height: 1.4; margin: 0;"></p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+      
+      <!-- TAB 5: NOTES & HISTORY PANEL -->
+      <div class="main-report-panel" id="main-panel-notes-history" style="display: none; grid-template-columns: 1fr 1.2fr; gap: 20px; align-items: stretch; height: 100%; min-height: 0; width: 100%;">
+        <!-- HR Review Notes & Remarks -->
+        <section class="premium-card report-section-card" id="sec-hr-notes-static" style="padding: 20px; gap: 12px; display: flex; flex-direction: column; height: 100%; min-height: 0; flex: 1;">
+          <h3 class="card-title" style="font-size: 14px; border-bottom: 0.5px solid #EEEAE3; padding-bottom: 8px; margin: 0; flex-shrink: 0;">HR Review Notes</h3>
+          <div style="position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column;">
+            <textarea id="rep-hr-notes-textarea" style="width: 100%; flex: 1; font-size: 12px; font-family: inherit; padding: 12px; border-radius: 6px; border: 0.5px solid #E2DFD7; background-color: #FAF9F6; resize: none; line-height: 1.5; color: var(--text-primary); outline: none; box-sizing: border-box;" placeholder="Type recruitment updates, interview remarks, or status reminders here..."></textarea>
+          </div>
+        </section>
+
+        <!-- Process Timeline Log -->
+        <section class="premium-card report-section-card" id="sec-timeline-log" style="padding: 20px; gap: 14px; display: flex; flex-direction: column; height: 100%; min-height: 0; flex: 1;">
+          <h3 class="card-title" style="font-size: 14px; border-bottom: 0.5px solid #EEEAE3; padding-bottom: 8px; margin: 0; flex-shrink: 0;">Hiring Process History Log</h3>
+          <div class="timeline-container" id="rep-timeline" style="margin: 0; padding: 0 4px 0 0; gap: 12px; overflow-y: auto; flex: 1; min-height: 0; scrollbar-width: thin;">
+            <!-- timeline items -->
+          </div>
+        </section>
+      </div>
+    </div>
+    
+    <!-- STICKY FOOTER ACTIONS -->
+    <div class="side-drawer-footer" style="position: sticky; bottom: 0; z-index: 100; border-top: 1px solid #EEEAE3; background-color: #FFFFFF; padding: 12px 24px; display: flex; justify-content: flex-end; width: 100%; flex-shrink: 0;">
+      <button class="btn-primary-pill" id="btn-close-report" style="width: 100%; height: 38px;">Close Performance Report</button>
+    </div>
+  </div>
+  <div class="side-drawer-overlay" id="report-modal-overlay"></div>
+
+  <!-- EXPORT OPTIONS MODAL (POPUP-FIRST EXPORTS) -->
+  <div class="modal-overlay" id="export-modal">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Export Hiring Report</h3>
+        <button class="modal-close-btn" id="close-export-modal">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="gap: 14px;">
+        <span class="profile-meta-label">Select File Format</span>
+        <div class="export-options-grid">
+          <div class="export-option-card selected" data-format="pdf">
+            <div class="export-icon" style="margin-bottom: 2px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25" /></svg>
+            </div>
+            <span class="export-label">PDF File</span>
+          </div>
+          
+          <div class="export-option-card" data-format="csv">
+            <div class="export-icon" style="margin-bottom: 2px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75c.621 0 1.125.504 1.125 1.125v17.25c0 .621-.504 1.125-1.125 1.125H5.625a1.125 1.125 0 01-1.125-1.125V5.625c0-.621.504-1.125 1.125-1.125z" /></svg>
+            </div>
+            <span class="export-label">CSV Sheet</span>
+          </div>
+          
+          <div class="export-option-card" data-format="excel">
+            <div class="export-icon" style="margin-bottom: 2px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25M21 5.25A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" /></svg>
+            </div>
+            <span class="export-label">Excel Sheet</span>
+          </div>
+        </div>
+        
+        <div style="height: 0.5px; background-color: var(--divider-color); margin: 6px 0;"></div>
+        
+        <span class="profile-meta-label">Include Data Columns</span>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer;">
+            <input type="checkbox" checked style="accent-color: var(--active-nav-bg);"> Screening assessment feedback
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer;">
+            <input type="checkbox" checked style="accent-color: var(--active-nav-bg);"> Recruiter HR timeline history
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer;">
+            <input type="checkbox" checked style="accent-color: var(--active-nav-bg);"> Interview notes and score reports
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary-pill" id="btn-cancel-export">Cancel</button>
+        <button class="btn-primary-pill" id="btn-download-report">Download File</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIDEO SCREENING PLAYBACK MODAL -->
+  <div class="modal-overlay" id="video-screening-modal">
+    <div class="modal-card" style="max-width: 600px; width: 95%;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="video-modal-title">AI Video Screening Playback</h3>
+        <button class="modal-close-btn" id="close-video-modal">
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <div class="video-player-container" style="aspect-ratio: 16/9; background-color: #0c1524; position: relative; overflow: hidden; border-radius: 8px; display: flex; flex-direction: column;">
+          <div class="video-watermark" style="position: absolute; top: 12px; left: 12px; z-index: 10; background: rgba(0,0,0,0.6); padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 6px; font-size: 10px; color: #FFF; pointer-events: none;">
+            <span class="video-rec-dot" style="display: inline-block; width: 6px; height: 6px; background: #FF3B30; border-radius: 50%;"></span>
+            <span id="video-modal-candidate-tag">Dianne Russell — AI Screening</span>
+          </div>
+          <video id="modal-video-player" controls style="width: 100%; height: 100%; display: block; object-fit: cover; border: none;"></video>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary-pill" id="close-video-modal-btn" style="width: 100%; height: 38px;">Close Playback</button>
+      </div>
+    </div>
+  </div>
+
+  
+
+  
+
   <!-- TOAST NOTIFICATIONS HOLDER -->
   <div class="toast-container" id="toast-holder"></div>
 
-  <script src="reports.js?v=1.0.2"></script>
+  <script src="reports-v2.js?v=3.0.0"></script>
 </body>
 </html>
