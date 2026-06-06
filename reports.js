@@ -531,6 +531,38 @@ const avatarGradients = [
   "linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)"
 ];
 
+
+// --------------------------------------------------------
+// Helper: Convert numeric score → descriptive English word
+// --------------------------------------------------------
+function scoreToWord(score) {
+  if (!score || score === 0) return { label: 'Pending', cls: 'score-pending' };
+  if (score >= 80) return { label: 'Strong', cls: 'score-strong' };
+  if (score >= 60) return { label: 'Moderate', cls: 'score-moderate' };
+  return { label: 'Weak', cls: 'score-weak' };
+}
+
+const SCORE_STYLES = {
+  'score-strong':  'background:#E6F7F2; color:#0D7A57; border:1px solid #A7EFCF;',
+  'score-moderate':'background:#FEF3C7; color:#B45309; border:1px solid #FCD34D;',
+  'score-weak':    'background:#FEF0EF; color:#E24B4A; border:1px solid #FCA5A5;',
+  'score-pending': 'background:#F3F4F6; color:#6B7280; border:1px solid #E5E7EB;'
+};
+
+// --------------------------------------------------------
+// Helper: Generate & copy shareable read-only link
+// --------------------------------------------------------
+function generateShareLink(candidateId) {
+  const url = `${window.location.origin}${window.location.pathname}?share=${encodeURIComponent(candidateId)}`;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => {
+      showToast(`🔗 Share link for ${candidateId} copied to clipboard!`);
+    }).catch(() => prompt('Copy this share link:', url));
+  } else {
+    prompt('Copy this share link:', url);
+  }
+}
+
 // Helper to resolve Department from Candidate Role
 function getCandidateDepartment(role) {
   const r = role.toLowerCase();
@@ -937,54 +969,63 @@ function renderListView(paginated) {
     const initials = getInitials(cand.name);
     const grad = getAvatarGradient(cand.name);
 
-    // Document Status Buttons (Resume & Screening)
-    const transcriptBtn = `
-      <button class="card-doc-btn active" data-tooltip="View Resume CV" data-id="${cand.id}" data-doc="transcript" style="color: var(--active-nav-bg);">
-        <svg viewBox="0 0 24 24"><path d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.12 2.99 2.68 3.22l3.07.46V21l3.56-3.56h6.76c1.63 0 2.94-1.3 2.94-2.93V6.43c0-1.63-1.31-2.93-2.94-2.93H4.63c-1.63 0-2.94 1.3-2.94 2.93v7.08z" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-    `;
+    // ── Screening rating word ──
+    const hasScreening = cand.botScreeningDone && cand.scores && cand.scores.screening > 0;
+    const sw = hasScreening ? scoreToWord(cand.scores.screening) : { label: 'Pending', cls: 'score-pending' };
+    const swStyle = SCORE_STYLES[sw.cls];
 
-    const techBtn = `
-      <button class="card-doc-btn ${cand.botScreeningDone ? 'active' : ''}" ${cand.botScreeningDone ? '' : 'disabled'} data-tooltip="${cand.botScreeningDone ? 'Play Screening Video' : 'Video Pending'}" data-id="${cand.id}" data-doc="tech" style="${cand.botScreeningDone ? 'color: var(--active-nav-bg);' : ''}">
-        <svg viewBox="0 0 24 24"><path d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-    `;
+    // ── Screening Upload column ──
+    const uploadCol = cand.botScreeningDone
+      ? `<span style="display:inline-flex;align-items:center;gap:4px;color:#0D7A57;font-size:11px;font-weight:700;">
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+           Done
+         </span>`
+      : `<label style="display:inline-flex;align-items:center;gap:5px;background:#EBF4FF;color:#378ADD;border:1px solid #C3DDFB;border-radius:999px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;" title="Upload Screening Video">
+           <input type="file" accept="video/*" style="display:none;" class="screening-upload-input" data-id="${cand.id}">
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"/></svg>
+           Upload
+         </label>`;
 
-    // Notes Button
-    const noteClass = cand.notes ? "has-notes" : "";
-    const notesIcon = cand.notes 
-      ? `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor"><path d="M19.5 21a3 3 0 003-3v-4.5a3 3 0 00-3-3h-15a3 3 0 00-3 3V18a3 3 0 003 3h15zM2 9V6a3 3 0 013-3h14a3 3 0 013 3v3H2z"/></svg>`
-      : `<svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.75.75 0 01-1.074-.765 6 6 0 001.257-2.737C3.038 16.289 1 14.368 1 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>`;
+    // ── Remark (truncated notes) ──
+    const remarkText = cand.notes
+      ? cand.notes.substring(0, 55) + (cand.notes.length > 55 ? '…' : '')
+      : '<em style="color:var(--text-secondary);font-style:italic;">No remark</em>';
 
     tr.innerHTML = `
       <td>
         <div class="col-candidate">
-          <div class="candidate-avatar" style="background: ${grad}">${initials}</div>
+          <div class="candidate-avatar" style="background:${grad}">${initials}</div>
           <div class="candidate-info">
             <span class="candidate-name">${cand.name}</span>
-            <span class="candidate-phone" style="font-size: 11px; color: var(--text-secondary);">${cand.email}</span>
+            <span class="candidate-phone" style="font-size:11px;color:var(--text-secondary);">${cand.email}</span>
           </div>
         </div>
       </td>
+      <td><span class="col-id">${cand.id}</span></td>
+      <td><span class="role-tag-blue">${cand.role}</span></td>
       <td>
-        <span class="col-id">${cand.id}</span>
+        <span style="display:inline-flex;align-items:center;border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700;${swStyle}">${sw.label}</span>
       </td>
+      <td>${uploadCol}</td>
       <td>
-        <span class="role-tag-blue">${cand.role}</span>
+        <span class="${getStageBadgeClass(cand.hiringStage)} stage-pill" data-id="${cand.id}" style="cursor:pointer;">${cand.hiringStage}</span>
       </td>
+      <td style="max-width:160px;white-space:normal;font-size:11.5px;color:var(--text-secondary);line-height:1.35;">${remarkText}</td>
       <td>
-        ${transcriptBtn}
-      </td>
-      <td>
-        ${techBtn}
-      </td>
-      <td>
-        <span class="${getStageBadgeClass(cand.hiringStage)} stage-pill" data-id="${cand.id}" style="cursor: pointer;">${cand.hiringStage}</span>
-      </td>
-      <td>
-        <button class="notes-btn ${noteClass}" data-id="${cand.id}" data-tooltip="${cand.notes || 'Add HR Notes'}">
-          ${notesIcon}
-        </button>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="btn-view-report-row" data-id="${cand.id}"
+            style="display:inline-flex;align-items:center;gap:4px;background:var(--active-nav-bg);color:#FFF;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .15s;"
+            onmouseenter="this.style.opacity='.85'" onmouseleave="this.style.opacity='1'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.641 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            View Report
+          </button>
+          <button class="btn-generate-link-row" data-id="${cand.id}"
+            style="display:inline-flex;align-items:center;gap:4px;background:#EBF4FF;color:#378ADD;border:1px solid #C3DDFB;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;"
+            onmouseenter="this.style.background='#D1E9FF'" onmouseleave="this.style.background='#EBF4FF'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+            Share Link
+          </button>
+        </div>
       </td>
     `;
     pipelineTableBody.appendChild(tr);
@@ -1083,10 +1124,11 @@ function renderListSkeletons() {
       </td>
       <td><div class="skeleton-block" style="width: 60px;"></div></td>
       <td><div class="skeleton-block" style="width: 100px;"></div></td>
-      <td><div class="skeleton-block" style="width: 24px;"></div></td>
-      <td><div class="skeleton-block" style="width: 24px;"></div></td>
-      <td><div class="skeleton-block" style="width: 80px; height: 20px; border-radius: 999px;"></div></td>
-      <td><div class="skeleton-block" style="width: 24px; height: 24px; border-radius: 999px;"></div></td>
+      <td><div class="skeleton-block" style="width: 70px; height: 22px; border-radius: 999px;"></div></td>
+      <td><div class="skeleton-block" style="width: 70px;"></div></td>
+      <td><div class="skeleton-block" style="width: 80px; height: 22px; border-radius: 999px;"></div></td>
+      <td><div class="skeleton-block" style="width: 120px;"></div></td>
+      <td><div class="skeleton-block" style="width: 150px; height: 28px; border-radius: 6px;"></div></td>
     `;
     pipelineTableBody.appendChild(tr);
   }
@@ -1325,11 +1367,30 @@ function openCandidateReport(candidateId, section) {
   }
   completionStatusEl.textContent = compStatus;
 
-  // Render KPI Score Cards
-  document.getElementById("rep-resume-score").textContent = hasScores ? `${resumeScore}%` : "Data Not Available";
-  document.getElementById("rep-screening-score").textContent = hasScores ? `${screeningScore}%` : "Data Not Available";
-  document.getElementById("rep-technical-score").textContent = hasScores ? `${technicalScore}%` : "Data Not Available";
-  document.getElementById("rep-final-score").textContent = hasScores ? `${overall}%` : "Data Not Available";
+  // Render KPI Score Cards — English words instead of numbers
+  const rw = scoreToWord(resumeScore);
+  const scw = scoreToWord(screeningScore);
+  const tw = scoreToWord(technicalScore);
+  const ow = scoreToWord(overall);
+
+  const setScoreCard = (id, word) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = hasScores ? word.label : 'N/A';
+    el.style.cssText = hasScores
+      ? `font-size:20px;font-weight:800;${SCORE_STYLES[word.cls].replace(/border:[^;]+;/,'')}`
+      : 'font-size:14px;font-weight:700;color:var(--text-secondary);';
+  };
+  setScoreCard('rep-resume-score', rw);
+  setScoreCard('rep-screening-score', scw);
+  setScoreCard('rep-technical-score', tw);
+  setScoreCard('rep-final-score', ow);
+
+  // Also update the match score in header to use word
+  if (overallScoreEl) {
+    overallScoreEl.textContent = hasScores ? ow.label : 'N/A';
+    overallScoreEl.style.fontSize = '20px';
+  }
 
   // Render Assessment Breakdown Table
   const breakdownBody = document.getElementById("breakdown-table-body");
@@ -1342,9 +1403,13 @@ function openCandidateReport(candidateId, section) {
     ];
     rows.forEach(r => {
       const tr = document.createElement("tr");
+      const rWord = scoreToWord(r.score);
+      const rStyle = SCORE_STYLES[rWord.cls];
       tr.innerHTML = `
         <td style="padding:8px; font-weight:600;">${r.name}</td>
-        <td style="padding:8px; text-align:center;">${r.score}%</td>
+        <td style="padding:8px; text-align:center;">
+          <span style="border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;${rStyle}">${rWord.label}</span>
+        </td>
         <td style="padding:8px; text-align:center; color:var(--text-secondary);">${r.weight}</td>
         <td style="padding:8px; text-align:center; font-weight:700; color:var(--active-nav-bg);">${r.contrib}</td>
       `;
@@ -1843,18 +1908,52 @@ function handleCandidateClick(e) {
     return;
   }
 
-  // 5. Table row click (excluding buttons/pills)
+  // 5. View Report row button click
+  const viewReportBtn = target.closest('.btn-view-report-row');
+  if (viewReportBtn) {
+    e.stopPropagation();
+    openCandidateReport(viewReportBtn.dataset.id);
+    return;
+  }
+
+  // 6. Share Link row button click
+  const shareLinkBtn = target.closest('.btn-generate-link-row');
+  if (shareLinkBtn) {
+    e.stopPropagation();
+    generateShareLink(shareLinkBtn.dataset.id);
+    return;
+  }
+
+  // 7. Screening upload input change
+  const uploadInput = target.closest('.screening-upload-input');
+  if (uploadInput) {
+    e.stopPropagation();
+    uploadInput.addEventListener('change', (ev) => {
+      const id = uploadInput.dataset.id;
+      const cand = candidates.find(c => c.id === id);
+      if (cand && ev.target.files.length > 0) {
+        cand.botScreeningDone = true;
+        cand.scores = cand.scores || {};
+        if (!cand.scores.screening) cand.scores.screening = 75;
+        renderCandidates();
+        updateKpiCounters();
+        showToast(`Screening video uploaded for ${cand.name}!`);
+      }
+    }, { once: true });
+    return;
+  }
+
+  // 8. Table row click (excluding buttons/pills)
   const tr = target.closest("#pipeline-table-body tr");
   if (tr) {
-    if (!target.closest("button") && !target.closest(".stage-pill")) {
+    if (!target.closest("button") && !target.closest(".stage-pill") && !target.closest('label')) {
       const id = tr.id.replace("candidate-row-", "");
       openCandidateReport(id);
     }
     return;
   }
 
-  // 6. Grid Card click (excluding buttons/pills)
-  const card = target.closest(".applicant-grid-card");
+  // 9. Grid Card click (excluding buttons/pills)
   if (card) {
     if (!target.closest("button") && !target.closest(".stage-pill")) {
       const id = card.id.replace("grid-card-", "");
@@ -1957,6 +2056,130 @@ function loadUrlParams() {
 
 // ----------------------------------------------------
 // Global Event Binding
+// Wire Generate Share Link button in the report modal
+const btnGenerateShareLink = document.getElementById('btn-generate-share-link');
+if (btnGenerateShareLink) {
+  btnGenerateShareLink.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (activeCandidateId) generateShareLink(activeCandidateId);
+  });
+}
+
+// ============================================================
+// SHAREABLE READ-ONLY VIEW — detects ?share=CAN-XXXX in URL
+// ============================================================
+function initShareView() {
+  const params = new URLSearchParams(window.location.search);
+  const shareId = params.get('share');
+  if (!shareId) return;
+
+  const overlay = document.getElementById('share-view-overlay');
+  const body = document.getElementById('share-view-body');
+  const idLabel = document.getElementById('share-view-candidate-id');
+  if (!overlay || !body) return;
+
+  const cand = candidates.find(c => c.id === shareId);
+  if (!cand) {
+    body.innerHTML = `<div style="text-align:center;padding:60px;color:#6B7280;font-size:14px;">Candidate report not found for ID: <strong>${shareId}</strong></div>`;
+    overlay.style.display = 'block';
+    return;
+  }
+
+  idLabel.textContent = cand.id;
+
+  const hasScores = cand.scores && typeof cand.scores.resume !== 'undefined';
+  const resumeScore = hasScores ? cand.scores.resume : 0;
+  const screeningScore = hasScores ? cand.scores.screening : 0;
+  const technicalScore = hasScores ? cand.scores.technical : 0;
+  const overall = hasScores ? Math.round(resumeScore*0.2 + screeningScore*0.3 + technicalScore*0.5) : 0;
+
+  const rw = scoreToWord(resumeScore);
+  const scw = scoreToWord(screeningScore);
+  const tw = scoreToWord(technicalScore);
+  const ow = scoreToWord(overall);
+
+  const grad = getAvatarGradient(cand.name);
+  const initials = getInitials(cand.name);
+
+  const decisionText = overall >= 85 ? 'Strongly Recommended' : overall >= 70 ? 'Recommended' : overall >= 50 ? 'Review Required' : 'Not Recommended';
+  const decisionColor = overall >= 85 ? '#0D7A57' : overall >= 70 ? '#2563EB' : overall >= 50 ? '#B45309' : '#E24B4A';
+  const decisionBg = overall >= 85 ? '#E6F7F2' : overall >= 70 ? '#EBF4FF' : overall >= 50 ? '#FEF3C7' : '#FEF0EF';
+
+  const scoreCard = (label, word) => `
+    <div style="background:#FFF;border:0.5px solid #E2DFD7;border-radius:10px;padding:16px;text-align:center;">
+      <div style="font-size:10px;text-transform:uppercase;font-weight:700;color:#6B7280;letter-spacing:0.4px;margin-bottom:8px;">${label}</div>
+      <div style="font-size:18px;font-weight:800;${SCORE_STYLES[word.cls].replace(/border:[^;]+;/,'')}border-radius:8px;padding:6px 14px;display:inline-block;">${word.label}</div>
+    </div>`;
+
+  body.innerHTML = `
+    <!-- Header card -->
+    <div style="background:#FFF;border:0.5px solid #E2DFD7;border-radius:14px;padding:24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+      <div style="width:64px;height:64px;border-radius:50%;background:${grad};display:flex;align-items:center;justify-content:center;color:#FFF;font-weight:700;font-size:22px;flex-shrink:0;">${initials}</div>
+      <div style="flex:1;min-width:200px;">
+        <h2 style="font-size:22px;font-weight:800;margin:0 0 6px;">${cand.name}</h2>
+        <div style="display:flex;flex-wrap:wrap;gap:10px 18px;font-size:12px;color:#6B7280;">
+          <span><strong style="color:#111;">Role:</strong> ${cand.role}</span>
+          <span><strong style="color:#111;">Experience:</strong> ${cand.experience || 'N/A'}</span>
+          <span><strong style="color:#111;">Qualification:</strong> ${cand.qualification || 'N/A'}</span>
+          <span><strong style="color:#111;">ID:</strong> <code>${cand.id}</code></span>
+          <span><strong style="color:#111;">Date:</strong> ${cand.reportDate || 'N/A'}</span>
+        </div>
+      </div>
+      <div style="background:${decisionBg};color:${decisionColor};border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;text-align:center;flex-shrink:0;">${decisionText}</div>
+    </div>
+
+    <!-- Score cards -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;">
+      ${scoreCard('Resume', rw)}
+      ${scoreCard('Screening', scw)}
+      ${scoreCard('Technical', tw)}
+      ${scoreCard('Overall Match', ow)}
+    </div>
+
+    <!-- Skills -->
+    ${cand.resumeData && cand.resumeData.skills ? `
+    <div style="background:#FFF;border:0.5px solid #E2DFD7;border-radius:14px;padding:20px;">
+      <h3 style="font-size:14px;font-weight:700;margin:0 0 12px;border-bottom:0.5px solid #EEEAE3;padding-bottom:8px;">Skills</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        ${Object.entries(cand.resumeData.skills).map(([cat,skills]) => `
+          <div><span style="font-size:10px;font-weight:700;text-transform:uppercase;color:#6B7280;letter-spacing:0.3px;">${cat}:</span>
+          <span style="margin-left:8px;">${skills.map(s=>`<span style="background:#EBF4FF;color:#2563EB;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:600;margin-right:4px;">${s}</span>`).join('')}</span></div>
+        `).join('')}
+      </div>
+    </div>` : ''}
+
+    <!-- Experience -->
+    ${cand.resumeData && cand.resumeData.experience && cand.resumeData.experience.length ? `
+    <div style="background:#FFF;border:0.5px solid #E2DFD7;border-radius:14px;padding:20px;">
+      <h3 style="font-size:14px;font-weight:700;margin:0 0 12px;border-bottom:0.5px solid #EEEAE3;padding-bottom:8px;">Work Experience</h3>
+      ${cand.resumeData.experience.map(exp => `
+        <div style="padding:12px 0;border-bottom:0.5px solid #F3F4F6;">
+          <div style="font-size:11px;font-weight:700;color:#1a7a4a;font-family:monospace;">${exp.period}</div>
+          <div style="font-size:13px;font-weight:700;margin:2px 0;">${exp.role} <span style="font-weight:500;color:#6B7280;">@ ${exp.company}</span></div>
+          <div style="font-size:12px;color:#6B7280;line-height:1.4;">${exp.description}</div>
+        </div>`).join('')}
+    </div>` : ''}
+
+    <!-- Insights -->
+    ${cand.insights && cand.insights.length ? `
+    <div style="background:#FFF;border:0.5px solid #E2DFD7;border-radius:14px;padding:20px;">
+      <h3 style="font-size:14px;font-weight:700;margin:0 0 12px;border-bottom:0.5px solid #EEEAE3;padding-bottom:8px;">Evidence-Based Insights</h3>
+      ${cand.insights.map(i => `<div style="padding:8px 0;border-bottom:0.5px solid #F3F4F6;font-size:12px;">✓ ${i.text} <span style="color:#9CA3AF;font-size:11px;">— ${i.source}</span></div>`).join('')}
+    </div>` : ''}
+
+    <!-- Footer -->
+    <div style="text-align:center;padding:16px;color:#9CA3AF;font-size:11px;">
+      This is a read-only shareable report generated by <strong>ElastiCrew ATS</strong>. Last updated: ${cand.reportDate || 'N/A'}.
+    </div>
+  `;
+
+  // Hide normal app UI, show share overlay
+  document.querySelector('.app-container').style.display = 'none';
+  overlay.style.display = 'block';
+}
+
+initShareView();
+
 // ----------------------------------------------------
 document.addEventListener("click", (e) => {
   if (!actionsDropdown.contains(e.target)) {
