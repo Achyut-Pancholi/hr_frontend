@@ -2090,7 +2090,7 @@ function initShareView() {
   });
 }
 
-initShareView();
+// initShareView is called at the END of this file (after all init is complete)
 
 // ----------------------------------------------------
 document.addEventListener("click", (e) => {
@@ -3310,3 +3310,8 @@ window.saveRpHrNotes = function() {
   renderCandidates();
   showToast('HR notes updated');
 }
+
+// ════════════════════════════════════════════════════════════
+// SHARE VIEW — called last so all init (tabs, events) is ready
+// ════════════════════════════════════════════════════════════
+initShareView();
