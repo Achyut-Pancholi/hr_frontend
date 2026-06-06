@@ -59,7 +59,7 @@ let candidates = [
     id: "CAN-1032",
     name: "Unnati Sutradhar",
     phone: "(555) 019-9923",
-    email: "mahima.dangi@kadellabs.com",
+    email: "mahima.dangi@elasticrew.com",
     role: "Python Developer",
     status: "Screening Completed",
     decision: "On Hold",
@@ -122,7 +122,7 @@ let candidates = [
       "How do you optimize page load times and Core Web Vitals in a modern web app?"
     ],
     transcript: [
-      { speaker: "AI Bot", text: "Welcome to the KadelLabs screening. First, please explain how closures work in JavaScript." },
+      { speaker: "AI Bot", text: "Welcome to the Elasticrew screening. First, please explain how closures work in JavaScript." },
       { speaker: "Candidate", text: "A closure is the combination of a function bundled together with references to its surrounding state or lexical environment. In other words, a closure gives an inner function access to the outer scope." },
       { speaker: "AI Bot", text: "Excellent. How would you optimize React page performance?" },
       { speaker: "Candidate", text: "I would use memoization strategies like React.memo, useMemo, and useCallback to avoid unnecessary re-renders. I would also code-split via React.lazy and optimize bundle size using tree shaking." }
@@ -158,7 +158,7 @@ let candidates = [
       "What is scoping in JavaScript and how does a closure work?"
     ],
     transcript: [
-      { speaker: "AI Bot", text: "Welcome to the KadelLabs screening. First, please explain how closures work in JavaScript." },
+      { speaker: "AI Bot", text: "Welcome to the Elasticrew screening. First, please explain how closures work in JavaScript." },
       { speaker: "Candidate", text: "I'm having trouble with my microphone. A closure is... sorry, can you hear me?" }
     ]
   },
@@ -559,7 +559,7 @@ let panelists = [
     title: 'Engineering Lead', 
     color: '#1B2B5E',
     department: 'Engineering',
-    email: 'ravi@kadellabs.com',
+    email: 'ravi@elasticrew.com',
     skills: ['React', 'Node.js', 'System Design', 'Python'],
     interviewTypes: ['Technical', 'Managerial', 'Final Round'],
     timezone: 'IST',
@@ -578,7 +578,7 @@ let panelists = [
     title: 'HR Manager', 
     color: '#1D9E75',
     department: 'HR',
-    email: 'sanya@kadellabs.com',
+    email: 'sanya@elasticrew.com',
     skills: ['Sourcing', 'Behavioral Evaluation', 'Culture Fit', 'Compensation'],
     interviewTypes: ['HR', 'Managerial'],
     timezone: 'IST',
@@ -597,7 +597,7 @@ let panelists = [
     title: 'Sr. Developer', 
     color: '#7C3AED',
     department: 'Engineering',
-    email: 'arjun@kadellabs.com',
+    email: 'arjun@elasticrew.com',
     skills: ['Java', 'Spring Boot', 'AWS', 'Kubernetes', 'Microservices'],
     interviewTypes: ['Technical'],
     timezone: 'IST',
@@ -616,7 +616,7 @@ let panelists = [
     title: 'Product Manager', 
     color: '#D97706',
     department: 'Product',
-    email: 'priya@kadellabs.com',
+    email: 'priya@elasticrew.com',
     skills: ['Product Strategy', 'Roadmapping', 'Agile', 'User Analytics'],
     interviewTypes: ['Managerial', 'Final Round'],
     timezone: 'IST',
@@ -1657,7 +1657,7 @@ function hideCandidateWorkspace() {
   }
 
   // Restore Title & URL
-  document.title = `Candidates Directory | KadelLabs ATS`;
+  document.title = `Candidates Directory | Elasticrew ATS`;
   window.history.replaceState({}, "", `${window.location.pathname}${originalUrlParams || ""}`);
 
   // Reload lists

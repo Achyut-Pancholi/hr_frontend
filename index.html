@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Resume Upload & Parsing | KadelLabs ATS</title>
+  <title>Resume Upload & Parsing | Elasticrew ATS</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,8 +12,8 @@
     <!-- LEFT SIDEBAR -->
     <aside class="sidebar">
       <div class="logo-area">
-        <span class="logo-title">KadelLabs</span>
-        <span class="logo-subtitle">serving through technology</span>
+        <span class="logo-title">Elasticrew</span>
+        <span class="logo-subtitle">candidate management system</span>
       </div>
       
       <nav class="navigation-menu">
@@ -59,7 +59,7 @@
         <div class="profile-block">
           <div class="profile-details">
             <span class="profile-name">Admin</span>
-            <span class="profile-email">careers@kadellabs.com</span>
+            <span class="profile-email">careers@elasticrew.com</span>
           </div>
           <div class="avatar-initials">KL</div>
         </div>
@@ -73,7 +73,7 @@
           <div class="card-header">
             <div class="card-title-group">
               <h2 class="card-title">Upload Resumes</h2>
-              <p class="card-subtitle">Select a Department and Sub Department and upload applicant resumes for AI parsing.</p>
+              <p class="card-subtitle">Select a Department and Sub Department and upload candidate resumes for AI parsing.</p>
             </div>
             <button class="panel-toggle-btn" id="btn-toggle-upload" title="Toggle upload panel">
               <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
@@ -143,8 +143,8 @@
         <section class="premium-card" id="card-parsed-candidates">
           <div class="card-header">
             <div class="card-title-group">
-              <h2 class="card-title">Applicant Pipeline</h2>
-              <p class="card-subtitle">Manage parsed applicant profiles, review notes, and update hiring pipeline stages.</p>
+              <h2 class="card-title">Candidate Pipeline</h2>
+              <p class="card-subtitle">Manage parsed candidate profiles, review notes, and update hiring pipeline stages.</p>
             </div>
             
             <!-- Search bar component -->
@@ -152,14 +152,14 @@
               <span class="search-icon">
                 <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
               </span>
-              <input type="text" id="candidate-search" class="search-input" placeholder="Search applicant">
+              <input type="text" id="candidate-search" class="search-input" placeholder="Search candidate">
             </div>
           </div>
 
           <!-- Pipeline Summary Pill-counters -->
           <div class="pipeline-summary-bar" id="pipeline-summary-bar">
             <div class="summary-pill active" data-filter="all" id="pill-all">
-              <span class="pill-label">Total Applicants</span>
+              <span class="pill-label">Total Candidates</span>
               <span class="pill-count" id="count-total">0</span>
             </div>
             <div class="summary-pill" data-filter="Resume Received" id="pill-parsed">
@@ -182,8 +182,8 @@
               <thead>
                 <tr>
                   <th class="col-checkbox"><input type="checkbox" id="bulk-select-all"></th>
-                  <th>Applicant ID</th>
-                  <th>Applicant</th>
+                  <th>Candidate ID</th>
+                  <th>Candidate</th>
                   <th>Email</th>
                   <th>Role Applied</th>
                   <th>Pipeline Stage</th>
@@ -253,13 +253,13 @@
   <!-- NOTES EDIT DRAWER -->
   <div class="side-drawer" id="notes-drawer">
     <div class="side-drawer-header">
-      <h3 class="card-title" id="notes-drawer-title">Applicant Notes</h3>
+      <h3 class="card-title" id="notes-drawer-title">Candidate Notes</h3>
       <button class="modal-close-btn" id="close-notes-drawer">
         <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M6 18L18 6M6 6l12 12" /></svg>
       </button>
     </div>
     <div class="side-drawer-body">
-      <p class="card-subtitle" style="margin-bottom: 4px;">Recruiter notes will be saved to the applicant profile. Hover over the notes icon on the candidate list to quick-read.</p>
+      <p class="card-subtitle" style="margin-bottom: 4px;">Recruiter notes will be saved to the candidate profile. Hover over the notes icon on the candidate list to quick-read.</p>
       <textarea id="notes-textarea" class="notes-textarea" placeholder="Type recruitment updates, interview remarks, or status reminders here..." style="height: 200px;"></textarea>
     </div>
     <div class="side-drawer-footer">
@@ -272,7 +272,7 @@
   <!-- PROFILE VIEW DRAWER -->
   <div class="side-drawer" id="profile-drawer">
     <div class="side-drawer-header">
-      <h3 class="card-title">Applicant Profile</h3>
+      <h3 class="card-title">Candidate Profile</h3>
       <button class="modal-close-btn" id="close-profile-drawer">
         <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M6 18L18 6M6 6l12 12" /></svg>
       </button>
@@ -288,7 +288,7 @@
       
       <div class="drawer-meta-section">
         <div class="drawer-meta-item">
-          <span class="drawer-meta-label">Applicant ID</span>
+          <span class="drawer-meta-label">Candidate ID</span>
           <span class="drawer-meta-value" id="prof-id" style="font-family: var(--font-mono); color: var(--active-nav-bg);">CAN-1024</span>
         </div>
         <div class="drawer-meta-item">

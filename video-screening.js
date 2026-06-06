@@ -4,7 +4,7 @@ let candidates = [
     id: "CAN-1032",
     name: "Unnati Sutradhar",
     phone: "(555) 019-9923",
-    email: "mahima.dangi@kadellabs.com",
+    email: "mahima.dangi@elasticrew.com",
     role: "Python Developer",
     status: "Screening Completed",
     decision: "On Hold",
@@ -67,7 +67,7 @@ let candidates = [
       "How do you optimize page load times and Core Web Vitals in a modern web app?"
     ],
     transcript: [
-      { speaker: "AI Bot", text: "Welcome to the KadelLabs screening. First, please explain how closures work in JavaScript." },
+      { speaker: "AI Bot", text: "Welcome to the Elasticrew screening. First, please explain how closures work in JavaScript." },
       { speaker: "Candidate", text: "A closure is the combination of a function bundled together with references to its surrounding state or lexical environment. In other words, a closure gives an inner function access to the outer scope." },
       { speaker: "AI Bot", text: "Excellent. How would you optimize React page performance?" },
       { speaker: "Candidate", text: "I would use memoization strategies like React.memo, useMemo, and useCallback to avoid unnecessary re-renders. I would also code-split via React.lazy and optimize bundle size using tree shaking." }
@@ -103,7 +103,7 @@ let candidates = [
       "What is scoping in JavaScript and how does a closure work?"
     ],
     transcript: [
-      { speaker: "AI Bot", text: "Welcome to the KadelLabs screening. First, please explain how closures work in JavaScript." },
+      { speaker: "AI Bot", text: "Welcome to the Elasticrew screening. First, please explain how closures work in JavaScript." },
       { speaker: "Candidate", text: "I'm having trouble with my microphone. A closure is... sorry, can you hear me?" }
     ]
   },
@@ -2547,7 +2547,7 @@ function hideCandidateWorkspace() {
   if (listView) listView.style.display = "block";
 
   // Restore document title
-  document.title = `Video Screening | KadelLabs ATS`;
+  document.title = `Video Screening | Elasticrew ATS`;
 
   // Restore original list URL parameters
   window.history.replaceState({}, "", `${window.location.pathname}${originalUrlParams || ""}`);

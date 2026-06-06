@@ -1,6 +1,6 @@
 /* =========================================================
    Interview Scheduler — scheduler.js
-   KadelLabs ATS  ·  v2 — improved calendar + week view + Panel Management
+   Elasticrew ATS  ·  v2 — improved calendar + week view + Panel Management
    ========================================================= */
 
 // ── Toast ─────────────────────────────────────────────────
@@ -27,7 +27,7 @@ const panelists = [
     title: 'Engineering Lead', 
     color: '#1B2B5E',
     department: 'Engineering',
-    email: 'ravi@kadellabs.com',
+    email: 'ravi@elasticrew.com',
     skills: ['React', 'Node.js', 'System Design', 'Python'],
     interviewTypes: ['Technical', 'Managerial', 'Final Round'],
     timezone: 'IST',
@@ -46,7 +46,7 @@ const panelists = [
     title: 'HR Manager', 
     color: '#1D9E75',
     department: 'HR',
-    email: 'sanya@kadellabs.com',
+    email: 'sanya@elasticrew.com',
     skills: ['Sourcing', 'Behavioral Evaluation', 'Culture Fit', 'Compensation'],
     interviewTypes: ['HR', 'Managerial'],
     timezone: 'IST',
@@ -65,7 +65,7 @@ const panelists = [
     title: 'Sr. Developer', 
     color: '#7C3AED',
     department: 'Engineering',
-    email: 'arjun@kadellabs.com',
+    email: 'arjun@elasticrew.com',
     skills: ['Java', 'Spring Boot', 'AWS', 'Kubernetes', 'Microservices'],
     interviewTypes: ['Technical'],
     timezone: 'IST',
@@ -84,7 +84,7 @@ const panelists = [
     title: 'Product Manager', 
     color: '#D97706',
     department: 'Product',
-    email: 'priya@kadellabs.com',
+    email: 'priya@elasticrew.com',
     skills: ['Product Strategy', 'Roadmapping', 'Agile', 'User Analytics'],
     interviewTypes: ['Managerial', 'Final Round'],
     timezone: 'IST',
@@ -1090,7 +1090,7 @@ if (submitModalBtn) {
     const applicant = document.getElementById('modal-applicant').value.trim();
     const date = document.getElementById('modal-date').value;
     const time = document.getElementById('modal-time').value;
-    if (!applicant) { showToast('Please enter an applicant name.','warning'); return; }
+    if (!applicant) { showToast('Please enter a candidate name.','warning'); return; }
     if (!date)      { showToast('Please select a date.','warning'); return; }
     if (!time)      { showToast('Please select a time.','warning'); return; }
     if (!selectedModalPanelists.length) { showToast('Select at least one interviewer.','warning'); return; }

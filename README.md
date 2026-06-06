@@ -1,6 +1,6 @@
-# KadelLabs HR Recruiter Platform - Frontend Mockups
+﻿# Elasticrew HR Recruiter Platform - Frontend Mockups
 
-A modern, minimal, and premium SaaS HR Recruiter Platform designed for KadelLabs. This repository contains high-fidelity, showcase-ready static mockups, styling guidelines, and interactive mock databases.
+A modern, minimal, and premium SaaS HR Recruiter Platform designed for Elasticrew. This repository contains high-fidelity, showcase-ready static mockups, styling guidelines, and interactive mock databases.
 
 ## Modules Implemented
 

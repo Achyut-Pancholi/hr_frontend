@@ -29,7 +29,7 @@ let candidates = [
         "Tools": ["Vite", "Webpack", "Git", "Docker"]
       },
       experience: [
-        { role: "Tech Lead", company: "KadelLabs", period: "2024 - Present", description: "Lead frontend team of 4, built modular enterprise UI design system." },
+        { role: "Tech Lead", company: "Elasticrew", period: "2024 - Present", description: "Lead frontend team of 4, built modular enterprise UI design system." },
         { role: "Senior Developer", company: "WebCorp", period: "2021 - 2024", description: "Designed scalable dashboards and reduced render times by 30%." }
       ],
       certifications: [

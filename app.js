@@ -44,7 +44,7 @@ let candidates = [
     email: "kathryn.murphy@example.com",
     role: "HR Executive",
     status: "On Hold",
-    notes: "Applicant has salary expectations slightly above budget. Holding for review with management.",
+    notes: "Candidate has salary expectations slightly above budget. Holding for review with management.",
     skills: ["Talent Acquisition", "Employee Relations", "HRIS Tools", "Negotiation", "Onboarding", "Conflict Resolution"],
     experience: [
       { role: "HR Consultant", company: "Enterprise People Corp", duration: "2023 - Present", desc: "Managed end-to-end recruitment pipelines for technical and operational roles. Implemented new HRIS tool, reducing onboarding delays." },
@@ -365,7 +365,7 @@ function renderCandidatesTable() {
     candidatesTableBody.innerHTML = `
       <tr>
         <td colspan="7" style="text-align: center; color: var(--text-secondary); height: 120px; font-style: italic;">
-          No matching applicants found. Select categories above to drag-and-drop new resumes.
+          No matching candidates found. Select categories above to drag-and-drop new resumes.
         </td>
       </tr>
     `;
@@ -615,7 +615,7 @@ function createParsedCandidate(filename, roleVal) {
   }).join(" ");
 
   if (!cleanName || cleanName.length < 2) {
-    cleanName = "Applicant Profile";
+    cleanName = "Candidate Profile";
   }
 
   // Generate phone
@@ -761,11 +761,11 @@ function updateStepIndicator() {
   } else if (!roleVal) {
     badge.className = "step-badge";
     badge.textContent = "Step 1 of 2";
-    text.textContent = "Select target role for applicant uploads";
+    text.textContent = "Select target role for candidate uploads";
   } else {
     badge.className = "step-badge complete";
     badge.textContent = "✓ Step 1 Complete";
-    text.innerHTML = ` &nbsp;|&nbsp; <span class="step-badge">Step 2 of 2</span> Drag and drop applicant resumes below for <strong style="color: var(--active-nav-bg);">${roleVal}</strong>`;
+    text.innerHTML = ` &nbsp;|&nbsp; <span class="step-badge">Step 2 of 2</span> Drag and drop candidate resumes below for <strong style="color: var(--active-nav-bg);">${roleVal}</strong>`;
   }
 }
 
@@ -914,7 +914,7 @@ function openNotesDrawer(candidateId) {
   if (!cand) return;
   
   activeCandidateId = candidateId;
-  document.getElementById("notes-drawer-title").textContent = `Applicant Notes — ${cand.name} (${cand.id})`;
+  document.getElementById("notes-drawer-title").textContent = `Candidate Notes — ${cand.name} (${cand.id})`;
   notesTextarea.value = cand.notes || "";
   
   notesDrawer.classList.add("active");
@@ -1050,7 +1050,7 @@ btnBulkDelete.addEventListener("click", () => {
   renderCandidatesTable();
   updateSummaryCounters();
   updateBulkDock();
-  showToast(`Bulk deleted ${deletedCount} applicants.`, "warning");
+  showToast(`Bulk deleted ${deletedCount} candidates.`, "warning");
 });
 
 bulkChangeStageSelect.addEventListener("change", (e) => {
@@ -1070,7 +1070,7 @@ bulkChangeStageSelect.addEventListener("change", (e) => {
   renderCandidatesTable();
   updateSummaryCounters();
   updateBulkDock();
-  showToast(`Bulk updated stage to ${newStage} for ${count} applicants.`);
+  showToast(`Bulk updated stage to ${newStage} for ${count} candidates.`);
 });
 
 btnBulkExport.addEventListener("click", () => {
@@ -1078,7 +1078,7 @@ btnBulkExport.addEventListener("click", () => {
   if (selectedList.length === 0) return;
   
   let csvContent = "data:text/csv;charset=utf-8,";
-  csvContent += "Applicant ID,Applicant,Email,Phone,Role Applied,Pipeline Stage,Notes\n";
+  csvContent += "Candidate ID,Applicant,Email,Phone,Role Applied,Pipeline Stage,Notes\n";
   
   selectedList.forEach(c => {
     const row = [
@@ -1096,12 +1096,12 @@ btnBulkExport.addEventListener("click", () => {
   const encodedUri = encodeURI(csvContent);
   const link = document.createElement("a");
   link.setAttribute("href", encodedUri);
-  link.setAttribute("download", `KadelLabs_ATS_Export_${Date.now()}.csv`);
+  link.setAttribute("download", `Elasticrew_ATS_Export_${Date.now()}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
   
-  showToast(`Successfully exported CSV file containing ${selectedList.length} applicant records.`);
+  showToast(`Successfully exported CSV file containing ${selectedList.length} candidate records.`);
 });
 
 // ----------------------------------------------------
