@@ -2033,14 +2033,9 @@ function initShareView() {
   const shareId = params.get('share');
   if (!shareId) return;
 
-  const overlay = document.getElementById('share-view-overlay');
-  const body = document.getElementById('share-view-body');
-  if (!overlay || !body) return;
-
   const cand = candidates.find(c => c.id === shareId);
   if (!cand) {
-    body.innerHTML = `<div style="text-align:center;padding:60px;color:#6B7280;font-size:14px;">Candidate report not found for ID: <strong>${shareId}</strong></div>`;
-    overlay.style.display = 'block';
+    document.body.innerHTML = `<div style="text-align:center;padding:60px;color:#6B7280;font-size:14px;">Candidate report not found for ID: <strong>${shareId}</strong></div>`;
     return;
   }
 
@@ -2997,12 +2992,41 @@ window.openFullReport = function(id) {
   getE('rp-full-phone').textContent = cand.phone || '+1 234 567 8900';
 
   // Stats
-  const ex = cand.extractedInfo || {};
+  // Generate dynamic dummy data for Overview and Resume tabs based on candidate's role
+  const isFrontend = (cand.role || '').toLowerCase().includes('frontend') || (cand.role || '').toLowerCase().includes('ui');
+  const roleName = cand.role || 'Software Engineer';
+  
+  const dummyEx = {
+    currentCompany: 'Tech Innovators Inc.',
+    totalExperience: cand.experience || '4.5 Years',
+    summary: `A highly skilled ${roleName} with extensive experience in building scalable, resilient architectures. Known for strong problem-solving capabilities and a passion for clean code. Has successfully led cross-functional teams to deliver critical business systems on time.`,
+    skills: isFrontend ? ['React', 'TypeScript', 'Next.js', 'TailwindCSS', 'Redux', 'GraphQL'] : ['Node.js', 'Python', 'PostgreSQL', 'Docker', 'Kubernetes', 'AWS', 'Microservices'],
+    experience: [
+      { role: `Senior ${roleName}`, company: 'Tech Innovators Inc.', duration: '2022 - Present', highlights: ['Led a team of 5 engineers to rebuild the core platform, improving performance by 40%.', 'Architected robust CI/CD pipelines reducing deployment time by half.'] },
+      { role: `${roleName}`, company: 'Global Solutions', duration: '2019 - 2022', highlights: ['Developed and maintained RESTful APIs serving millions of requests daily.', 'Collaborated with product teams to launch 3 major features.'] }
+    ],
+    education: [
+      { degree: 'B.Tech in Computer Science', institution: 'State University', year: '2019' }
+    ],
+    certifications: isFrontend ? ['Certified React Developer', 'UI/UX Design Certification'] : ['AWS Certified Solutions Architect', 'CKA: Certified Kubernetes Administrator']
+  };
+
+  const ex = Object.keys(cand.extractedInfo || {}).length ? cand.extractedInfo : (cand.resumeData ? {
+    ...cand.resumeData,
+    currentCompany: cand.resumeData.experience?.[0]?.company || dummyEx.currentCompany,
+    totalExperience: cand.experience || dummyEx.totalExperience,
+    summary: dummyEx.summary,
+    skills: Array.isArray(cand.resumeData.skills) ? cand.resumeData.skills : Object.values(cand.resumeData.skills || {}).flat().length ? Object.values(cand.resumeData.skills).flat() : dummyEx.skills,
+    experience: (cand.resumeData.experience || dummyEx.experience).map(e => ({ role: e.role, company: e.company, duration: e.period || e.duration, highlights: [e.description || 'Contributed to major project deliverables.'] })),
+    education: cand.resumeData.education || dummyEx.education,
+    certifications: (cand.resumeData.certifications || []).map(c => c.name) || dummyEx.certifications
+  } : dummyEx);
+
   getE('rp-full-company').textContent = ex.currentCompany || 'N/A';
   getE('rp-stat-company').textContent = ex.currentCompany || 'N/A';
   getE('rp-full-exp').textContent = ex.totalExperience || 'N/A';
   getE('rp-stat-exp').textContent = ex.totalExperience || 'N/A';
-  const qual = (ex.education && ex.education[0]) ? ex.education[0].degree : 'N/A';
+  const qual = (ex.education && ex.education[0]) ? ex.education[0].degree : (cand.qualification || 'N/A');
   getE('rp-stat-qual-inline').textContent = qual;
   getE('rp-stat-qual').textContent = qual;
 
@@ -3014,23 +3038,22 @@ window.openFullReport = function(id) {
 
   let expHtml = '';
   if(ex.experience && ex.experience.length) {
-    expHtml = ex.experience.slice(0, 2).map(e => `
+    expHtml = ex.experience.map(e => `
       <div class="rp-exp-item">
         <div class="rp-exp-period">${e.duration || 'N/A'}</div>
         <div>
           <div class="rp-exp-title">${e.role || 'Role'}</div>
           <div class="rp-exp-company">${e.company || 'Company'}</div>
-          ${(e.highlights||[]).slice(0, 2).map(h => `<div class="rp-exp-bullet">${h}</div>`).join('')}
+          ${(e.highlights||[]).map(h => `<div class="rp-exp-bullet">${h}</div>`).join('')}
         </div>
       </div>
     `).join('');
-    if(ex.experience.length > 2) expHtml += `<div style="font-size:11px;color:var(--rp-blue);margin-top:8px;font-weight:600;cursor:pointer;">+ ${ex.experience.length - 2} more experiences (View Resume)</div>`;
   } else expHtml = '<div style="color:#9CA3AF;font-size:12px;">No experience listed</div>';
   getE('rp-experience-list').innerHTML = expHtml;
 
   let eduHtml = '';
   if(ex.education && ex.education.length) {
-    eduHtml = ex.education.slice(0, 1).map(e => `
+    eduHtml = ex.education.map(e => `
       <div class="rp-edu-degree">${e.degree || 'Degree'}</div>
       <div class="rp-edu-inst">${e.institution || 'Inst'} • ${e.year || ''}</div>
     `).join('');
@@ -3039,7 +3062,7 @@ window.openFullReport = function(id) {
 
   let certsHtml = '';
   if(ex.certifications && ex.certifications.length) {
-    certsHtml = ex.certifications.map(c => `<div class="rp-cert-item">${c}</div>`).join('');
+    certsHtml = ex.certifications.map(c => `<div class="rp-cert-item">${typeof c === 'string' ? c : c.name}</div>`).join('');
   } else certsHtml = '<div style="color:#9CA3AF;font-size:12px;">No certifications</div>';
   getE('rp-certs-list').innerHTML = certsHtml;
 
