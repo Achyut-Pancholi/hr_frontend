@@ -738,7 +738,7 @@ function updateDropZoneText() {
     if (roleVal) {
       heading.innerHTML = `Drag & drop resumes to upload for <strong style="color: var(--active-nav-bg);">${roleVal}</strong> (${deptText})`;
     } else {
-      heading.innerHTML = `No job selected. Click expand arrow (右上) to select department and role.`;
+      heading.innerHTML = `No job selected. Click expand arrow to select department and role.`;
     }
     subheading.style.display = "none";
   } else {
