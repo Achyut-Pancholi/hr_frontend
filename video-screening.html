@@ -27,6 +27,39 @@
       color: var(--text-primary);
     }
 
+    /* Accordion collapsible cards */
+    .accordion-card {
+      overflow: hidden;
+    }
+    .accordion-toggle {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.15s;
+    }
+    .accordion-toggle:hover {
+      background-color: #FAFAF8;
+    }
+    .accordion-toggle svg {
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+    .accordion-body {
+      display: none;
+      padding: 0 16px 16px 16px;
+    }
+    .accordion-card.open .accordion-body {
+      display: block;
+    }
+    .accordion-card.open .accordion-toggle svg {
+      transform: rotate(180deg);
+    }
+
     /* ══ Candidate Review Workspace ═════════════════════════ */
     #candidate-review-workspace {
       display: none;
@@ -817,10 +850,10 @@
 
           </div>
 
-          <!-- Right Column (30%) - Sidebar Widgets -->
-          <div class="workspace-sidebar">
+          <!-- Right Column (30%) - Sidebar Widgets (Collapsible Accordions) -->
+          <div class="workspace-sidebar" style="overflow-y: auto; max-height: calc(100vh - 160px);">
             
-            <!-- Candidate Profile widget -->
+            <!-- Candidate Profile widget - Always visible -->
             <div class="workspace-card" style="padding: 16px;">
               <h3 class="workspace-card-title" style="margin-bottom: 12px;">Candidate Profile</h3>
               <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12px; color: var(--text-primary);">
@@ -845,34 +878,43 @@
               </div>
             </div>
 
-            <!-- Resume Widget with Clickable PDF -->
-            <div class="workspace-card" style="padding: 16px;">
-              <h3 class="workspace-card-title" style="margin-bottom: 12px;">Resume Details</h3>
-              <p id="ws-resume-summary" style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.4; margin: 0 0 12px 0;"></p>
-              
-              <!-- PDF Resume Mockup -->
-              <a href="#" id="ws-resume-link" style="display: flex; align-items: center; gap: 10px; background: #FAF9F6; border: 1px dashed #D1D9E8; padding: 10px; border-radius: 8px; text-decoration: none; transition: background 0.15s;" onclick="event.preventDefault(); showToast('Opening resume PDF viewer...');">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#E24B4A" stroke-width="2" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
-                <div style="display: flex; flex-direction: column; gap: 2px;">
-                  <span style="font-size: 11px; font-weight: 700; color: var(--text-primary);">resume_attachment.pdf</span>
-                  <span style="font-size: 10px; color: var(--text-secondary);">Click to view PDF</span>
-                </div>
-              </a>
-            </div>
-
-            <!-- Core Skills Widget -->
-            <div class="workspace-card" style="padding: 16px;">
-              <h3 class="workspace-card-title" style="margin-bottom: 12px;">Core Skills</h3>
-              <div id="ws-skills-container" style="display: flex; gap: 6px; flex-wrap: wrap;">
-                <!-- Tags injected dynamically -->
+            <!-- Resume Details - Collapsible -->
+            <div class="workspace-card accordion-card" style="padding: 0;">
+              <button class="accordion-toggle" onclick="this.parentElement.classList.toggle('open')">
+                <span class="workspace-card-title" style="margin: 0; font-size: 12px;">Resume Details</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; transition: transform 0.2s;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+              </button>
+              <div class="accordion-body">
+                <p id="ws-resume-summary" style="font-size: 11.5px; color: var(--text-secondary); line-height: 1.4; margin: 0 0 12px 0;"></p>
+                <a href="#" id="ws-resume-link" style="display: flex; align-items: center; gap: 10px; background: #FAF9F6; border: 1px dashed #D1D9E8; padding: 10px; border-radius: 8px; text-decoration: none;" onclick="event.preventDefault(); showToast('Opening resume PDF viewer...');">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#E24B4A" stroke-width="2" style="width: 24px; height: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>
+                  <div style="display: flex; flex-direction: column; gap: 2px;">
+                    <span style="font-size: 11px; font-weight: 700; color: var(--text-primary);">resume_attachment.pdf</span>
+                    <span style="font-size: 10px; color: var(--text-secondary);">Click to view PDF</span>
+                  </div>
+                </a>
               </div>
             </div>
 
-            <!-- Experience History Timeline -->
-            <div class="workspace-card" style="padding: 16px;">
-              <h3 class="workspace-card-title" style="margin-bottom: 12px;">Experience History</h3>
-              <div class="experience-timeline" id="ws-experience-container">
-                <!-- Items injected dynamically -->
+            <!-- Core Skills - Collapsible -->
+            <div class="workspace-card accordion-card" style="padding: 0;">
+              <button class="accordion-toggle" onclick="this.parentElement.classList.toggle('open')">
+                <span class="workspace-card-title" style="margin: 0; font-size: 12px;">Core Skills</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; transition: transform 0.2s;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+              </button>
+              <div class="accordion-body">
+                <div id="ws-skills-container" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+              </div>
+            </div>
+
+            <!-- Experience History - Collapsible -->
+            <div class="workspace-card accordion-card" style="padding: 0;">
+              <button class="accordion-toggle" onclick="this.parentElement.classList.toggle('open')">
+                <span class="workspace-card-title" style="margin: 0; font-size: 12px;">Experience History</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px; transition: transform 0.2s;"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+              </button>
+              <div class="accordion-body">
+                <div class="experience-timeline" id="ws-experience-container"></div>
               </div>
             </div>
 
