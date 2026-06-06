@@ -738,7 +738,7 @@ function updateDropZoneText() {
     if (roleVal) {
       heading.innerHTML = `Drag & drop resumes to upload for <strong style="color: var(--active-nav-bg);">${roleVal}</strong> (${deptText})`;
     } else {
-      heading.innerHTML = `No job selected. Click expand arrow to select department and role.`;
+      heading.innerHTML = `No role selected. Click expand arrow to select department and role.`;
     }
     subheading.style.display = "none";
   } else {
@@ -757,7 +757,7 @@ function updateStepIndicator() {
   if (!deptVal) {
     badge.className = "step-badge";
     badge.textContent = "Step 1 of 2";
-    text.textContent = "Select job department and sub-department";
+    text.textContent = "Select department and sub-department";
   } else if (!roleVal) {
     badge.className = "step-badge";
     badge.textContent = "Step 1 of 2";

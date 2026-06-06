@@ -370,7 +370,7 @@ let candidates = [
       }
     },
     timeline: [
-      { date: "May 18, 2026", event: "Application Submitted", desc: "Applied via Github Jobs." },
+      { date: "May 18, 2026", event: "Application Submitted", desc: "Applied via Github Roles." },
       { date: "May 19, 2026", event: "Video Screening Completed", desc: "AI evaluation scored 8.2/10." },
       { date: "May 22, 2026", event: "L1 Interview Scheduled", desc: "Scheduled for React Native Panel." }
     ]

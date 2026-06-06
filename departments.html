@@ -483,7 +483,7 @@
       <header class="top-bar">
         <div style="display: flex; flex-direction: column; gap: 2px;">
           <h1 class="page-title">Department Configuration</h1>
-          <p class="card-subtitle" style="margin: 0; padding: 0;">Manage hiring departments, sub-departments, and job roles.</p>
+          <p class="card-subtitle" style="margin: 0; padding: 0;">Manage hiring departments, sub-departments, and roles.</p>
         </div>
         
         <div class="profile-block">
@@ -522,7 +522,7 @@
 
           <div class="kpi-card" style="border-top: 4px solid var(--active-nav-bg);">
             <div class="kpi-header">
-              <span class="kpi-label">Total Job Titles</span>
+              <span class="kpi-label">Total Role Titles</span>
               <span class="kpi-icon" style="color: #1a7a4a;">
                 <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" style="width: 18px; height: 18px;"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 .621-.504 1.125-1.125 1.125H4.875c-.621 0-1.125-.504-1.125-1.125v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.453.254-.718.254H16.5a1.5 1.5 0 00-1.5 1.5v1.5a1.5 1.5 0 01-1.5 1.5h-3a1.5 1.5 0 01-1.5-1.5v-1.5a1.5 1.5 0 00-1.5-1.5H3.75c-.265 0-.524-.09-.718-.254M16.5 7.75V6.75a4.5 4.5 0 00-9 0v1.001" /></svg>
               </span>
@@ -537,7 +537,7 @@
             <span class="search-icon">
               <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
             </span>
-            <input type="text" id="dept-search" class="search-input" placeholder="Search department, sub-department, or job title...">
+            <input type="text" id="dept-search" class="search-input" placeholder="Search department, sub-department, or role title...">
           </div>
           <button class="btn-pill" id="btn-add-department" style="font-size: 12px; height: 36px; padding: 0 18px; white-space: nowrap;">
             <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" style="width: 14px; height: 14px; stroke-width: 2.5; margin-right: 4px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
@@ -620,20 +620,20 @@
   <div class="modal-overlay add-role-modal" id="add-role-modal">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 class="modal-title" id="add-role-modal-title">+ Add Job Title</h3>
+        <h3 class="modal-title" id="add-role-modal-title">+ Add Role Title</h3>
         <button class="modal-close-btn" id="close-add-role-modal">
           <svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path d="M6 18L18 6M6 6l12 12" /></svg>
         </button>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label class="form-label" for="input-new-role-name">Job Title<span>*</span></label>
+          <label class="form-label" for="input-new-role-name">Role Title<span>*</span></label>
           <input type="text" id="input-new-role-name" class="search-input" placeholder="e.g. Senior Frontend Developer" style="width: 100%; border-radius: var(--radius-input);">
         </div>
       </div>
       <div class="modal-footer">
         <button class="btn-secondary-pill" id="btn-cancel-add-role">Cancel</button>
-        <button class="btn-primary-pill" id="btn-save-add-role">Add Job Title</button>
+        <button class="btn-primary-pill" id="btn-save-add-role">Add Role Title</button>
       </div>
     </div>
   </div>

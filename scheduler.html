@@ -523,6 +523,192 @@
     .conflict-warning svg { width:14px; height:14px; stroke-width:2; flex-shrink:0; }
     .panelist-chip-sel.recommended::after { content:'⭐'; margin-left:3px; font-size:9px; }
     .panelist-chip-sel.conflict { background:#FEF0EF !important; border-color:#E24B4A !important; color:#E24B4A !important; }
+
+    /* Custom Dropdown Chevron Arrow for select inputs */
+    select.modal-input,
+    select.mp-select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      background-size: 14px;
+      padding-right: 40px;
+      cursor: pointer;
+    }
+    select.pa-filter,
+    select.dir-filter-select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 12px;
+      padding-right: 24px;
+      cursor: pointer;
+    }
+
+    /* Searchable dropdown panelist styling */
+    .searchable-dropdown-wrapper {
+      position: relative;
+    }
+    .dropdown-trigger-input {
+      padding-right: 40px !important;
+    }
+    .dropdown-arrow-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--text-secondary);
+      pointer-events: auto;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+    .dropdown-arrow-icon.open {
+      transform: translateY(-50%) rotate(180deg);
+    }
+    .dropdown-arrow-icon svg {
+      width: 14px;
+      height: 14px;
+      stroke-width: 2;
+    }
+    .searchable-dropdown-wrapper:focus-within .panelist-dropdown-panel {
+      /* keep open when focused */
+    }
+    .dropdown-panelist-item.selected {
+      background: rgba(26,122,74,0.04);
+    }
+    .panelist-dropdown-panel {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: #FFFFFF;
+      border: 1px solid #E2DFD7;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(28,43,74,0.12);
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+    }
+    .panelist-dropdown-panel.show {
+      display: block;
+    }
+    .dropdown-panelist-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-bottom: 0.5px solid #F3F1EC;
+    }
+    .dropdown-panelist-item:last-child {
+      border-bottom: none;
+    }
+    .dropdown-panelist-item:hover {
+      background: #FAF9F6;
+    }
+    .dropdown-panelist-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .dropdown-panelist-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 700;
+      color: #FFF;
+      flex-shrink: 0;
+    }
+    .dropdown-panelist-details {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .dropdown-panelist-name {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .dropdown-panelist-title {
+      font-size: 10px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .dropdown-panelist-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .dropdown-panelist-status {
+      font-size: 9.5px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+    .dropdown-panelist-status.available {
+      background: #E6F7F2;
+      color: #0D7A57;
+    }
+    .dropdown-panelist-status.busy {
+      background: #FEF3C7;
+      color: #B45309;
+    }
+    .dropdown-panelist-status.on-leave {
+      background: #FEF0EF;
+      color: #E24B4A;
+    }
+    .dropdown-checkbox {
+      width: 14px;
+      height: 14px;
+      border: 1px solid #E2DFD7;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: transparent;
+      transition: all 0.15s;
+    }
+    .dropdown-panelist-item.selected .dropdown-checkbox {
+      background: var(--active-nav-bg);
+      border-color: var(--active-nav-bg);
+      color: #FFF;
+    }
+    .dropdown-recommendation-star {
+      font-size: 11px;
+      color: #F59E0B;
+    }
+    .dropdown-panelist-item.conflict .dropdown-panelist-name {
+      color: #E24B4A;
+    }
+    .remove-chip-btn:hover {
+      color: #C62828 !important;
+    }
   </style>
 
 </head>
@@ -871,19 +1057,32 @@
             <option value="MS Teams" selected>Microsoft Teams</option>
           </select>
         </div>
-        <!-- Interviewers -->
+        <!-- Interview Type -->
         <div class="modal-form-section">
-          <label class="modal-form-label">Interviewer <span style="color:#C62828">*</span></label>
-          <select class="modal-input" id="modal-interviewer-select" style="appearance:none;cursor:pointer;">
-            <option value="" disabled selected>Select Interviewer</option>
-            <option value="Sarah Chen">Sarah Chen - Engineering Manager</option>
-            <option value="Marcus Johnson">Marcus Johnson - Senior Developer</option>
-            <option value="Priya Patel">Priya Patel - Tech Lead</option>
-            <option value="David Kim">David Kim - HR Director</option>
-            <option value="Emily Rodriguez">Emily Rodriguez - Product Manager</option>
-            <option value="James Wilson">James Wilson - CTO</option>
-            <option value="Aisha Mohammed">Aisha Mohammed - VP Engineering</option>
+          <label class="modal-form-label">Interview Type <span style="color:#C62828">*</span></label>
+          <select class="modal-input" id="modal-interview-type">
+            <option value="Technical">Technical</option>
+            <option value="HR" selected>HR</option>
+            <option value="Managerial">Managerial</option>
+            <option value="Final Round">Final Round</option>
           </select>
+        </div>
+        <!-- Interviewers (Searchable Dropdown) -->
+        <div class="modal-form-section">
+          <label class="modal-form-label">Interviewer(s) <span style="color:#C62828">*</span></label>
+          <div class="searchable-dropdown-wrapper" id="panelist-search-wrapper">
+            <input type="text" class="modal-input dropdown-trigger-input" id="modal-panelist-search" placeholder="Search and select interviewers..." autocomplete="off">
+            <span class="dropdown-arrow-icon" id="panelist-dropdown-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </span>
+            <div class="panelist-dropdown-panel" id="modal-panelist-dropdown-panel">
+              <!-- Dynamic list of panelists with recommendations and status -->
+            </div>
+          </div>
+          <div class="selected-panelists-chips" id="modal-selected-chips" style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
+            <!-- Selected panelists chips will appear here -->
+          </div>
+          <div class="conflict-warning" id="modal-conflict-warning"></div>
         </div>
         <!-- Notes -->
         <div class="modal-form-section">
