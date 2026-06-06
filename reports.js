@@ -3245,7 +3245,7 @@ window.openFullReport = function(id) {
   const isGood = (sc.technical || 0) > 80;
   
   // Dummy Code Snippet based on performance
-  const goodCode = \`function findLongestSubstring(s) {
+  const goodCode = `function findLongestSubstring(s) {
   let longest = 0;
   let start = 0;
   let seen = new Map();
@@ -3259,9 +3259,9 @@ window.openFullReport = function(id) {
     longest = Math.max(longest, i - start + 1);
   }
   return longest;
-}\`;
+}`;
 
-  const badCode = \`function findLongestSubstring(s) {
+  const badCode = `function findLongestSubstring(s) {
   let max = 0;
   for(let i=0; i<s.length; i++) {
     for(let j=i; j<s.length; j++) {
@@ -3271,7 +3271,7 @@ window.openFullReport = function(id) {
     }
   }
   return max;
-}\`;
+}`;
 
   getE('rp-tech-code').textContent = isGood ? goodCode : badCode;
 
