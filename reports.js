@@ -3078,22 +3078,23 @@ window.openFullReport = function(id) {
 
   let expHtml = '';
   if(ex.experience && ex.experience.length) {
-    expHtml = ex.experience.map(e => `
+    expHtml = ex.experience.slice(0, 2).map(e => `
       <div class="rp-exp-item">
         <div class="rp-exp-period">${e.duration || 'N/A'}</div>
         <div>
           <div class="rp-exp-title">${e.role || 'Role'}</div>
           <div class="rp-exp-company">${e.company || 'Company'}</div>
-          ${(e.highlights||[]).map(h => `<div class="rp-exp-bullet">${h}</div>`).join('')}
+          ${(e.highlights||[]).slice(0, 2).map(h => `<div class="rp-exp-bullet">${h}</div>`).join('')}
         </div>
       </div>
     `).join('');
+    if(ex.experience.length > 2) expHtml += `<div style="font-size:11px;color:var(--rp-blue);margin-top:8px;font-weight:600;cursor:pointer;">+ ${ex.experience.length - 2} more experiences (View Resume)</div>`;
   } else expHtml = '<div style="color:#9CA3AF;font-size:12px;">No experience listed</div>';
   getE('rp-experience-list').innerHTML = expHtml;
 
   let eduHtml = '';
   if(ex.education && ex.education.length) {
-    eduHtml = ex.education.map(e => `
+    eduHtml = ex.education.slice(0, 1).map(e => `
       <div class="rp-edu-degree">${e.degree || 'Degree'}</div>
       <div class="rp-edu-inst">${e.institution || 'Inst'} • ${e.year || ''}</div>
     `).join('');
@@ -3150,14 +3151,40 @@ window.openFullReport = function(id) {
 
   // Screening Tab
   if(cand.botScreeningDone) {
+    // Determine skill/role for the bot script
+    const domain = (cand.role || 'Software Engineering').split(' ')[0];
+    
     getE('rp-video-player').src = "https://www.w3schools.com/html/mov_bbb.mp4";
+    
+    // Detailed dummy transcript
     getE('rp-transcript-list').innerHTML = `
-      <div style="font-size:12px;color:#374151;background:#F9FAFB;padding:10px;border-radius:6px;"><strong>Bot:</strong> Hello, please tell us about your most recent project.</div>
-      <div style="font-size:12px;color:#374151;background:#EBF4FF;padding:10px;border-radius:6px;margin-left:20px;"><strong>${cand.name}:</strong> I recently led the migration of our monolithic backend to microservices using Node.js and Docker...</div>
+      <div style="font-size:12px;color:#374151;background:#F9FAFB;padding:10px;border-radius:6px;border-left:3px solid #E5E7EB;">
+        <strong>ElastiCrew Bot:</strong> Welcome ${cand.name.split(' ')[0]}. Can you describe a challenging technical problem you solved recently in ${domain}?
+      </div>
+      <div style="font-size:12px;color:#111827;background:#EBF4FF;padding:10px;border-radius:6px;margin-left:20px;border-left:3px solid var(--rp-blue);">
+        <strong>${cand.name.split(' ')[0]}:</strong> Sure. In my last project, we were facing severe latency issues due to synchronous third-party API calls. I redesigned the architecture to use asynchronous message queues with RabbitMQ, which decoupled the processes and reduced our average response time by 40%.
+      </div>
+      <div style="font-size:12px;color:#374151;background:#F9FAFB;padding:10px;border-radius:6px;border-left:3px solid #E5E7EB;">
+        <strong>ElastiCrew Bot:</strong> That's impressive. How did you handle potential message failures or dead letters?
+      </div>
+      <div style="font-size:12px;color:#111827;background:#EBF4FF;padding:10px;border-radius:6px;margin-left:20px;border-left:3px solid var(--rp-blue);">
+        <strong>${cand.name.split(' ')[0]}:</strong> I implemented a Dead Letter Exchange (DLX) strategy where failed messages were routed after 3 retries. We also added an alert mechanism so the DevOps team could manually inspect the DLX queue if the failure rate spiked.
+      </div>
+      <div style="font-size:12.5px;color:#0D7A57;background:#E6F7EF;padding:12px;border-radius:6px;margin-top:8px;">
+        <div style="font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          AI Summary & Analysis
+        </div>
+        Candidate demonstrated clear problem-solving skills and a strong grasp of asynchronous architecture. Communication was concise, structured, and confident. Technical vocabulary used correctly in context.
+      </div>
     `;
+    
+    // Communication Metrics
     getE('rp-comm-metrics').innerHTML = `
-      <div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Clarity</span><span>Strong</span></div><div class="rp-comp-bar-track"><div style="width:85%;height:100%;background:var(--rp-green);border-radius:999px;"></div></div></div>
-      <div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Confidence</span><span>Strong</span></div><div class="rp-comp-bar-track"><div style="width:90%;height:100%;background:var(--rp-green);border-radius:999px;"></div></div></div>
+      <div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Clarity & Articulation</span><span>Strong</span></div><div class="rp-comp-bar-track"><div style="width:90%;height:100%;background:var(--rp-green);border-radius:999px;"></div></div></div>
+      <div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Confidence</span><span>Strong</span></div><div class="rp-comp-bar-track"><div style="width:85%;height:100%;background:var(--rp-green);border-radius:999px;"></div></div></div>
+      <div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>English Proficiency</span><span>Strong</span></div><div class="rp-comp-bar-track"><div style="width:95%;height:100%;background:var(--rp-green);border-radius:999px;"></div></div></div>
+      <div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Relevance of Answers</span><span>Moderate</span></div><div class="rp-comp-bar-track"><div style="width:75%;height:100%;background:#F59E0B;border-radius:999px;"></div></div></div>
     `;
   } else {
     getE('rp-video-player').src = "";
@@ -3166,32 +3193,99 @@ window.openFullReport = function(id) {
   }
 
   // Assessment Tab
-  getE('rp-hr-notes-ta').value = cand.notes || '';
+  const hrScore = sc.hr || 0;
+  const hrWord = scoreToWord(hrScore).label;
+  
+  // Dummy notes if none exist
+  let dummyNotes = cand.notes || '';
+  if (!dummyNotes) {
+    if (hrScore > 85) {
+      dummyNotes = `Candidate performed exceptionally well in the HR round. Great cultural fit for ElastiCrew. Displayed strong leadership potential and aligned well with our remote-first environment. Expected salary is within budget. Notice period is 30 days. Recommended to proceed to final offer.`;
+    } else if (hrScore > 70) {
+      dummyNotes = `Good candidate. Communication is decent, though sometimes long-winded. Technical background matches the requirement. Has some hesitations about the shift timings but agreed to be flexible. Keep as backup if top candidate falls through.`;
+    } else {
+      dummyNotes = `Candidate struggled to explain past job transitions clearly. High salary expectations that exceed our budget constraint. Might not be the best fit for this fast-paced project.`;
+    }
+  }
+
+  getE('rp-hr-notes-ta').value = dummyNotes;
   getE('rp-timeline-list').innerHTML = `
     <div class="rp-timeline-item-rp">
       <div class="rp-tl-dot"></div>
       <div>
-        <div style="font-size:12.5px;font-weight:600;color:#111827;">Applied</div>
-        <div style="font-size:11px;color:#6B7280;">May 10, 2024</div>
+        <div style="font-size:12.5px;font-weight:600;color:#111827;">Applied for ${cand.role}</div>
+        <div style="font-size:11px;color:#6B7280;">May 10, 2024 via LinkedIn</div>
       </div>
     </div>
     <div class="rp-timeline-item-rp">
       <div class="rp-tl-dot"></div>
       <div>
-        <div style="font-size:12.5px;font-weight:600;color:#111827;">AI Screening Completed</div>
+        <div style="font-size:12.5px;font-weight:600;color:#111827;">Resume Parsed & Ranked</div>
+        <div style="font-size:11px;color:#6B7280;">May 10, 2024 by ElastiCrew AI</div>
+      </div>
+    </div>
+    <div class="rp-timeline-item-rp">
+      <div class="rp-tl-dot"></div>
+      <div>
+        <div style="font-size:12.5px;font-weight:600;color:#111827;">AI Video Screening Completed</div>
         <div style="font-size:11px;color:#6B7280;">May 12, 2024</div>
+      </div>
+    </div>
+    <div class="rp-timeline-item-rp">
+      <div class="rp-tl-dot" style="background:#2563EB;"></div>
+      <div>
+        <div style="font-size:12.5px;font-weight:600;color:#111827;">Technical Assessment Passed</div>
+        <div style="font-size:11px;color:#6B7280;">May 15, 2024</div>
       </div>
     </div>
   `;
 
   // Technical Tab
+  const techWord = scoreToWord(sc.technical || 0).label;
+  const isGood = (sc.technical || 0) > 80;
+  
+  // Dummy Code Snippet based on performance
+  const goodCode = \`function findLongestSubstring(s) {
+  let longest = 0;
+  let start = 0;
+  let seen = new Map();
+
+  for (let i = 0; i < s.length; i++) {
+    let char = s[i];
+    if (seen.has(char) && seen.get(char) >= start) {
+      start = seen.get(char) + 1;
+    }
+    seen.set(char, i);
+    longest = Math.max(longest, i - start + 1);
+  }
+  return longest;
+}\`;
+
+  const badCode = \`function findLongestSubstring(s) {
+  let max = 0;
+  for(let i=0; i<s.length; i++) {
+    for(let j=i; j<s.length; j++) {
+       // O(N^3) approach
+       let sub = s.slice(i, j);
+       // ... logic missing
+    }
+  }
+  return max;
+}\`;
+
+  getE('rp-tech-code').textContent = isGood ? goodCode : badCode;
+
   getE('rp-tech-competencies').innerHTML = `
-    <div><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Core Skills</span><span>${scoreToWord(sc.technical||0).label}</span></div><div class="rp-comp-bar-track"><div style="width:${sc.technical||0}%;height:100%;background:var(--rp-blue);border-radius:999px;"></div></div></div>
-    <div><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Problem Solving</span><span>Moderate</span></div><div class="rp-comp-bar-track"><div style="width:70%;height:100%;background:#F59E0B;border-radius:999px;"></div></div></div>
+    <div><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Data Structures</span><span>${techWord}</span></div><div class="rp-comp-bar-track"><div style="width:${sc.technical||0}%;height:100%;background:var(--rp-blue);border-radius:999px;"></div></div></div>
+    <div><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Algorithm Optimization</span><span>${isGood ? 'Strong' : 'Weak'}</span></div><div class="rp-comp-bar-track"><div style="width:${isGood ? '90' : '40'}%;height:100%;background:${isGood ? 'var(--rp-green)' : '#EF4444'};border-radius:999px;"></div></div></div>
+    <div><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Code Quality</span><span>${techWord}</span></div><div class="rp-comp-bar-track"><div style="width:${(sc.technical||0)-5}%;height:100%;background:var(--rp-blue);border-radius:999px;"></div></div></div>
   `;
-  getE('rp-tech-insights').innerHTML = `
-    <div style="font-size:12px;color:#374151;padding:10px;background:#F9FAFB;border-radius:6px;border-left:3px solid var(--rp-blue);">Demonstrated strong understanding of REST API design patterns during the assessment.</div>
-    <div style="font-size:12px;color:#374151;padding:10px;background:#F9FAFB;border-radius:6px;border-left:3px solid var(--rp-green);">Successfully completed the coding challenge within the allotted time limit.</div>
+  getE('rp-tech-insights').innerHTML = isGood ? `
+    <div style="font-size:12px;color:#374151;padding:10px;background:#F9FAFB;border-radius:6px;border-left:3px solid var(--rp-green);margin-bottom:8px;">Successfully utilized an optimal O(N) approach using a sliding window and Hash Map. Time limit was comfortably met.</div>
+    <div style="font-size:12px;color:#374151;padding:10px;background:#F9FAFB;border-radius:6px;border-left:3px solid var(--rp-blue);">Variable naming was clear and professional. Edge cases (like empty strings) were implicitly handled by the loop condition.</div>
+  ` : `
+    <div style="font-size:12px;color:#374151;padding:10px;background:#FEF2F2;border-radius:6px;border-left:3px solid #EF4444;margin-bottom:8px;">Attempted a brute-force approach which resulted in a Time Limit Exceeded (TLE) on hidden test cases.</div>
+    <div style="font-size:12px;color:#374151;padding:10px;background:#FFFBEB;border-radius:6px;border-left:3px solid #F59E0B;">Struggled to identify the optimal sliding window technique. Required multiple hints from the automated system.</div>
   `;
 
   // Reset tabs

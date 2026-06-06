@@ -798,7 +798,7 @@
   <!-- ═══════════════════════════════════════════════════════ -->
   <!-- FULL-PAGE CANDIDATE REPORT (image-matched design)       -->
   <!-- ═══════════════════════════════════════════════════════ -->
-  <div id="full-report-page" style="display:none; position:fixed; top:0; bottom:0; right:0; background:#F0F2F5; z-index:400; overflow-y:auto; left:220px; font-family:'Inter','Segoe UI',sans-serif;">
+  <div id="full-report-page" style="display:none; position:fixed; top:0; bottom:0; right:0; background:#F0F2F5; z-index:400; overflow:hidden; left:220px; font-family:'Inter','Segoe UI',sans-serif;">
     <style>
       #full-report-page{--rp-green:#1a7a4a;--rp-blue:#2563EB;--rp-border:#E5E7EB;--rp-text:#111827;--rp-label:#6B7280}
       .rp-breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:#6B7280;padding:14px 28px 0}
@@ -943,11 +943,21 @@
     <!-- TAB: TECHNICAL -->
     <div class="rp-tab-panel" id="rptab-technical">
       <div class="rp-body">
-        <div class="rp-card" style="flex:1.2;">
-          <div class="rp-card-title">Technical Competencies</div>
-          <div id="rp-tech-competencies" style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;"></div>
-          <div class="rp-card-title">Evidence-Based Insights</div>
-          <div id="rp-tech-insights" style="display:flex;flex-direction:column;gap:8px;"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:16px;">
+          <div class="rp-card">
+            <div class="rp-card-title">Coding Challenge Submission</div>
+            <pre id="rp-tech-code" style="background:#1E1E1E;color:#D4D4D4;padding:16px;border-radius:8px;font-family:'Consolas','Courier New',monospace;font-size:12px;overflow-x:auto;line-height:1.5;margin:0;">// Code will appear here</pre>
+          </div>
+          <div class="rp-card">
+            <div class="rp-card-title">Evidence-Based Insights</div>
+            <div id="rp-tech-insights" style="display:flex;flex-direction:column;gap:8px;"></div>
+          </div>
+        </div>
+        <div style="width:280px;flex-shrink:0;">
+          <div class="rp-card">
+            <div class="rp-card-title">Technical Competencies</div>
+            <div id="rp-tech-competencies" style="display:flex;flex-direction:column;gap:12px;"></div>
+          </div>
         </div>
       </div>
     </div>
