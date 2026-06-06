@@ -2035,7 +2035,6 @@ function initShareView() {
 
   const overlay = document.getElementById('share-view-overlay');
   const body = document.getElementById('share-view-body');
-  const idLabel = document.getElementById('share-view-candidate-id');
   if (!overlay || !body) return;
 
   const cand = candidates.find(c => c.id === shareId);
@@ -2045,97 +2044,34 @@ function initShareView() {
     return;
   }
 
-  idLabel.textContent = cand.id;
+  // Hide the normal app structure
+  const appContainer = document.querySelector('.app-container');
+  if (appContainer) appContainer.style.display = 'none';
 
-  const hasScores = cand.scores && typeof cand.scores.resume !== 'undefined';
-  const resumeScore = hasScores ? cand.scores.resume : 0;
-  const screeningScore = hasScores ? cand.scores.screening : 0;
-  const technicalScore = hasScores ? cand.scores.technical : 0;
-  const overall = hasScores ? Math.round(resumeScore*0.2 + screeningScore*0.3 + technicalScore*0.5) : 0;
+  // Open the full report
+  openFullReport(shareId);
 
-  const rw = scoreToWord(resumeScore);
-  const scw = scoreToWord(screeningScore);
-  const tw = scoreToWord(technicalScore);
-  const ow = scoreToWord(overall);
+  // Customize for read-only view
+  const fp = document.getElementById('full-report-page');
+  if (fp) {
+    fp.style.left = '0'; // Span full screen width
+  }
 
-  const grad = getAvatarGradient(cand.name);
-  const initials = getInitials(cand.name);
+  // Hide action buttons since it's shared
+  const backBtn = document.querySelector('.rp-back-btn');
+  if (backBtn) backBtn.style.display = 'none';
+  const shareBtn = document.getElementById('rp-gen-link-btn');
+  if (shareBtn) shareBtn.style.display = 'none';
 
-  const decisionText = overall >= 85 ? 'Strongly Recommended' : overall >= 70 ? 'Recommended' : overall >= 50 ? 'Review Required' : 'Not Recommended';
-  const decisionColor = overall >= 85 ? '#0D7A57' : overall >= 70 ? '#2563EB' : overall >= 50 ? '#B45309' : '#E24B4A';
-  const decisionBg = overall >= 85 ? '#E6F7F2' : overall >= 70 ? '#EBF4FF' : overall >= 50 ? '#FEF3C7' : '#FEF0EF';
-
-  const scoreCard = (label, word) => `
-    <div style="background:#FFF;border:0.5px solid #E2DFD7;border-radius:10px;padding:16px;text-align:center;">
-      <div style="font-size:10px;text-transform:uppercase;font-weight:700;color:#6B7280;letter-spacing:0.4px;margin-bottom:8px;">${label}</div>
-      <div style="font-size:18px;font-weight:800;${SCORE_STYLES[word.cls].replace(/border:[^;]+;/,'')}border-radius:8px;padding:6px 14px;display:inline-block;">${word.label}</div>
-    </div>`;
-
-  body.innerHTML = `
-    <!-- Header card -->
-    <div style="background:#FFF;border:0.5px solid #E2DFD7;border-radius:14px;padding:24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
-      <div style="width:64px;height:64px;border-radius:50%;background:${grad};display:flex;align-items:center;justify-content:center;color:#FFF;font-weight:700;font-size:22px;flex-shrink:0;">${initials}</div>
-      <div style="flex:1;min-width:200px;">
-        <h2 style="font-size:22px;font-weight:800;margin:0 0 6px;">${cand.name}</h2>
-        <div style="display:flex;flex-wrap:wrap;gap:10px 18px;font-size:12px;color:#6B7280;">
-          <span><strong style="color:#111;">Role:</strong> ${cand.role}</span>
-          <span><strong style="color:#111;">Experience:</strong> ${cand.experience || 'N/A'}</span>
-          <span><strong style="color:#111;">Qualification:</strong> ${cand.qualification || 'N/A'}</span>
-          <span><strong style="color:#111;">ID:</strong> <code>${cand.id}</code></span>
-          <span><strong style="color:#111;">Date:</strong> ${cand.reportDate || 'N/A'}</span>
-        </div>
-      </div>
-      <div style="background:${decisionBg};color:${decisionColor};border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;text-align:center;flex-shrink:0;">${decisionText}</div>
-    </div>
-
-    <!-- Score cards -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;">
-      ${scoreCard('Resume', rw)}
-      ${scoreCard('Screening', scw)}
-      ${scoreCard('Technical', tw)}
-      ${scoreCard('Overall Match', ow)}
-    </div>
-
-    <!-- Skills -->
-    ${cand.resumeData && cand.resumeData.skills ? `
-    <div style="background:#FFF;border:0.5px solid #E2DFD7;border-radius:14px;padding:20px;">
-      <h3 style="font-size:14px;font-weight:700;margin:0 0 12px;border-bottom:0.5px solid #EEEAE3;padding-bottom:8px;">Skills</h3>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        ${Object.entries(cand.resumeData.skills).map(([cat,skills]) => `
-          <div><span style="font-size:10px;font-weight:700;text-transform:uppercase;color:#6B7280;letter-spacing:0.3px;">${cat}:</span>
-          <span style="margin-left:8px;">${skills.map(s=>`<span style="background:#EBF4FF;color:#2563EB;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:600;margin-right:4px;">${s}</span>`).join('')}</span></div>
-        `).join('')}
-      </div>
-    </div>` : ''}
-
-    <!-- Experience -->
-    ${cand.resumeData && cand.resumeData.experience && cand.resumeData.experience.length ? `
-    <div style="background:#FFF;border:0.5px solid #E2DFD7;border-radius:14px;padding:20px;">
-      <h3 style="font-size:14px;font-weight:700;margin:0 0 12px;border-bottom:0.5px solid #EEEAE3;padding-bottom:8px;">Work Experience</h3>
-      ${cand.resumeData.experience.map(exp => `
-        <div style="padding:12px 0;border-bottom:0.5px solid #F3F4F6;">
-          <div style="font-size:11px;font-weight:700;color:#1a7a4a;font-family:monospace;">${exp.period}</div>
-          <div style="font-size:13px;font-weight:700;margin:2px 0;">${exp.role} <span style="font-weight:500;color:#6B7280;">@ ${exp.company}</span></div>
-          <div style="font-size:12px;color:#6B7280;line-height:1.4;">${exp.description}</div>
-        </div>`).join('')}
-    </div>` : ''}
-
-    <!-- Insights -->
-    ${cand.insights && cand.insights.length ? `
-    <div style="background:#FFF;border:0.5px solid #E2DFD7;border-radius:14px;padding:20px;">
-      <h3 style="font-size:14px;font-weight:700;margin:0 0 12px;border-bottom:0.5px solid #EEEAE3;padding-bottom:8px;">Evidence-Based Insights</h3>
-      ${cand.insights.map(i => `<div style="padding:8px 0;border-bottom:0.5px solid #F3F4F6;font-size:12px;">✓ ${i.text} <span style="color:#9CA3AF;font-size:11px;">— ${i.source}</span></div>`).join('')}
-    </div>` : ''}
-
-    <!-- Footer -->
-    <div style="text-align:center;padding:16px;color:#9CA3AF;font-size:11px;">
-      This is a read-only shareable report generated by <strong>ElastiCrew ATS</strong>. Last updated: ${cand.reportDate || 'N/A'}.
-    </div>
-  `;
-
-  // Hide normal app UI, show share overlay
-  document.querySelector('.app-container').style.display = 'none';
-  overlay.style.display = 'block';
+  // Add footer note
+  const overviewTab = document.getElementById('rptab-overview');
+  if (overviewTab) {
+    const footer = document.createElement('div');
+    footer.style = "text-align:center;padding:16px;color:#9CA3AF;font-size:11px;margin-top:20px;";
+    footer.innerHTML = `This is a read-only shareable report generated by <strong>ElastiCrew ATS</strong>.`;
+    const rpBody = overviewTab.querySelector('.rp-body');
+    if(rpBody) rpBody.appendChild(footer);
+  }
 }
 
 initShareView();
@@ -3274,6 +3210,30 @@ window.openFullReport = function(id) {
 }`;
 
   getE('rp-tech-code').textContent = isGood ? goodCode : badCode;
+  
+  // Tech Video & Transcript Dummy Data
+  getE('rp-tech-video').src = "https://www.w3schools.com/html/mov_bbb.mp4";
+  getE('rp-tech-transcript').innerHTML = `
+    <div style="font-size:11.5px;color:#374151;background:#F9FAFB;padding:8px;border-radius:6px;border-left:3px solid #E5E7EB;">
+      <strong>ElastiCrew Tech Interviewer:</strong> We provided a problem to find the longest substring without repeating characters. Can you walk me through your approach?
+    </div>
+    <div style="font-size:11.5px;color:#111827;background:#EBF4FF;padding:8px;border-radius:6px;margin-left:16px;border-left:3px solid var(--rp-blue);">
+      <strong>${cand.name.split(' ')[0]}:</strong> Sure. I initially thought of a brute-force approach, checking every substring, but that's O(N^3). I quickly optimized it to O(N) by using a sliding window algorithm and a hash map to track the indices of characters I've already seen.
+    </div>
+    <div style="font-size:11.5px;color:#374151;background:#F9FAFB;padding:8px;border-radius:6px;border-left:3px solid #E5E7EB;">
+      <strong>Interviewer:</strong> Great. What happens if the input string is empty or contains only one character?
+    </div>
+    <div style="font-size:11.5px;color:#111827;background:#EBF4FF;padding:8px;border-radius:6px;margin-left:16px;border-left:3px solid var(--rp-blue);">
+      <strong>${cand.name.split(' ')[0]}:</strong> If it's empty, the loop won't execute, and the function correctly returns 0. If it has one character, the loop runs once, and it returns 1. Both edge cases are implicitly handled without needing extra if-statements.
+    </div>
+    <div style="font-size:11px;color:#0D7A57;background:#E6F7EF;padding:10px;border-radius:6px;margin-top:6px;">
+      <div style="font-weight:700;margin-bottom:2px;display:flex;align-items:center;gap:4px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        AI Tech Summary
+      </div>
+      Candidate was able to confidently explain time and space complexity tradeoffs. The code produced is robust against common edge cases.
+    </div>
+  `;
 
   getE('rp-tech-competencies').innerHTML = `
     <div><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Data Structures</span><span>${techWord}</span></div><div class="rp-comp-bar-track"><div style="width:${sc.technical||0}%;height:100%;background:var(--rp-blue);border-radius:999px;"></div></div></div>
