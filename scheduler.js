@@ -126,7 +126,7 @@ let currentView   = 'month';           // 'month' | 'week'
 let weekStart     = getWeekStartDate(today); // Date object
 let activeFilter  = 'all';
 let activeEventId = null;
-let selectedPlatform = 'Google Meet';
+let selectedPlatform = 'MS Teams';
 let selectedModalPanelists = [];
 let editingInterviewId = null; // Interview ID being edited/rescheduled
 
@@ -809,37 +809,9 @@ if (popupRescheduleBtn) {
 
 // ── Schedule Modal ────────────────────────────────────────
 function openScheduleModal(interviewId = null, focusPanelists = false) {
-  const sel = document.getElementById('modal-panelist-selector');
-  if (!sel) return;
-  sel.innerHTML = ''; 
   selectedModalPanelists = [];
   editingInterviewId = interviewId;
-
   const iv = interviewId ? interviews.find(i => i.id === interviewId) : null;
-
-  panelists.forEach(p => {
-    const chip = document.createElement('div');
-    chip.className = 'panelist-chip-sel'; 
-    chip.textContent = p.name; 
-    chip.dataset.pid = p.id;
-
-    const isSelected = iv ? iv.panelists.includes(p.id) : false;
-    if (isSelected) {
-      chip.classList.add('selected');
-      selectedModalPanelists.push(p.id);
-    }
-
-    chip.addEventListener('click', () => {
-      chip.classList.toggle('selected');
-      if (chip.classList.contains('selected')) {
-        selectedModalPanelists.push(p.id);
-      } else {
-        selectedModalPanelists = selectedModalPanelists.filter(id => id !== p.id);
-      }
-      checkScheduleConflicts();
-    });
-    sel.appendChild(chip);
-  });
 
   const applicantInput = document.getElementById('modal-applicant');
   const dateInput = document.getElementById('modal-date');
@@ -858,10 +830,11 @@ function openScheduleModal(interviewId = null, focusPanelists = false) {
     if (titleText) titleText.textContent = 'Reschedule Interview';
     if (submitBtn) submitBtn.textContent = 'Update Interview';
 
-    selectedPlatform = iv.platform;
-    document.querySelectorAll('#platform-btns .platform-btn').forEach(b => {
-      b.classList.toggle('selected', b.dataset.platform === iv.platform);
-    });
+    selectedPlatform = iv.platform || 'MS Teams';
+    const platformSel = document.getElementById('modal-platform');
+    if (platformSel) platformSel.value = 'MS Teams';
+
+    selectedModalPanelists = iv.panelists ? [...iv.panelists] : [];
   } else {
     if (applicantInput) applicantInput.value = '';
     if (dateInput) dateInput.value = today.toISOString().split('T')[0];
@@ -871,32 +844,42 @@ function openScheduleModal(interviewId = null, focusPanelists = false) {
     if (titleText) titleText.textContent = 'Schedule Interview';
     if (submitBtn) submitBtn.textContent = 'Schedule Interview';
 
-    selectedPlatform = 'Google Meet';
-    document.querySelectorAll('#platform-btns .platform-btn').forEach(b => {
-      b.classList.toggle('selected', b.dataset.platform === 'Google Meet');
-    });
+    selectedPlatform = 'MS Teams';
+    const platformSel2 = document.getElementById('modal-platform');
+    if (platformSel2) platformSel2.value = 'MS Teams';
+    selectedModalPanelists = [];
   }
 
   // Bind change listeners to check conflicts in real-time
   if (dateInput) {
     dateInput.onchange = () => {
+      renderModalPanelistDropdown();
       checkScheduleConflicts();
-      updatePanelistRecommendations();
     };
   }
   if (timeInput) {
     timeInput.onchange = () => {
+      renderModalPanelistDropdown();
       checkScheduleConflicts();
-      updatePanelistRecommendations();
     };
   }
   if (applicantInput) {
     applicantInput.oninput = () => {
-      updatePanelistRecommendations();
+      renderModalPanelistDropdown();
     };
   }
 
-  updatePanelistRecommendations();
+  // Reset search input and close dropdown panel
+  const panelistSearch = document.getElementById('modal-panelist-search');
+  const panelistDropPanel = document.getElementById('modal-panelist-dropdown-panel');
+  const panelistArrow = document.getElementById('panelist-dropdown-arrow');
+  if (panelistSearch) panelistSearch.value = '';
+  if (panelistDropPanel) panelistDropPanel.classList.remove('show');
+  if (panelistArrow) panelistArrow.classList.remove('open');
+
+  // Render dropdown panelist options and selected chips
+  renderModalPanelistDropdown();
+  renderSelectedPanelistChips();
   checkScheduleConflicts();
 
   const overlay = document.getElementById('schedule-modal-overlay');
@@ -915,28 +898,17 @@ function openScheduleModal(interviewId = null, focusPanelists = false) {
   }
 }
 
-// Filter interviewer chips
-const modalPanelistSearch = document.getElementById('modal-panelist-search');
-if (modalPanelistSearch) {
-  modalPanelistSearch.addEventListener('input', () => {
-    const q = modalPanelistSearch.value.toLowerCase();
-    document.querySelectorAll('#modal-panelist-selector .panelist-chip-sel').forEach(chip => {
-      const p = getPanelist(chip.dataset.pid);
-      if (!p) return;
-      const matches = p.name.toLowerCase().includes(q) || 
-                      (p.skills && p.skills.some(s => s.toLowerCase().includes(q))) ||
-                      (p.title && p.title.toLowerCase().includes(q));
-      chip.style.display = matches ? 'flex' : 'none';
-    });
-  });
-}
+// ── Searchable Dropdown Helper Methods ────────────────────
+function renderModalPanelistDropdown() {
+  const dropdownPanel = document.getElementById('modal-panelist-dropdown-panel');
+  if (!dropdownPanel) return;
+  dropdownPanel.innerHTML = '';
 
-function updatePanelistRecommendations() {
+  const q = document.getElementById('modal-panelist-search')?.value.toLowerCase() || '';
+
   const applicantVal = document.getElementById('modal-applicant')?.value.trim() || '';
   const dateVal = document.getElementById('modal-date')?.value || '';
   const timeVal = document.getElementById('modal-time')?.value || '';
-
-  if (!applicantVal) return;
 
   const parts = applicantVal.split('–');
   const role = (parts[1] || '').trim().toLowerCase();
@@ -944,11 +916,21 @@ function updatePanelistRecommendations() {
   const dayName = getDayName(dateVal);
   const slotIdx = getTimeSlotIndex(timeVal);
 
-  document.querySelectorAll('#modal-panelist-selector .panelist-chip-sel').forEach(chip => {
-    const pid = chip.dataset.pid;
-    const p = getPanelist(pid);
-    if (!p) return;
+  const filteredPanelists = panelists.filter(p => {
+    return p.name.toLowerCase().includes(q) || 
+           (p.skills && p.skills.some(s => s.toLowerCase().includes(q))) ||
+           (p.title && p.title.toLowerCase().includes(q));
+  });
 
+  if (filteredPanelists.length === 0) {
+    dropdownPanel.innerHTML = '<div style="padding:10px 14px; font-size:12px; color:var(--text-secondary); text-align:center;">No panelists found</div>';
+    return;
+  }
+
+  filteredPanelists.forEach(p => {
+    const isSelected = selectedModalPanelists.includes(p.id);
+
+    // Calculate if recommended
     let isMatch = false;
     if (role) {
       const roleKeywords = role.split(/\s+/);
@@ -965,16 +947,165 @@ function updatePanelistRecommendations() {
     if (dayName && slotIdx !== -1 && p.avail?.[dayName]) {
       isAvailable = isAvailable && (p.avail[dayName][slotIdx] === 1);
     }
+    const isRecommended = isMatch && isAvailable;
 
-    if (isMatch && isAvailable) {
-      chip.classList.add('recommended');
-      chip.title = 'Recommended: Matches skills & is available';
-    } else {
-      chip.classList.remove('recommended');
-      chip.title = '';
+    const item = document.createElement('div');
+    item.className = `dropdown-panelist-item${isSelected ? ' selected' : ''}`;
+    item.dataset.pid = p.id;
+
+    const initials = p.name.split(' ').map(n => n[0]).join('');
+    const statusClass = p.availabilityStatus === 'available' ? 'available' : p.availabilityStatus === 'busy' ? 'busy' : 'on-leave';
+    const statusText = p.availabilityStatus === 'available' ? 'Available' : p.availabilityStatus === 'busy' ? 'Busy' : 'On Leave';
+
+    // Check availability slot specifically
+    let hasConflict = false;
+    if (p.availabilityStatus === 'on-leave') {
+      hasConflict = true;
+    } else if (p.availabilityStatus === 'busy') {
+      hasConflict = true;
+    } else if (dayName && slotIdx !== -1 && p.avail?.[dayName] && p.avail[dayName][slotIdx] === 0) {
+      hasConflict = true;
     }
+
+    // Check double booking
+    const isDoubleBooked = interviews.some(iv => {
+      if (editingInterviewId && iv.id === editingInterviewId) return false;
+      if (iv.status === 'cancelled') return false;
+      if (iv.date === dateVal && iv.panelists.includes(p.id)) {
+        const [h1] = iv.time.split(':').map(Number);
+        const [h2] = timeVal.split(':').map(Number);
+        return Math.abs(h1 - h2) < 1;
+      }
+      return false;
+    });
+    if (isDoubleBooked) hasConflict = true;
+
+    item.innerHTML = `
+      <div class="dropdown-panelist-left">
+        <div class="dropdown-checkbox">✓</div>
+        <div class="dropdown-panelist-avatar" style="background:${p.color || '#1B2B5E'}">${initials}</div>
+        <div class="dropdown-panelist-details">
+          <span class="dropdown-panelist-name">${p.name} ${isRecommended ? '<span class="dropdown-recommendation-star" title="Recommended: Matches skills & is available">⭐</span>' : ''}</span>
+          <span class="dropdown-panelist-title">${p.title}</span>
+        </div>
+      </div>
+      <div class="dropdown-panelist-right">
+        <span class="dropdown-panelist-status ${statusClass}">${statusText}</span>
+      </div>
+    `;
+
+    if (hasConflict) {
+      item.classList.add('conflict');
+    }
+
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = selectedModalPanelists.indexOf(p.id);
+      if (idx !== -1) {
+        selectedModalPanelists.splice(idx, 1);
+      } else {
+        selectedModalPanelists.push(p.id);
+      }
+      renderModalPanelistDropdown();
+      renderSelectedPanelistChips();
+      checkScheduleConflicts();
+    });
+
+    dropdownPanel.appendChild(item);
   });
 }
+
+function renderSelectedPanelistChips() {
+  const chipContainer = document.getElementById('modal-selected-chips');
+  if (!chipContainer) return;
+  chipContainer.innerHTML = '';
+
+  if (selectedModalPanelists.length === 0) {
+    chipContainer.innerHTML = '<span style="font-size:11.5px; color:var(--text-secondary); font-style:italic;">No interviewers selected</span>';
+    return;
+  }
+
+  selectedModalPanelists.forEach(pid => {
+    const p = getPanelist(pid);
+    if (!p) return;
+
+    const chip = document.createElement('div');
+    chip.className = 'panelist-chip-sel selected';
+    chip.dataset.pid = pid;
+    chip.style.margin = '0';
+    chip.innerHTML = `
+      <span>${p.name}</span>
+      <span class="remove-chip-btn" style="cursor:pointer; font-weight:bold; margin-left:6px;">×</span>
+    `;
+
+    chip.querySelector('.remove-chip-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectedModalPanelists = selectedModalPanelists.filter(id => id !== pid);
+      renderModalPanelistDropdown();
+      renderSelectedPanelistChips();
+      checkScheduleConflicts();
+    });
+
+    chipContainer.appendChild(chip);
+  });
+}
+
+
+// Bind search input toggle and filter events
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('modal-panelist-search');
+  const dropdownPanel = document.getElementById('modal-panelist-dropdown-panel');
+  const arrowIcon = document.getElementById('panelist-dropdown-arrow');
+
+  function openDropdown() {
+    dropdownPanel.classList.add('show');
+    if (arrowIcon) arrowIcon.classList.add('open');
+    renderModalPanelistDropdown();
+  }
+
+  function closeDropdown() {
+    dropdownPanel.classList.remove('show');
+    if (arrowIcon) arrowIcon.classList.remove('open');
+  }
+
+  if (searchInput && dropdownPanel) {
+    searchInput.addEventListener('focus', () => {
+      openDropdown();
+    });
+
+    searchInput.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openDropdown();
+    });
+
+    searchInput.addEventListener('input', () => {
+      openDropdown();
+      renderModalPanelistDropdown();
+    });
+  }
+
+  // Arrow click toggles dropdown
+  if (arrowIcon && dropdownPanel) {
+    arrowIcon.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (dropdownPanel.classList.contains('show')) {
+        closeDropdown();
+      } else {
+        openDropdown();
+        if (searchInput) searchInput.focus();
+      }
+    });
+  }
+
+  // Click outside to close panel
+  document.addEventListener('click', (e) => {
+    const wrapper = document.getElementById('panelist-search-wrapper');
+    if (wrapper && !wrapper.contains(e.target) && dropdownPanel) {
+      closeDropdown();
+    }
+  });
+});
+
 
 function checkScheduleConflicts() {
   const dateVal = document.getElementById('modal-date')?.value || '';
@@ -996,7 +1127,7 @@ function checkScheduleConflicts() {
     const p = getPanelist(pid);
     if (!p) return;
 
-    const chip = document.querySelector(`#modal-panelist-selector .panelist-chip-sel[data-pid="${pid}"]`);
+    const chip = document.querySelector(`#modal-selected-chips .panelist-chip-sel[data-pid="${pid}"]`);
     let hasConflict = false;
 
     // Check Availability Status
@@ -1076,11 +1207,11 @@ if (overlaySchedule) {
 }
 
 const platformBtns = document.getElementById('platform-btns');
-if (platformBtns) {
-  platformBtns.addEventListener('click', e => {
-    const btn = e.target.closest('.platform-btn'); if (!btn) return;
-    document.querySelectorAll('#platform-btns .platform-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected'); selectedPlatform = btn.dataset.platform;
+// Platform is now a dropdown - no button handler needed
+const platformSelect = document.getElementById('modal-platform');
+if (platformSelect) {
+  platformSelect.addEventListener('change', e => {
+    selectedPlatform = e.target.value;
   });
 }
 
@@ -1093,13 +1224,19 @@ if (submitModalBtn) {
     if (!applicant) { showToast('Please enter a candidate name.','warning'); return; }
     if (!date)      { showToast('Please select a date.','warning'); return; }
     if (!time)      { showToast('Please select a time.','warning'); return; }
-    if (!selectedModalPanelists.length) { showToast('Select at least one interviewer.','warning'); return; }
+    
+    if (selectedModalPanelists.length === 0) { 
+      showToast('Please select at least one interviewer.', 'warning'); 
+      return; 
+    }
 
     const parts = applicant.split('–');
     const candName = parts[0].trim();
     const candRole = parts[1]?.trim() || 'Not specified';
     const duration = parseInt(document.getElementById('modal-duration').value);
     const notes = document.getElementById('modal-notes').value.trim();
+    const interviewType = document.getElementById('modal-interview-type')?.value || 'HR';
+    const platformVal = document.getElementById('modal-platform')?.value || selectedPlatform;
 
     if (editingInterviewId) {
       const idx = interviews.findIndex(i => i.id === editingInterviewId);
@@ -1109,10 +1246,11 @@ if (submitModalBtn) {
         interviews[idx].date = date;
         interviews[idx].time = time;
         interviews[idx].duration = duration;
-        interviews[idx].platform = selectedPlatform;
-        interviews[idx].platformLink = selectedPlatform==='In-Person'?'':`https://meet.google.com/${Math.random().toString(36).slice(2,8)}`;
+        interviews[idx].platform = platformVal;
+        interviews[idx].platformLink = `https://teams.microsoft.com/l/meeting/${Math.random().toString(36).slice(2,10)}`;
         interviews[idx].panelists = [...selectedModalPanelists];
         interviews[idx].notes = notes;
+        interviews[idx].interviewType = interviewType;
         
         showToast(`Interview with ${candName} updated!`, 'success');
       }
@@ -1124,16 +1262,23 @@ if (submitModalBtn) {
         date,
         time,
         duration,
-        platform: selectedPlatform,
-        platformLink: selectedPlatform==='In-Person'?'':`https://meet.google.com/${Math.random().toString(36).slice(2,8)}`,
+        platform: platformVal,
+        platformLink: `https://teams.microsoft.com/l/meeting/${Math.random().toString(36).slice(2,10)}`,
         panelists: [...selectedModalPanelists],
         status: 'pending',
         department: 'General',
+        interviewType,
         notes
       };
       interviews.push(newIv);
       showToast(`Interview with ${candName} scheduled!`, 'success');
     }
+
+    // Close dropdown if open
+    const dp = document.getElementById('modal-panelist-dropdown-panel');
+    const arrow = document.getElementById('panelist-dropdown-arrow');
+    if (dp) dp.classList.remove('show');
+    if (arrow) arrow.classList.remove('open');
 
     const modal = document.getElementById('schedule-modal-overlay');
     if (modal) modal.classList.remove('active');
