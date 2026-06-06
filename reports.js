@@ -963,34 +963,10 @@ function renderCandidates() {
 
 function renderListView(paginated) {
   paginated.forEach(cand => {
-    const tr = document.createElement("tr");
+    const tr = document.createElement('tr');
     tr.id = `candidate-row-${cand.id}`;
-
     const initials = getInitials(cand.name);
     const grad = getAvatarGradient(cand.name);
-
-    // ── Screening rating word ──
-    const hasScreening = cand.botScreeningDone && cand.scores && cand.scores.screening > 0;
-    const sw = hasScreening ? scoreToWord(cand.scores.screening) : { label: 'Pending', cls: 'score-pending' };
-    const swStyle = SCORE_STYLES[sw.cls];
-
-    // ── Screening Upload column ──
-    const uploadCol = cand.botScreeningDone
-      ? `<span style="display:inline-flex;align-items:center;gap:4px;color:#0D7A57;font-size:11px;font-weight:700;">
-           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-           Done
-         </span>`
-      : `<label style="display:inline-flex;align-items:center;gap:5px;background:#EBF4FF;color:#378ADD;border:1px solid #C3DDFB;border-radius:999px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;" title="Upload Screening Video">
-           <input type="file" accept="video/*" style="display:none;" class="screening-upload-input" data-id="${cand.id}">
-           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"/></svg>
-           Upload
-         </label>`;
-
-    // ── Remark (truncated notes) ──
-    const remarkText = cand.notes
-      ? cand.notes.substring(0, 55) + (cand.notes.length > 55 ? '…' : '')
-      : '<em style="color:var(--text-secondary);font-style:italic;">No remark</em>';
-
     tr.innerHTML = `
       <td>
         <div class="col-candidate">
@@ -1003,24 +979,17 @@ function renderListView(paginated) {
       </td>
       <td><span class="col-id">${cand.id}</span></td>
       <td><span class="role-tag-blue">${cand.role}</span></td>
-      <td>
-        <span style="display:inline-flex;align-items:center;border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700;${swStyle}">${sw.label}</span>
-      </td>
-      <td>${uploadCol}</td>
-      <td>
-        <span class="${getStageBadgeClass(cand.hiringStage)} stage-pill" data-id="${cand.id}" style="cursor:pointer;">${cand.hiringStage}</span>
-      </td>
-      <td style="max-width:160px;white-space:normal;font-size:11.5px;color:var(--text-secondary);line-height:1.35;">${remarkText}</td>
+      <td><span class="${getStageBadgeClass(cand.hiringStage)} stage-pill" data-id="${cand.id}" style="cursor:pointer;">${cand.hiringStage}</span></td>
       <td>
         <div style="display:flex;gap:6px;align-items:center;">
           <button class="btn-view-report-row" data-id="${cand.id}"
-            style="display:inline-flex;align-items:center;gap:4px;background:var(--active-nav-bg);color:#FFF;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .15s;"
+            style="display:inline-flex;align-items:center;gap:4px;background:var(--active-nav-bg);color:#FFF;border:none;border-radius:6px;padding:6px 12px;font-size:11.5px;font-weight:600;cursor:pointer;transition:opacity .15s;"
             onmouseenter="this.style.opacity='.85'" onmouseleave="this.style.opacity='1'">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.641 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
             View Report
           </button>
           <button class="btn-generate-link-row" data-id="${cand.id}"
-            style="display:inline-flex;align-items:center;gap:4px;background:#EBF4FF;color:#378ADD;border:1px solid #C3DDFB;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;"
+            style="display:inline-flex;align-items:center;gap:4px;background:#EBF4FF;color:#378ADD;border:1px solid #C3DDFB;border-radius:6px;padding:6px 10px;font-size:11.5px;font-weight:600;cursor:pointer;transition:all .15s;"
             onmouseenter="this.style.background='#D1E9FF'" onmouseleave="this.style.background='#EBF4FF'">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
             Share Link
@@ -1031,6 +1000,7 @@ function renderListView(paginated) {
     pipelineTableBody.appendChild(tr);
   });
 }
+
 
 function renderGridView(paginated) {
   paginated.forEach(cand => {
@@ -1110,25 +1080,14 @@ function renderGridEmptyState() {
 
 function renderListSkeletons() {
   for (let i = 0; i < 5; i++) {
-    const tr = document.createElement("tr");
-    tr.className = "skeleton-row";
+    const tr = document.createElement('tr');
+    tr.className = 'skeleton-row';
     tr.innerHTML = `
-      <td>
-        <div class="col-candidate">
-          <div class="skeleton-avatar"></div>
-          <div class="candidate-info" style="width: 120px;">
-            <div class="skeleton-block" style="height: 12px; margin-bottom: 4px;"></div>
-            <div class="skeleton-block" style="height: 10px; width: 80%;"></div>
-          </div>
-        </div>
-      </td>
-      <td><div class="skeleton-block" style="width: 60px;"></div></td>
-      <td><div class="skeleton-block" style="width: 100px;"></div></td>
-      <td><div class="skeleton-block" style="width: 70px; height: 22px; border-radius: 999px;"></div></td>
-      <td><div class="skeleton-block" style="width: 70px;"></div></td>
-      <td><div class="skeleton-block" style="width: 80px; height: 22px; border-radius: 999px;"></div></td>
-      <td><div class="skeleton-block" style="width: 120px;"></div></td>
-      <td><div class="skeleton-block" style="width: 150px; height: 28px; border-radius: 6px;"></div></td>
+      <td><div class="col-candidate"><div class="skeleton-avatar"></div><div class="candidate-info" style="width:120px;"><div class="skeleton-block" style="height:12px;margin-bottom:4px;"></div><div class="skeleton-block" style="height:10px;width:80%;"></div></div></div></td>
+      <td><div class="skeleton-block" style="width:60px;"></div></td>
+      <td><div class="skeleton-block" style="width:100px;"></div></td>
+      <td><div class="skeleton-block" style="width:80px;height:22px;border-radius:999px;"></div></td>
+      <td><div class="skeleton-block" style="width:160px;height:28px;border-radius:6px;"></div></td>
     `;
     pipelineTableBody.appendChild(tr);
   }
@@ -1912,7 +1871,7 @@ function handleCandidateClick(e) {
   const viewReportBtn = target.closest('.btn-view-report-row');
   if (viewReportBtn) {
     e.stopPropagation();
-    openCandidateReport(viewReportBtn.dataset.id);
+    openFullReport(viewReportBtn.dataset.id);
     return;
   }
 
@@ -1948,12 +1907,13 @@ function handleCandidateClick(e) {
   if (tr) {
     if (!target.closest("button") && !target.closest(".stage-pill") && !target.closest('label')) {
       const id = tr.id.replace("candidate-row-", "");
-      openCandidateReport(id);
+      openFullReport(id);
     }
     return;
   }
 
   // 9. Grid Card click (excluding buttons/pills)
+  const card = target.closest(".grid-card");
   if (card) {
     if (!target.closest("button") && !target.closest(".stage-pill")) {
       const id = card.id.replace("grid-card-", "");
@@ -3052,4 +3012,199 @@ if (document.readyState === "loading") {
   triggerReload();
   initRedesignedReportEvents();
   initFunnelCollapse();
+}
+
+// ════════════════════════════════════════════════════════════
+// FULL PAGE REPORT LOGIC
+// ════════════════════════════════════════════════════════════
+let currentReportId = null;
+
+function initRedesignedReportEvents() {
+  document.querySelectorAll('.rp-tab').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('.rp-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.rp-tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const tabId = btn.dataset.rptab;
+      document.getElementById('rptab-' + tabId).classList.add('active');
+    });
+  });
+
+  const genLinkBtn = document.getElementById('rp-gen-link-btn');
+  if (genLinkBtn) {
+    genLinkBtn.addEventListener('click', () => {
+      if(currentReportId) generateShareLink(currentReportId);
+    });
+  }
+}
+
+window.closeFullReport = function() {
+  document.getElementById('full-report-page').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+window.openFullReport = function(id) {
+  const cand = candidates.find(c => c.id === id);
+  if (!cand) return;
+  currentReportId = id;
+
+  const getE = (eid) => document.getElementById(eid);
+
+  // Profile Header
+  getE('rp-avatar-lg').textContent = getInitials(cand.name);
+  getE('rp-avatar-lg').style.background = getAvatarGradient(cand.name);
+  getE('rp-full-name').textContent = cand.name;
+  getE('rp-stage-badge').textContent = cand.hiringStage;
+  getE('rp-full-role').textContent = cand.role;
+  getE('rp-full-id').textContent = id;
+  getE('rp-full-email').textContent = cand.email;
+  getE('rp-full-phone').textContent = cand.phone || '+1 234 567 8900';
+
+  // Stats
+  const ex = cand.extractedInfo || {};
+  getE('rp-full-company').textContent = ex.currentCompany || 'N/A';
+  getE('rp-stat-company').textContent = ex.currentCompany || 'N/A';
+  getE('rp-full-exp').textContent = ex.totalExperience || 'N/A';
+  getE('rp-stat-exp').textContent = ex.totalExperience || 'N/A';
+  const qual = (ex.education && ex.education[0]) ? ex.education[0].degree : 'N/A';
+  getE('rp-stat-qual-inline').textContent = qual;
+  getE('rp-stat-qual').textContent = qual;
+
+  // Overview Tab
+  getE('rp-summary-text').innerHTML = ex.summary || 'No summary extracted.';
+  
+  const skillHtml = (ex.skills || []).map(s => `<span class="rp-skill-tag">${s}</span>`).join('');
+  getE('rp-skills-tags').innerHTML = skillHtml || '<div style="color:#9CA3AF;font-size:12px;">No skills listed</div>';
+
+  let expHtml = '';
+  if(ex.experience && ex.experience.length) {
+    expHtml = ex.experience.map(e => `
+      <div class="rp-exp-item">
+        <div class="rp-exp-period">${e.duration || 'N/A'}</div>
+        <div>
+          <div class="rp-exp-title">${e.role || 'Role'}</div>
+          <div class="rp-exp-company">${e.company || 'Company'}</div>
+          ${(e.highlights||[]).map(h => `<div class="rp-exp-bullet">${h}</div>`).join('')}
+        </div>
+      </div>
+    `).join('');
+  } else expHtml = '<div style="color:#9CA3AF;font-size:12px;">No experience listed</div>';
+  getE('rp-experience-list').innerHTML = expHtml;
+
+  let eduHtml = '';
+  if(ex.education && ex.education.length) {
+    eduHtml = ex.education.map(e => `
+      <div class="rp-edu-degree">${e.degree || 'Degree'}</div>
+      <div class="rp-edu-inst">${e.institution || 'Inst'} • ${e.year || ''}</div>
+    `).join('');
+  } else eduHtml = '<div style="color:#9CA3AF;font-size:12px;">No education listed</div>';
+  getE('rp-education-list').innerHTML = eduHtml;
+
+  let certsHtml = '';
+  if(ex.certifications && ex.certifications.length) {
+    certsHtml = ex.certifications.map(c => `<div class="rp-cert-item">${c}</div>`).join('');
+  } else certsHtml = '<div style="color:#9CA3AF;font-size:12px;">No certifications</div>';
+  getE('rp-certs-list').innerHTML = certsHtml;
+
+  // Right Panel Scores
+  const sc = cand.scores || {};
+  const scrnWord = (cand.botScreeningDone && sc.screening>0) ? scoreToWord(sc.screening).label : 'Pending';
+  getE('rp-score-cards').innerHTML = `
+    <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:12px;text-align:center;">
+      <div style="font-size:10px;text-transform:uppercase;font-weight:700;color:#9CA3AF;margin-bottom:6px;">HR Score</div>
+      <div style="font-size:13px;font-weight:700;">${scoreToWord(sc.hr||0).label}</div>
+    </div>
+    <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:12px;text-align:center;">
+      <div style="font-size:10px;text-transform:uppercase;font-weight:700;color:#9CA3AF;margin-bottom:6px;">Tech Score</div>
+      <div style="font-size:13px;font-weight:700;">${scoreToWord(sc.technical||0).label}</div>
+    </div>
+    <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:12px;text-align:center;grid-column:1/-1;">
+      <div style="font-size:10px;text-transform:uppercase;font-weight:700;color:#9CA3AF;margin-bottom:6px;">Screening Score</div>
+      <div style="font-size:13px;font-weight:700;">${scrnWord}</div>
+    </div>
+  `;
+
+  // Right Panel Info
+  getE('rp-extracted-info').innerHTML = `
+    <div class="rp-info-row"><div class="rp-info-label">Full Name</div><div class="rp-info-val">${cand.name}</div></div>
+    <div class="rp-info-row"><div class="rp-info-label">Email</div><div class="rp-info-val" style="word-break:break-all;">${cand.email}</div></div>
+    <div class="rp-info-row"><div class="rp-info-label">Phone</div><div class="rp-info-val">${cand.phone || '+91 98765 43210'}</div></div>
+    <div class="rp-info-row"><div class="rp-info-label">Designation</div><div class="rp-info-val">${ex.currentRole || 'N/A'}</div></div>
+    <div class="rp-info-row"><div class="rp-info-label">Primary Skills</div><div class="rp-info-val">${(ex.skills||[]).slice(0,4).join(', ')}</div></div>
+  `;
+
+  getE('rp-resume-filename').textContent = cand.name.toLowerCase().replace(/ /g,'_') + '_resume.pdf';
+  getE('rp-ec-resume-filename').textContent = cand.name.toLowerCase().replace(/ /g,'_') + '_elasticrew.pdf';
+
+  // Resume Tab
+  getE('rp-resume-full').innerHTML = `
+    <div style="margin-bottom:20px;">
+      <h2 style="margin:0 0 5px;font-size:20px;color:#111827;">${cand.name}</h2>
+      <p style="margin:0;color:#6B7280;font-size:13px;">${cand.email} • ${cand.phone || '+1 234 567 8900'}</p>
+    </div>
+    <h3 style="margin:0 0 10px;font-size:15px;color:#111827;border-bottom:1px solid #E5E7EB;padding-bottom:5px;">Professional Summary</h3>
+    <p>${ex.summary || 'No summary available.'}</p>
+    <h3 style="margin:20px 0 10px;font-size:15px;color:#111827;border-bottom:1px solid #E5E7EB;padding-bottom:5px;">Experience</h3>
+    ${expHtml}
+  `;
+
+  // Screening Tab
+  if(cand.botScreeningDone) {
+    getE('rp-video-player').src = "https://www.w3schools.com/html/mov_bbb.mp4";
+    getE('rp-transcript-list').innerHTML = `
+      <div style="font-size:12px;color:#374151;background:#F9FAFB;padding:10px;border-radius:6px;"><strong>Bot:</strong> Hello, please tell us about your most recent project.</div>
+      <div style="font-size:12px;color:#374151;background:#EBF4FF;padding:10px;border-radius:6px;margin-left:20px;"><strong>${cand.name}:</strong> I recently led the migration of our monolithic backend to microservices using Node.js and Docker...</div>
+    `;
+    getE('rp-comm-metrics').innerHTML = `
+      <div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Clarity</span><span>Strong</span></div><div class="rp-comp-bar-track"><div style="width:85%;height:100%;background:var(--rp-green);border-radius:999px;"></div></div></div>
+      <div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Confidence</span><span>Strong</span></div><div class="rp-comp-bar-track"><div style="width:90%;height:100%;background:var(--rp-green);border-radius:999px;"></div></div></div>
+    `;
+  } else {
+    getE('rp-video-player').src = "";
+    getE('rp-transcript-list').innerHTML = '<div style="color:#9CA3AF;font-size:12px;text-align:center;padding:20px;">Screening Pending</div>';
+    getE('rp-comm-metrics').innerHTML = '<div style="color:#9CA3AF;font-size:12px;text-align:center;padding:20px;">No Data</div>';
+  }
+
+  // Assessment Tab
+  getE('rp-hr-notes-ta').value = cand.notes || '';
+  getE('rp-timeline-list').innerHTML = `
+    <div class="rp-timeline-item-rp">
+      <div class="rp-tl-dot"></div>
+      <div>
+        <div style="font-size:12.5px;font-weight:600;color:#111827;">Applied</div>
+        <div style="font-size:11px;color:#6B7280;">May 10, 2024</div>
+      </div>
+    </div>
+    <div class="rp-timeline-item-rp">
+      <div class="rp-tl-dot"></div>
+      <div>
+        <div style="font-size:12.5px;font-weight:600;color:#111827;">AI Screening Completed</div>
+        <div style="font-size:11px;color:#6B7280;">May 12, 2024</div>
+      </div>
+    </div>
+  `;
+
+  // Technical Tab
+  getE('rp-tech-competencies').innerHTML = `
+    <div><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Core Skills</span><span>${scoreToWord(sc.technical||0).label}</span></div><div class="rp-comp-bar-track"><div style="width:${sc.technical||0}%;height:100%;background:var(--rp-blue);border-radius:999px;"></div></div></div>
+    <div><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Problem Solving</span><span>Moderate</span></div><div class="rp-comp-bar-track"><div style="width:70%;height:100%;background:#F59E0B;border-radius:999px;"></div></div></div>
+  `;
+  getE('rp-tech-insights').innerHTML = `
+    <div style="font-size:12px;color:#374151;padding:10px;background:#F9FAFB;border-radius:6px;border-left:3px solid var(--rp-blue);">Demonstrated strong understanding of REST API design patterns during the assessment.</div>
+    <div style="font-size:12px;color:#374151;padding:10px;background:#F9FAFB;border-radius:6px;border-left:3px solid var(--rp-green);">Successfully completed the coding challenge within the allotted time limit.</div>
+  `;
+
+  // Reset tabs
+  document.querySelector('.rp-tab[data-rptab="overview"]').click();
+  document.getElementById('full-report-page').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+window.saveRpHrNotes = function() {
+  if(!currentReportId) return;
+  const cand = candidates.find(c => c.id === currentReportId);
+  if(!cand) return;
+  cand.notes = document.getElementById('rp-hr-notes-ta').value;
+  renderCandidates();
+  showToast('HR notes updated');
 }
