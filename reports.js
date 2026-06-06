@@ -531,6 +531,38 @@ const avatarGradients = [
   "linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)"
 ];
 
+
+// --------------------------------------------------------
+// Helper: Convert numeric score → descriptive English word
+// --------------------------------------------------------
+function scoreToWord(score) {
+  if (!score || score === 0) return { label: 'Pending', cls: 'score-pending' };
+  if (score >= 80) return { label: 'Strong', cls: 'score-strong' };
+  if (score >= 60) return { label: 'Moderate', cls: 'score-moderate' };
+  return { label: 'Weak', cls: 'score-weak' };
+}
+
+const SCORE_STYLES = {
+  'score-strong':  'background:#E6F7F2; color:#0D7A57; border:1px solid #A7EFCF;',
+  'score-moderate':'background:#FEF3C7; color:#B45309; border:1px solid #FCD34D;',
+  'score-weak':    'background:#FEF0EF; color:#E24B4A; border:1px solid #FCA5A5;',
+  'score-pending': 'background:#F3F4F6; color:#6B7280; border:1px solid #E5E7EB;'
+};
+
+// --------------------------------------------------------
+// Helper: Generate & copy shareable read-only link
+// --------------------------------------------------------
+function generateShareLink(candidateId) {
+  const url = `${window.location.origin}${window.location.pathname}?share=${encodeURIComponent(candidateId)}`;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => {
+      showToast(`🔗 Share link for ${candidateId} copied to clipboard!`);
+    }).catch(() => prompt('Copy this share link:', url));
+  } else {
+    prompt('Copy this share link:', url);
+  }
+}
+
 // Helper to resolve Department from Candidate Role
 function getCandidateDepartment(role) {
   const r = role.toLowerCase();
@@ -931,65 +963,44 @@ function renderCandidates() {
 
 function renderListView(paginated) {
   paginated.forEach(cand => {
-    const tr = document.createElement("tr");
+    const tr = document.createElement('tr');
     tr.id = `candidate-row-${cand.id}`;
-
     const initials = getInitials(cand.name);
     const grad = getAvatarGradient(cand.name);
-
-    // Document Status Buttons (Resume & Screening)
-    const transcriptBtn = `
-      <button class="card-doc-btn active" data-tooltip="View Resume CV" data-id="${cand.id}" data-doc="transcript" style="color: var(--active-nav-bg);">
-        <svg viewBox="0 0 24 24"><path d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.12 2.99 2.68 3.22l3.07.46V21l3.56-3.56h6.76c1.63 0 2.94-1.3 2.94-2.93V6.43c0-1.63-1.31-2.93-2.94-2.93H4.63c-1.63 0-2.94 1.3-2.94 2.93v7.08z" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-    `;
-
-    const techBtn = `
-      <button class="card-doc-btn ${cand.botScreeningDone ? 'active' : ''}" ${cand.botScreeningDone ? '' : 'disabled'} data-tooltip="${cand.botScreeningDone ? 'Play Screening Video' : 'Video Pending'}" data-id="${cand.id}" data-doc="tech" style="${cand.botScreeningDone ? 'color: var(--active-nav-bg);' : ''}">
-        <svg viewBox="0 0 24 24"><path d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-    `;
-
-    // Notes Button
-    const noteClass = cand.notes ? "has-notes" : "";
-    const notesIcon = cand.notes 
-      ? `<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor"><path d="M19.5 21a3 3 0 003-3v-4.5a3 3 0 00-3-3h-15a3 3 0 00-3 3V18a3 3 0 003 3h15zM2 9V6a3 3 0 013-3h14a3 3 0 013 3v3H2z"/></svg>`
-      : `<svg viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.75.75 0 01-1.074-.765 6 6 0 001.257-2.737C3.038 16.289 1 14.368 1 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" /></svg>`;
-
     tr.innerHTML = `
       <td>
         <div class="col-candidate">
-          <div class="candidate-avatar" style="background: ${grad}">${initials}</div>
+          <div class="candidate-avatar" style="background:${grad}">${initials}</div>
           <div class="candidate-info">
             <span class="candidate-name">${cand.name}</span>
-            <span class="candidate-phone" style="font-size: 11px; color: var(--text-secondary);">${cand.email}</span>
+            <span class="candidate-phone" style="font-size:11px;color:var(--text-secondary);">${cand.email}</span>
           </div>
         </div>
       </td>
+      <td><span class="col-id">${cand.id}</span></td>
+      <td><span class="role-tag-blue">${cand.role}</span></td>
+      <td><span class="${getStageBadgeClass(cand.hiringStage)} stage-pill" data-id="${cand.id}" style="cursor:pointer;">${cand.hiringStage}</span></td>
       <td>
-        <span class="col-id">${cand.id}</span>
-      </td>
-      <td>
-        <span class="role-tag-blue">${cand.role}</span>
-      </td>
-      <td>
-        ${transcriptBtn}
-      </td>
-      <td>
-        ${techBtn}
-      </td>
-      <td>
-        <span class="${getStageBadgeClass(cand.hiringStage)} stage-pill" data-id="${cand.id}" style="cursor: pointer;">${cand.hiringStage}</span>
-      </td>
-      <td>
-        <button class="notes-btn ${noteClass}" data-id="${cand.id}" data-tooltip="${cand.notes || 'Add HR Notes'}">
-          ${notesIcon}
-        </button>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <button class="btn-view-report-row" data-id="${cand.id}"
+            style="display:inline-flex;align-items:center;gap:4px;background:var(--active-nav-bg);color:#FFF;border:none;border-radius:6px;padding:6px 12px;font-size:11.5px;font-weight:600;cursor:pointer;transition:opacity .15s;"
+            onmouseenter="this.style.opacity='.85'" onmouseleave="this.style.opacity='1'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.641 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            View Report
+          </button>
+          <button class="btn-generate-link-row" data-id="${cand.id}"
+            style="display:inline-flex;align-items:center;gap:4px;background:#EBF4FF;color:#378ADD;border:1px solid #C3DDFB;border-radius:6px;padding:6px 10px;font-size:11.5px;font-weight:600;cursor:pointer;transition:all .15s;"
+            onmouseenter="this.style.background='#D1E9FF'" onmouseleave="this.style.background='#EBF4FF'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+            Share Link
+          </button>
+        </div>
       </td>
     `;
     pipelineTableBody.appendChild(tr);
   });
 }
+
 
 function renderGridView(paginated) {
   paginated.forEach(cand => {
@@ -1069,24 +1080,14 @@ function renderGridEmptyState() {
 
 function renderListSkeletons() {
   for (let i = 0; i < 5; i++) {
-    const tr = document.createElement("tr");
-    tr.className = "skeleton-row";
+    const tr = document.createElement('tr');
+    tr.className = 'skeleton-row';
     tr.innerHTML = `
-      <td>
-        <div class="col-candidate">
-          <div class="skeleton-avatar"></div>
-          <div class="candidate-info" style="width: 120px;">
-            <div class="skeleton-block" style="height: 12px; margin-bottom: 4px;"></div>
-            <div class="skeleton-block" style="height: 10px; width: 80%;"></div>
-          </div>
-        </div>
-      </td>
-      <td><div class="skeleton-block" style="width: 60px;"></div></td>
-      <td><div class="skeleton-block" style="width: 100px;"></div></td>
-      <td><div class="skeleton-block" style="width: 24px;"></div></td>
-      <td><div class="skeleton-block" style="width: 24px;"></div></td>
-      <td><div class="skeleton-block" style="width: 80px; height: 20px; border-radius: 999px;"></div></td>
-      <td><div class="skeleton-block" style="width: 24px; height: 24px; border-radius: 999px;"></div></td>
+      <td><div class="col-candidate"><div class="skeleton-avatar"></div><div class="candidate-info" style="width:120px;"><div class="skeleton-block" style="height:12px;margin-bottom:4px;"></div><div class="skeleton-block" style="height:10px;width:80%;"></div></div></div></td>
+      <td><div class="skeleton-block" style="width:60px;"></div></td>
+      <td><div class="skeleton-block" style="width:100px;"></div></td>
+      <td><div class="skeleton-block" style="width:80px;height:22px;border-radius:999px;"></div></td>
+      <td><div class="skeleton-block" style="width:160px;height:28px;border-radius:6px;"></div></td>
     `;
     pipelineTableBody.appendChild(tr);
   }
@@ -1325,11 +1326,30 @@ function openCandidateReport(candidateId, section) {
   }
   completionStatusEl.textContent = compStatus;
 
-  // Render KPI Score Cards
-  document.getElementById("rep-resume-score").textContent = hasScores ? `${resumeScore}%` : "Data Not Available";
-  document.getElementById("rep-screening-score").textContent = hasScores ? `${screeningScore}%` : "Data Not Available";
-  document.getElementById("rep-technical-score").textContent = hasScores ? `${technicalScore}%` : "Data Not Available";
-  document.getElementById("rep-final-score").textContent = hasScores ? `${overall}%` : "Data Not Available";
+  // Render KPI Score Cards — English words instead of numbers
+  const rw = scoreToWord(resumeScore);
+  const scw = scoreToWord(screeningScore);
+  const tw = scoreToWord(technicalScore);
+  const ow = scoreToWord(overall);
+
+  const setScoreCard = (id, word) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = hasScores ? word.label : 'N/A';
+    el.style.cssText = hasScores
+      ? `font-size:20px;font-weight:800;${SCORE_STYLES[word.cls].replace(/border:[^;]+;/,'')}`
+      : 'font-size:14px;font-weight:700;color:var(--text-secondary);';
+  };
+  setScoreCard('rep-resume-score', rw);
+  setScoreCard('rep-screening-score', scw);
+  setScoreCard('rep-technical-score', tw);
+  setScoreCard('rep-final-score', ow);
+
+  // Also update the match score in header to use word
+  if (overallScoreEl) {
+    overallScoreEl.textContent = hasScores ? ow.label : 'N/A';
+    overallScoreEl.style.fontSize = '20px';
+  }
 
   // Render Assessment Breakdown Table
   const breakdownBody = document.getElementById("breakdown-table-body");
@@ -1342,9 +1362,13 @@ function openCandidateReport(candidateId, section) {
     ];
     rows.forEach(r => {
       const tr = document.createElement("tr");
+      const rWord = scoreToWord(r.score);
+      const rStyle = SCORE_STYLES[rWord.cls];
       tr.innerHTML = `
         <td style="padding:8px; font-weight:600;">${r.name}</td>
-        <td style="padding:8px; text-align:center;">${r.score}%</td>
+        <td style="padding:8px; text-align:center;">
+          <span style="border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;${rStyle}">${rWord.label}</span>
+        </td>
         <td style="padding:8px; text-align:center; color:var(--text-secondary);">${r.weight}</td>
         <td style="padding:8px; text-align:center; font-weight:700; color:var(--active-nav-bg);">${r.contrib}</td>
       `;
@@ -1843,18 +1867,53 @@ function handleCandidateClick(e) {
     return;
   }
 
-  // 5. Table row click (excluding buttons/pills)
+  // 5. View Report row button click
+  const viewReportBtn = target.closest('.btn-view-report-row');
+  if (viewReportBtn) {
+    e.stopPropagation();
+    openFullReport(viewReportBtn.dataset.id);
+    return;
+  }
+
+  // 6. Share Link row button click
+  const shareLinkBtn = target.closest('.btn-generate-link-row');
+  if (shareLinkBtn) {
+    e.stopPropagation();
+    generateShareLink(shareLinkBtn.dataset.id);
+    return;
+  }
+
+  // 7. Screening upload input change
+  const uploadInput = target.closest('.screening-upload-input');
+  if (uploadInput) {
+    e.stopPropagation();
+    uploadInput.addEventListener('change', (ev) => {
+      const id = uploadInput.dataset.id;
+      const cand = candidates.find(c => c.id === id);
+      if (cand && ev.target.files.length > 0) {
+        cand.botScreeningDone = true;
+        cand.scores = cand.scores || {};
+        if (!cand.scores.screening) cand.scores.screening = 75;
+        renderCandidates();
+        updateKpiCounters();
+        showToast(`Screening video uploaded for ${cand.name}!`);
+      }
+    }, { once: true });
+    return;
+  }
+
+  // 8. Table row click (excluding buttons/pills)
   const tr = target.closest("#pipeline-table-body tr");
   if (tr) {
-    if (!target.closest("button") && !target.closest(".stage-pill")) {
+    if (!target.closest("button") && !target.closest(".stage-pill") && !target.closest('label')) {
       const id = tr.id.replace("candidate-row-", "");
-      openCandidateReport(id);
+      openFullReport(id);
     }
     return;
   }
 
-  // 6. Grid Card click (excluding buttons/pills)
-  const card = target.closest(".applicant-grid-card");
+  // 9. Grid Card click (excluding buttons/pills)
+  const card = target.closest(".grid-card");
   if (card) {
     if (!target.closest("button") && !target.closest(".stage-pill")) {
       const id = card.id.replace("grid-card-", "");
@@ -1957,6 +2016,61 @@ function loadUrlParams() {
 
 // ----------------------------------------------------
 // Global Event Binding
+// Wire Generate Share Link button in the report modal
+const btnGenerateShareLink = document.getElementById('btn-generate-share-link');
+if (btnGenerateShareLink) {
+  btnGenerateShareLink.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (activeCandidateId) generateShareLink(activeCandidateId);
+  });
+}
+
+// ============================================================
+// SHAREABLE READ-ONLY VIEW — detects ?share=CAN-XXXX in URL
+// ============================================================
+function initShareView() {
+  const params = new URLSearchParams(window.location.search);
+  const shareId = params.get('share');
+  if (!shareId) return;
+
+  const cand = candidates.find(c => c.id === shareId);
+  if (!cand) {
+    document.body.innerHTML = `<div style="text-align:center;padding:60px;color:#6B7280;font-size:14px;">Candidate report not found for ID: <strong>${shareId}</strong></div>`;
+    return;
+  }
+
+  // Hide the normal app structure
+  const appContainer = document.querySelector('.app-container');
+  if (appContainer) appContainer.style.display = 'none';
+
+  // Open the full report
+  openFullReport(shareId);
+
+  // Customize for read-only view
+  const fp = document.getElementById('full-report-page');
+  if (fp) {
+    fp.style.left = '0'; // Span full screen width
+  }
+
+  // Hide action buttons since it's shared
+  const backBtn = document.querySelector('.rp-back-btn');
+  if (backBtn) backBtn.style.display = 'none';
+  const shareBtn = document.getElementById('rp-gen-link-btn');
+  if (shareBtn) shareBtn.style.display = 'none';
+
+  // Add footer note
+  const overviewTab = document.getElementById('rptab-overview');
+  if (overviewTab) {
+    const footer = document.createElement('div');
+    footer.style = "text-align:center;padding:16px;color:#9CA3AF;font-size:11px;margin-top:20px;";
+    footer.innerHTML = `This is a read-only shareable report generated by <strong>ElastiCrew ATS</strong>.`;
+    const rpBody = overviewTab.querySelector('.rp-body');
+    if(rpBody) rpBody.appendChild(footer);
+  }
+}
+
+initShareView();
+
 // ----------------------------------------------------
 document.addEventListener("click", (e) => {
   if (!actionsDropdown.contains(e.target)) {
@@ -2829,4 +2943,345 @@ if (document.readyState === "loading") {
   triggerReload();
   initRedesignedReportEvents();
   initFunnelCollapse();
+}
+
+// ════════════════════════════════════════════════════════════
+// FULL PAGE REPORT LOGIC
+// ════════════════════════════════════════════════════════════
+let currentReportId = null;
+
+function initRedesignedReportEvents() {
+  document.querySelectorAll('.rp-tab').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('.rp-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.rp-tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const tabId = btn.dataset.rptab;
+      document.getElementById('rptab-' + tabId).classList.add('active');
+    });
+  });
+
+  const genLinkBtn = document.getElementById('rp-gen-link-btn');
+  if (genLinkBtn) {
+    genLinkBtn.addEventListener('click', () => {
+      if(currentReportId) generateShareLink(currentReportId);
+    });
+  }
+}
+
+window.closeFullReport = function() {
+  document.getElementById('full-report-page').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+window.openFullReport = function(id) {
+  const cand = candidates.find(c => c.id === id);
+  if (!cand) return;
+  currentReportId = id;
+
+  const getE = (eid) => document.getElementById(eid);
+
+  // Profile Header
+  getE('rp-avatar-lg').textContent = getInitials(cand.name);
+  getE('rp-avatar-lg').style.background = getAvatarGradient(cand.name);
+  getE('rp-full-name').textContent = cand.name;
+  getE('rp-stage-badge').textContent = cand.hiringStage;
+  getE('rp-full-role').textContent = cand.role;
+  getE('rp-full-id').textContent = id;
+  getE('rp-full-email').textContent = cand.email;
+  getE('rp-full-phone').textContent = cand.phone || '+1 234 567 8900';
+
+  // Stats
+  // Generate dynamic dummy data for Overview and Resume tabs based on candidate's role
+  const isFrontend = (cand.role || '').toLowerCase().includes('frontend') || (cand.role || '').toLowerCase().includes('ui');
+  const roleName = cand.role || 'Software Engineer';
+  
+  const dummyEx = {
+    currentCompany: 'Tech Innovators Inc.',
+    totalExperience: cand.experience || '4.5 Years',
+    summary: `A highly skilled ${roleName} with extensive experience in building scalable, resilient architectures. Known for strong problem-solving capabilities and a passion for clean code. Has successfully led cross-functional teams to deliver critical business systems on time.`,
+    skills: isFrontend ? ['React', 'TypeScript', 'Next.js', 'TailwindCSS', 'Redux', 'GraphQL'] : ['Node.js', 'Python', 'PostgreSQL', 'Docker', 'Kubernetes', 'AWS', 'Microservices'],
+    experience: [
+      { role: `Senior ${roleName}`, company: 'Tech Innovators Inc.', duration: '2022 - Present', highlights: ['Led a team of 5 engineers to rebuild the core platform, improving performance by 40%.', 'Architected robust CI/CD pipelines reducing deployment time by half.'] },
+      { role: `${roleName}`, company: 'Global Solutions', duration: '2019 - 2022', highlights: ['Developed and maintained RESTful APIs serving millions of requests daily.', 'Collaborated with product teams to launch 3 major features.'] }
+    ],
+    education: [
+      { degree: 'B.Tech in Computer Science', institution: 'State University', year: '2019' }
+    ],
+    certifications: isFrontend ? ['Certified React Developer', 'UI/UX Design Certification'] : ['AWS Certified Solutions Architect', 'CKA: Certified Kubernetes Administrator']
+  };
+
+  const ex = Object.keys(cand.extractedInfo || {}).length ? cand.extractedInfo : (cand.resumeData ? {
+    ...cand.resumeData,
+    currentCompany: cand.resumeData.experience?.[0]?.company || dummyEx.currentCompany,
+    totalExperience: cand.experience || dummyEx.totalExperience,
+    summary: dummyEx.summary,
+    skills: Array.isArray(cand.resumeData.skills) ? cand.resumeData.skills : Object.values(cand.resumeData.skills || {}).flat().length ? Object.values(cand.resumeData.skills).flat() : dummyEx.skills,
+    experience: (cand.resumeData.experience || dummyEx.experience).map(e => ({ role: e.role, company: e.company, duration: e.period || e.duration, highlights: [e.description || 'Contributed to major project deliverables.'] })),
+    education: cand.resumeData.education || dummyEx.education,
+    certifications: (cand.resumeData.certifications || []).map(c => c.name) || dummyEx.certifications
+  } : dummyEx);
+
+  getE('rp-full-company').textContent = ex.currentCompany || 'N/A';
+  getE('rp-stat-company').textContent = ex.currentCompany || 'N/A';
+  getE('rp-full-exp').textContent = ex.totalExperience || 'N/A';
+  getE('rp-stat-exp').textContent = ex.totalExperience || 'N/A';
+  const qual = (ex.education && ex.education[0]) ? ex.education[0].degree : (cand.qualification || 'N/A');
+  getE('rp-stat-qual-inline').textContent = qual;
+  getE('rp-stat-qual').textContent = qual;
+
+  // Overview Tab
+  getE('rp-summary-text').innerHTML = ex.summary || 'No summary extracted.';
+  
+  const skillHtml = (ex.skills || []).map(s => `<span class="rp-skill-tag">${s}</span>`).join('');
+  getE('rp-skills-tags').innerHTML = skillHtml || '<div style="color:#9CA3AF;font-size:12px;">No skills listed</div>';
+
+  let expHtml = '';
+  if(ex.experience && ex.experience.length) {
+    expHtml = ex.experience.map(e => `
+      <div class="rp-exp-item">
+        <div class="rp-exp-period">${e.duration || 'N/A'}</div>
+        <div>
+          <div class="rp-exp-title">${e.role || 'Role'}</div>
+          <div class="rp-exp-company">${e.company || 'Company'}</div>
+          ${(e.highlights||[]).map(h => `<div class="rp-exp-bullet">${h}</div>`).join('')}
+        </div>
+      </div>
+    `).join('');
+  } else expHtml = '<div style="color:#9CA3AF;font-size:12px;">No experience listed</div>';
+  getE('rp-experience-list').innerHTML = expHtml;
+
+  let eduHtml = '';
+  if(ex.education && ex.education.length) {
+    eduHtml = ex.education.map(e => `
+      <div class="rp-edu-degree">${e.degree || 'Degree'}</div>
+      <div class="rp-edu-inst">${e.institution || 'Inst'} • ${e.year || ''}</div>
+    `).join('');
+  } else eduHtml = '<div style="color:#9CA3AF;font-size:12px;">No education listed</div>';
+  getE('rp-education-list').innerHTML = eduHtml;
+
+  let certsHtml = '';
+  if(ex.certifications && ex.certifications.length) {
+    certsHtml = ex.certifications.map(c => `<div class="rp-cert-item">${typeof c === 'string' ? c : c.name}</div>`).join('');
+  } else certsHtml = '<div style="color:#9CA3AF;font-size:12px;">No certifications</div>';
+  getE('rp-certs-list').innerHTML = certsHtml;
+
+  // Right Panel Scores
+  const sc = cand.scores || {};
+  const scrnWord = (cand.botScreeningDone && sc.screening>0) ? scoreToWord(sc.screening).label : 'Pending';
+  getE('rp-score-cards').innerHTML = `
+    <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:12px;text-align:center;">
+      <div style="font-size:10px;text-transform:uppercase;font-weight:700;color:#9CA3AF;margin-bottom:6px;">HR Score</div>
+      <div style="font-size:13px;font-weight:700;">${scoreToWord(sc.hr||0).label}</div>
+    </div>
+    <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:12px;text-align:center;">
+      <div style="font-size:10px;text-transform:uppercase;font-weight:700;color:#9CA3AF;margin-bottom:6px;">Tech Score</div>
+      <div style="font-size:13px;font-weight:700;">${scoreToWord(sc.technical||0).label}</div>
+    </div>
+    <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;padding:12px;text-align:center;grid-column:1/-1;">
+      <div style="font-size:10px;text-transform:uppercase;font-weight:700;color:#9CA3AF;margin-bottom:6px;">Screening Score</div>
+      <div style="font-size:13px;font-weight:700;">${scrnWord}</div>
+    </div>
+  `;
+
+  // Right Panel Info
+  getE('rp-extracted-info').innerHTML = `
+    <div class="rp-info-row"><div class="rp-info-label">Full Name</div><div class="rp-info-val">${cand.name}</div></div>
+    <div class="rp-info-row"><div class="rp-info-label">Email</div><div class="rp-info-val" style="word-break:break-all;">${cand.email}</div></div>
+    <div class="rp-info-row"><div class="rp-info-label">Phone</div><div class="rp-info-val">${cand.phone || '+91 98765 43210'}</div></div>
+    <div class="rp-info-row"><div class="rp-info-label">Designation</div><div class="rp-info-val">${ex.currentRole || 'N/A'}</div></div>
+    <div class="rp-info-row"><div class="rp-info-label">Primary Skills</div><div class="rp-info-val">${(ex.skills||[]).slice(0,4).join(', ')}</div></div>
+  `;
+
+  getE('rp-resume-filename').textContent = cand.name.toLowerCase().replace(/ /g,'_') + '_resume.pdf';
+  getE('rp-ec-resume-filename').textContent = cand.name.toLowerCase().replace(/ /g,'_') + '_elasticrew.pdf';
+
+  // Resume Tab
+  getE('rp-resume-full').innerHTML = `
+    <div style="margin-bottom:20px;">
+      <h2 style="margin:0 0 5px;font-size:20px;color:#111827;">${cand.name}</h2>
+      <p style="margin:0;color:#6B7280;font-size:13px;">${cand.email} • ${cand.phone || '+1 234 567 8900'}</p>
+    </div>
+    <h3 style="margin:0 0 10px;font-size:15px;color:#111827;border-bottom:1px solid #E5E7EB;padding-bottom:5px;">Professional Summary</h3>
+    <p>${ex.summary || 'No summary available.'}</p>
+    <h3 style="margin:20px 0 10px;font-size:15px;color:#111827;border-bottom:1px solid #E5E7EB;padding-bottom:5px;">Experience</h3>
+    ${expHtml}
+  `;
+
+  // Screening Tab
+  if(cand.botScreeningDone) {
+    // Determine skill/role for the bot script
+    const domain = (cand.role || 'Software Engineering').split(' ')[0];
+    
+    getE('rp-video-player').src = "https://www.w3schools.com/html/mov_bbb.mp4";
+    
+    // Detailed dummy transcript
+    getE('rp-transcript-list').innerHTML = `
+      <div style="font-size:12px;color:#374151;background:#F9FAFB;padding:10px;border-radius:6px;border-left:3px solid #E5E7EB;">
+        <strong>ElastiCrew Bot:</strong> Welcome ${cand.name.split(' ')[0]}. Can you describe a challenging technical problem you solved recently in ${domain}?
+      </div>
+      <div style="font-size:12px;color:#111827;background:#EBF4FF;padding:10px;border-radius:6px;margin-left:20px;border-left:3px solid var(--rp-blue);">
+        <strong>${cand.name.split(' ')[0]}:</strong> Sure. In my last project, we were facing severe latency issues due to synchronous third-party API calls. I redesigned the architecture to use asynchronous message queues with RabbitMQ, which decoupled the processes and reduced our average response time by 40%.
+      </div>
+      <div style="font-size:12px;color:#374151;background:#F9FAFB;padding:10px;border-radius:6px;border-left:3px solid #E5E7EB;">
+        <strong>ElastiCrew Bot:</strong> That's impressive. How did you handle potential message failures or dead letters?
+      </div>
+      <div style="font-size:12px;color:#111827;background:#EBF4FF;padding:10px;border-radius:6px;margin-left:20px;border-left:3px solid var(--rp-blue);">
+        <strong>${cand.name.split(' ')[0]}:</strong> I implemented a Dead Letter Exchange (DLX) strategy where failed messages were routed after 3 retries. We also added an alert mechanism so the DevOps team could manually inspect the DLX queue if the failure rate spiked.
+      </div>
+      <div style="font-size:12.5px;color:#0D7A57;background:#E6F7EF;padding:12px;border-radius:6px;margin-top:8px;">
+        <div style="font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          AI Summary & Analysis
+        </div>
+        Candidate demonstrated clear problem-solving skills and a strong grasp of asynchronous architecture. Communication was concise, structured, and confident. Technical vocabulary used correctly in context.
+      </div>
+    `;
+    
+    // Communication Metrics
+    getE('rp-comm-metrics').innerHTML = `
+      <div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Clarity & Articulation</span><span>Strong</span></div><div class="rp-comp-bar-track"><div style="width:90%;height:100%;background:var(--rp-green);border-radius:999px;"></div></div></div>
+      <div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Confidence</span><span>Strong</span></div><div class="rp-comp-bar-track"><div style="width:85%;height:100%;background:var(--rp-green);border-radius:999px;"></div></div></div>
+      <div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>English Proficiency</span><span>Strong</span></div><div class="rp-comp-bar-track"><div style="width:95%;height:100%;background:var(--rp-green);border-radius:999px;"></div></div></div>
+      <div style="margin-bottom:12px;"><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Relevance of Answers</span><span>Moderate</span></div><div class="rp-comp-bar-track"><div style="width:75%;height:100%;background:#F59E0B;border-radius:999px;"></div></div></div>
+    `;
+  } else {
+    getE('rp-video-player').src = "";
+    getE('rp-transcript-list').innerHTML = '<div style="color:#9CA3AF;font-size:12px;text-align:center;padding:20px;">Screening Pending</div>';
+    getE('rp-comm-metrics').innerHTML = '<div style="color:#9CA3AF;font-size:12px;text-align:center;padding:20px;">No Data</div>';
+  }
+
+  // Assessment Tab
+  const hrScore = sc.hr || 0;
+  const hrWord = scoreToWord(hrScore).label;
+  
+  // Dummy notes if none exist
+  let dummyNotes = cand.notes || '';
+  if (!dummyNotes) {
+    if (hrScore > 85) {
+      dummyNotes = `Candidate performed exceptionally well in the HR round. Great cultural fit for ElastiCrew. Displayed strong leadership potential and aligned well with our remote-first environment. Expected salary is within budget. Notice period is 30 days. Recommended to proceed to final offer.`;
+    } else if (hrScore > 70) {
+      dummyNotes = `Good candidate. Communication is decent, though sometimes long-winded. Technical background matches the requirement. Has some hesitations about the shift timings but agreed to be flexible. Keep as backup if top candidate falls through.`;
+    } else {
+      dummyNotes = `Candidate struggled to explain past job transitions clearly. High salary expectations that exceed our budget constraint. Might not be the best fit for this fast-paced project.`;
+    }
+  }
+
+  getE('rp-hr-notes-ta').value = dummyNotes;
+  getE('rp-timeline-list').innerHTML = `
+    <div class="rp-timeline-item-rp">
+      <div class="rp-tl-dot"></div>
+      <div>
+        <div style="font-size:12.5px;font-weight:600;color:#111827;">Applied for ${cand.role}</div>
+        <div style="font-size:11px;color:#6B7280;">May 10, 2024 via LinkedIn</div>
+      </div>
+    </div>
+    <div class="rp-timeline-item-rp">
+      <div class="rp-tl-dot"></div>
+      <div>
+        <div style="font-size:12.5px;font-weight:600;color:#111827;">Resume Parsed & Ranked</div>
+        <div style="font-size:11px;color:#6B7280;">May 10, 2024 by ElastiCrew AI</div>
+      </div>
+    </div>
+    <div class="rp-timeline-item-rp">
+      <div class="rp-tl-dot"></div>
+      <div>
+        <div style="font-size:12.5px;font-weight:600;color:#111827;">AI Video Screening Completed</div>
+        <div style="font-size:11px;color:#6B7280;">May 12, 2024</div>
+      </div>
+    </div>
+    <div class="rp-timeline-item-rp">
+      <div class="rp-tl-dot" style="background:#2563EB;"></div>
+      <div>
+        <div style="font-size:12.5px;font-weight:600;color:#111827;">Technical Assessment Passed</div>
+        <div style="font-size:11px;color:#6B7280;">May 15, 2024</div>
+      </div>
+    </div>
+  `;
+
+  // Technical Tab
+  const techWord = scoreToWord(sc.technical || 0).label;
+  const isGood = (sc.technical || 0) > 80;
+  
+  // Dummy Code Snippet based on performance
+  const goodCode = `function findLongestSubstring(s) {
+  let longest = 0;
+  let start = 0;
+  let seen = new Map();
+
+  for (let i = 0; i < s.length; i++) {
+    let char = s[i];
+    if (seen.has(char) && seen.get(char) >= start) {
+      start = seen.get(char) + 1;
+    }
+    seen.set(char, i);
+    longest = Math.max(longest, i - start + 1);
+  }
+  return longest;
+}`;
+
+  const badCode = `function findLongestSubstring(s) {
+  let max = 0;
+  for(let i=0; i<s.length; i++) {
+    for(let j=i; j<s.length; j++) {
+       // O(N^3) approach
+       let sub = s.slice(i, j);
+       // ... logic missing
+    }
+  }
+  return max;
+}`;
+
+  getE('rp-tech-code').textContent = isGood ? goodCode : badCode;
+  
+  // Tech Video & Transcript Dummy Data
+  getE('rp-tech-video').src = "https://www.w3schools.com/html/mov_bbb.mp4";
+  getE('rp-tech-transcript').innerHTML = `
+    <div style="font-size:11.5px;color:#374151;background:#F9FAFB;padding:8px;border-radius:6px;border-left:3px solid #E5E7EB;">
+      <strong>ElastiCrew Tech Interviewer:</strong> We provided a problem to find the longest substring without repeating characters. Can you walk me through your approach?
+    </div>
+    <div style="font-size:11.5px;color:#111827;background:#EBF4FF;padding:8px;border-radius:6px;margin-left:16px;border-left:3px solid var(--rp-blue);">
+      <strong>${cand.name.split(' ')[0]}:</strong> Sure. I initially thought of a brute-force approach, checking every substring, but that's O(N^3). I quickly optimized it to O(N) by using a sliding window algorithm and a hash map to track the indices of characters I've already seen.
+    </div>
+    <div style="font-size:11.5px;color:#374151;background:#F9FAFB;padding:8px;border-radius:6px;border-left:3px solid #E5E7EB;">
+      <strong>Interviewer:</strong> Great. What happens if the input string is empty or contains only one character?
+    </div>
+    <div style="font-size:11.5px;color:#111827;background:#EBF4FF;padding:8px;border-radius:6px;margin-left:16px;border-left:3px solid var(--rp-blue);">
+      <strong>${cand.name.split(' ')[0]}:</strong> If it's empty, the loop won't execute, and the function correctly returns 0. If it has one character, the loop runs once, and it returns 1. Both edge cases are implicitly handled without needing extra if-statements.
+    </div>
+    <div style="font-size:11px;color:#0D7A57;background:#E6F7EF;padding:10px;border-radius:6px;margin-top:6px;">
+      <div style="font-weight:700;margin-bottom:2px;display:flex;align-items:center;gap:4px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        AI Tech Summary
+      </div>
+      Candidate was able to confidently explain time and space complexity tradeoffs. The code produced is robust against common edge cases.
+    </div>
+  `;
+
+  getE('rp-tech-competencies').innerHTML = `
+    <div><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Data Structures</span><span>${techWord}</span></div><div class="rp-comp-bar-track"><div style="width:${sc.technical||0}%;height:100%;background:var(--rp-blue);border-radius:999px;"></div></div></div>
+    <div><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Algorithm Optimization</span><span>${isGood ? 'Strong' : 'Weak'}</span></div><div class="rp-comp-bar-track"><div style="width:${isGood ? '90' : '40'}%;height:100%;background:${isGood ? 'var(--rp-green)' : '#EF4444'};border-radius:999px;"></div></div></div>
+    <div><div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:600;margin-bottom:4px;"><span>Code Quality</span><span>${techWord}</span></div><div class="rp-comp-bar-track"><div style="width:${(sc.technical||0)-5}%;height:100%;background:var(--rp-blue);border-radius:999px;"></div></div></div>
+  `;
+  getE('rp-tech-insights').innerHTML = isGood ? `
+    <div style="font-size:12px;color:#374151;padding:10px;background:#F9FAFB;border-radius:6px;border-left:3px solid var(--rp-green);margin-bottom:8px;">Successfully utilized an optimal O(N) approach using a sliding window and Hash Map. Time limit was comfortably met.</div>
+    <div style="font-size:12px;color:#374151;padding:10px;background:#F9FAFB;border-radius:6px;border-left:3px solid var(--rp-blue);">Variable naming was clear and professional. Edge cases (like empty strings) were implicitly handled by the loop condition.</div>
+  ` : `
+    <div style="font-size:12px;color:#374151;padding:10px;background:#FEF2F2;border-radius:6px;border-left:3px solid #EF4444;margin-bottom:8px;">Attempted a brute-force approach which resulted in a Time Limit Exceeded (TLE) on hidden test cases.</div>
+    <div style="font-size:12px;color:#374151;padding:10px;background:#FFFBEB;border-radius:6px;border-left:3px solid #F59E0B;">Struggled to identify the optimal sliding window technique. Required multiple hints from the automated system.</div>
+  `;
+
+  // Reset tabs
+  document.querySelector('.rp-tab[data-rptab="overview"]').click();
+  document.getElementById('full-report-page').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+window.saveRpHrNotes = function() {
+  if(!currentReportId) return;
+  const cand = candidates.find(c => c.id === currentReportId);
+  if(!cand) return;
+  cand.notes = document.getElementById('rp-hr-notes-ta').value;
+  renderCandidates();
+  showToast('HR notes updated');
 }
